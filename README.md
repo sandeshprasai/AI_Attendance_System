@@ -8,7 +8,7 @@ The system consists of a **Python backend (AI + API)** and a **React frontend (W
 ## 📂 Project Structure
 ```plaintext
 AI_Attendance_System/
-│── WebApp/            # Frontend (React) + Backend (Python/Flask/FastAPI)
+│── WebApp/            # Frontend (React) + Backend (Node)
 │── data/              # Dataset storage (ignored in Git)
 │   ├── raw/           # Original collected images (unprocessed)
 │   ├── processed/     # Preprocessed/cleaned images for training
