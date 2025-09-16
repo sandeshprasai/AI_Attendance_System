@@ -1,4 +1,4 @@
-# 🎓 AI Attendance System (Final Year Project)
+# 🎓 Advanced Attendance System using Face Recognition
 
 An advanced attendance management system that leverages **Face Recognition** to automate attendance marking.  
 The system consists of a **Python backend (AI + API)** and a **React frontend (WebApp)**, making it efficient, scalable, and user-friendly.
