@@ -1,19 +1,29 @@
 import React from "react";
+import NavBar from "../components/NavBar";
+import Footer from "../components/Footer";
 
 function App() {
   return (
-    <div style={{ 
-      display: "flex", 
-      flexDirection: "column", 
-      alignItems: "center", 
-      justifyContent: "center", 
-      height: "100vh", 
-      background: "#f5f6fa" 
+    <div style={{
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column"
     }}>
-      <h1>Welcome to the Attendance System!</h1>
-      <p>
-        We’re glad to have you here. Please have patience, System is under development .
-      </p>
+      <NavBar />
+      <div style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#f5f6fa"
+      }}>
+        <h1>Welcome to the Attendance System!</h1>
+        <p>
+          We’re glad to have you here. Please have patience, System is under development.
+        </p>
+      </div>
+      <Footer />
     </div>
   );
 }
