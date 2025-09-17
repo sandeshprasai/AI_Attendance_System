@@ -8,18 +8,36 @@ The system consists of a **Python backend (AI + API)** and a **React frontend (W
 ## 📂 Project Structure
 ```plaintext
 AI_Attendance_System/
-│── WebApp/            # Frontend (React) + Backend (Python/Flask/FastAPI)
-│── data/              # Dataset storage (ignored in Git)
-│   ├── raw/           # Original collected images (unprocessed)
-│   ├── processed/     # Preprocessed/cleaned images for training
-│   └── faces/         # Cropped faces used in training & inference
-│── notebooks/         # Jupyter notebooks for experiments, EDA, and model prototyping
-│── models/            # Trained ML/DL models (ignored in Git, shared externally if large)
-│── docs/              # Documentation, reports, diagrams
-│── scripts/           # Utility scripts for preprocessing, training, etc.
-│── README.md          # Project overview and instructions
-│── .gitignore         # Files/folders excluded from version control
-│── requirements.txt   # Python dependencies
+├── AI_And_ML_Model/            # AI & ML-related resources
+│   ├── data/                   # Dataset storage
+│   │   ├── faces/              # Cropped faces for training & inference
+│   │   ├── processed/          # Preprocessed/cleaned dataset
+│   │   └── raw/                # Raw image dataset (collected samples)
+│   ├── docs/                   # Documentation for AI model
+│   ├── models/                 # Trained model files (.h5, .pkl, etc.)
+│   ├── notebooks/              # Jupyter notebooks for experiments
+│   └── scripts/                # Python scripts for preprocessing, training, testing
+│
+└── WebApp/                     # Full-stack web application
+    ├── Backend/                # Backend (Node.js/Express API)
+    │   ├── Controller/         # Business logic & request handling
+    │   ├── Middleware/         # Authentication & custom middlewares
+    │   ├── Model/              # Database models (Mongoose/ORM)
+    │   ├── routes/             # API routes
+    │   ├── Utills/             # Utility/helper functions
+    │   ├── node_modules/       # Installed dependencies
+    │   └── package.json        # Backend dependencies & scripts
+    │
+    └── Frontend/               # Frontend (React.js app)
+        └── react_frontend/
+            ├── components/     # Reusable UI components
+            ├── context/        # React Context API for global state
+            ├── hooks/          # Custom React hooks
+            ├── pages/          # Page components (routes)
+            ├── public/         # Static assets (favicon, index.html)
+            ├── src/            # Source code
+            │   └── assets/     # Images, icons, etc.
+            └── utills/         # Utility functions
 
 ---
 ```
