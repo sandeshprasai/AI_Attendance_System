@@ -11,6 +11,12 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(bodyParser.json());
 
+//routes 
+const studentRoutes=require("./routes/studentRoute");
+
+//api-endpoints
+app.use("/api/v1/students", studentRoutes);
+
 
 app.get('/', (req, res)=>{
   res.send("Hello from backend🥰 ")
