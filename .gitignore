@@ -28,6 +28,7 @@ face_crop_env/
 # Ignore full datasets (keep only small samples)
 AI_And_ML_Model/data/raw/
 AI_And_ML_Model/data/processed/
+AI_And_ML_Model/data/normalized/
 AI_And_ML_Model/data/faces/
 
 # Large model files
