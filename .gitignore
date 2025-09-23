@@ -18,6 +18,10 @@ venv/
 env/
 ENV/
 face_crop_env/
+venv/
+myvenv/
+myvenv/Scripts/
+env.bak/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
@@ -30,6 +34,10 @@ AI_And_ML_Model/data/raw/
 AI_And_ML_Model/data/processed/
 AI_And_ML_Model/data/normalized/
 AI_And_ML_Model/data/faces/
+AI_And_ML_Model/datasets/
+AI_And_ML_Model/datasets/train/
+AI_And_ML_Model/datasets/test
+AI_And_ML_Model/datasets/val/
 
 # Large model files
 *.h5
