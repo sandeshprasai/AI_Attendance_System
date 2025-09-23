@@ -1,0 +1,5 @@
+ opencv-python
+ mediapipe
+ numpy
+ tqdm
+ pillow==10.4.0

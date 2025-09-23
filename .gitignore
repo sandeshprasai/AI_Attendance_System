@@ -18,6 +18,10 @@ venv/
 env/
 ENV/
 face_crop_env/
+venv/
+myvenv/
+myvenv/Scripts/
+env.bak/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
