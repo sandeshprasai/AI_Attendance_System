@@ -3,3 +3,4 @@
  numpy
  tqdm
  pillow==10.4.0
+ imgaug
