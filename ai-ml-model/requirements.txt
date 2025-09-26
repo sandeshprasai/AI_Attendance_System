@@ -4,3 +4,7 @@
  tqdm
  pillow==10.4.0
  imgaug
+
+ tensorflow[and-cuda]
+ seaborn
+ scikit-learn
