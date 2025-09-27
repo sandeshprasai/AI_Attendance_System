@@ -537,3 +537,227 @@ Epoch 50: val_loss did not improve from 0.77024
 Test Accuracy: 0.9011
 ✅ Final model saved as 'face_recognition_attendance_final.keras'
 ✅ Class labels saved as 'class_labels.json'
+
+
+5th log 
+
+
+ Using GPU: PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')
+Found 30800 images belonging to 55 classes.
+Found 379 images belonging to 55 classes.
+Found 364 images belonging to 55 classes.
+Number of classes: 55
+Epoch 1/50
+963/963 [==============================] - ETA: 0s - loss: 4.0227 - accuracy: 0.0439
+Epoch 1: val_loss improved from inf to 3.66784, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 415s 421ms/step - loss: 4.0227 - accuracy: 0.0439 - val_loss: 3.6678 - val_accuracy: 0.0765 - lr: 5.0000e-04
+Epoch 2/50
+963/963 [==============================] - ETA: 0s - loss: 3.4792 - accuracy: 0.1166
+Epoch 2: val_loss improved from 3.66784 to 3.17984, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 326s 338ms/step - loss: 3.4792 - accuracy: 0.1166 - val_loss: 3.1798 - val_accuracy: 0.1926 - lr: 5.0000e-04
+Epoch 3/50
+963/963 [==============================] - ETA: 0s - loss: 2.9648 - accuracy: 0.2076
+Epoch 3: val_loss improved from 3.17984 to 3.00268, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 326s 338ms/step - loss: 2.9648 - accuracy: 0.2076 - val_loss: 3.0027 - val_accuracy: 0.1926 - lr: 5.0000e-04
+Epoch 4/50
+963/963 [==============================] - ETA: 0s - loss: 2.4831 - accuracy: 0.3186
+Epoch 4: val_loss improved from 3.00268 to 2.63712, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 326s 339ms/step - loss: 2.4831 - accuracy: 0.3186 - val_loss: 2.6371 - val_accuracy: 0.3298 - lr: 5.0000e-04
+Epoch 5/50
+963/963 [==============================] - ETA: 0s - loss: 1.9902 - accuracy: 0.4540
+Epoch 5: val_loss improved from 2.63712 to 1.84933, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 348s 361ms/step - loss: 1.9902 - accuracy: 0.4540 - val_loss: 1.8493 - val_accuracy: 0.5330 - lr: 5.0000e-04
+Epoch 6/50
+963/963 [==============================] - ETA: 0s - loss: 1.5251 - accuracy: 0.5936
+Epoch 6: val_loss did not improve from 1.84933
+963/963 [==============================] - 326s 338ms/step - loss: 1.5251 - accuracy: 0.5936 - val_loss: 2.5493 - val_accuracy: 0.3931 - lr: 5.0000e-04
+Epoch 7/50
+963/963 [==============================] - ETA: 0s - loss: 1.1888 - accuracy: 0.7081
+Epoch 7: val_loss improved from 1.84933 to 1.46931, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 326s 338ms/step - loss: 1.1888 - accuracy: 0.7081 - val_loss: 1.4693 - val_accuracy: 0.6807 - lr: 5.0000e-04
+Epoch 8/50
+963/963 [==============================] - ETA: 0s - loss: 0.9553 - accuracy: 0.7896
+Epoch 8: val_loss did not improve from 1.46931
+963/963 [==============================] - 326s 338ms/step - loss: 0.9553 - accuracy: 0.7896 - val_loss: 1.6346 - val_accuracy: 0.6570 - lr: 5.0000e-04
+Epoch 9/50
+963/963 [==============================] - ETA: 0s - loss: 0.8179 - accuracy: 0.8385
+Epoch 9: val_loss did not improve from 1.46931
+963/963 [==============================] - 326s 338ms/step - loss: 0.8179 - accuracy: 0.8385 - val_loss: 1.5060 - val_accuracy: 0.7045 - lr: 5.0000e-04
+Epoch 10/50
+963/963 [==============================] - ETA: 0s - loss: 0.7207 - accuracy: 0.8729
+Epoch 10: val_loss did not improve from 1.46931
+963/963 [==============================] - 326s 338ms/step - loss: 0.7207 - accuracy: 0.8729 - val_loss: 2.2843 - val_accuracy: 0.6069 - lr: 5.0000e-04
+Epoch 11/50
+963/963 [==============================] - ETA: 0s - loss: 0.6660 - accuracy: 0.8955
+Epoch 11: val_loss did not improve from 1.46931
+963/963 [==============================] - 330s 343ms/step - loss: 0.6660 - accuracy: 0.8955 - val_loss: 2.5859 - val_accuracy: 0.5646 - lr: 5.0000e-04
+Epoch 12/50
+963/963 [==============================] - ETA: 0s - loss: 0.6374 - accuracy: 0.9089
+Epoch 12: val_loss improved from 1.46931 to 1.35630, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 328s 340ms/step - loss: 0.6374 - accuracy: 0.9089 - val_loss: 1.3563 - val_accuracy: 0.7810 - lr: 5.0000e-04
+Epoch 13/50
+963/963 [==============================] - ETA: 0s - loss: 0.6072 - accuracy: 0.9212
+Epoch 13: val_loss did not improve from 1.35630
+963/963 [==============================] - 326s 338ms/step - loss: 0.6072 - accuracy: 0.9212 - val_loss: 1.7427 - val_accuracy: 0.7282 - lr: 5.0000e-04
+Epoch 14/50
+963/963 [==============================] - ETA: 0s - loss: 0.5852 - accuracy: 0.9301
+Epoch 14: val_loss did not improve from 1.35630
+963/963 [==============================] - 325s 338ms/step - loss: 0.5852 - accuracy: 0.9301 - val_loss: 1.3901 - val_accuracy: 0.8100 - lr: 5.0000e-04
+Epoch 15/50
+963/963 [==============================] - ETA: 0s - loss: 0.5701 - accuracy: 0.9364
+Epoch 15: val_loss did not improve from 1.35630
+963/963 [==============================] - 325s 338ms/step - loss: 0.5701 - accuracy: 0.9364 - val_loss: 1.4312 - val_accuracy: 0.7863 - lr: 5.0000e-04
+Epoch 16/50
+963/963 [==============================] - ETA: 0s - loss: 0.5655 - accuracy: 0.9397
+Epoch 16: val_loss did not improve from 1.35630
+963/963 [==============================] - 347s 361ms/step - loss: 0.5655 - accuracy: 0.9397 - val_loss: 1.3601 - val_accuracy: 0.7810 - lr: 5.0000e-04
+Epoch 17/50
+963/963 [==============================] - ETA: 0s - loss: 0.5592 - accuracy: 0.9440
+Epoch 17: ReduceLROnPlateau reducing learning rate to 0.0001500000071246177.
+
+Epoch 17: val_loss did not improve from 1.35630
+963/963 [==============================] - 326s 338ms/step - loss: 0.5592 - accuracy: 0.9440 - val_loss: 1.4236 - val_accuracy: 0.7836 - lr: 5.0000e-04
+Epoch 18/50
+963/963 [==============================] - ETA: 0s - loss: 0.4565 - accuracy: 0.9735
+Epoch 18: val_loss improved from 1.35630 to 1.04034, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 326s 338ms/step - loss: 0.4565 - accuracy: 0.9735 - val_loss: 1.0403 - val_accuracy: 0.8707 - lr: 1.5000e-04
+Epoch 19/50
+963/963 [==============================] - ETA: 0s - loss: 0.4298 - accuracy: 0.9792
+Epoch 19: val_loss did not improve from 1.04034
+963/963 [==============================] - 326s 338ms/step - loss: 0.4298 - accuracy: 0.9792 - val_loss: 1.0412 - val_accuracy: 0.8602 - lr: 1.5000e-04
+Epoch 20/50
+963/963 [==============================] - ETA: 0s - loss: 0.4101 - accuracy: 0.9812
+Epoch 20: val_loss improved from 1.04034 to 0.97886, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 326s 338ms/step - loss: 0.4101 - accuracy: 0.9812 - val_loss: 0.9789 - val_accuracy: 0.8760 - lr: 1.5000e-04
+Epoch 21/50
+963/963 [==============================] - ETA: 0s - loss: 0.4002 - accuracy: 0.9816
+Epoch 21: val_loss did not improve from 0.97886
+963/963 [==============================] - 326s 338ms/step - loss: 0.4002 - accuracy: 0.9816 - val_loss: 1.0148 - val_accuracy: 0.8575 - lr: 1.5000e-04
+Epoch 22/50
+963/963 [==============================] - ETA: 0s - loss: 0.3836 - accuracy: 0.9842
+Epoch 22: val_loss improved from 0.97886 to 0.93211, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 326s 338ms/step - loss: 0.3836 - accuracy: 0.9842 - val_loss: 0.9321 - val_accuracy: 0.8681 - lr: 1.5000e-04
+Epoch 23/50
+963/963 [==============================] - ETA: 0s - loss: 0.3724 - accuracy: 0.9850
+Epoch 23: val_loss did not improve from 0.93211
+963/963 [==============================] - 326s 338ms/step - loss: 0.3724 - accuracy: 0.9850 - val_loss: 1.1641 - val_accuracy: 0.8179 - lr: 1.5000e-04
+Epoch 24/50
+963/963 [==============================] - ETA: 0s - loss: 0.3645 - accuracy: 0.9842
+Epoch 24: val_loss did not improve from 0.93211
+963/963 [==============================] - 326s 338ms/step - loss: 0.3645 - accuracy: 0.9842 - val_loss: 1.1202 - val_accuracy: 0.8496 - lr: 1.5000e-04
+Epoch 25/50
+963/963 [==============================] - ETA: 0s - loss: 0.3531 - accuracy: 0.9863
+Epoch 25: val_loss did not improve from 0.93211
+963/963 [==============================] - 326s 338ms/step - loss: 0.3531 - accuracy: 0.9863 - val_loss: 0.9608 - val_accuracy: 0.8654 - lr: 1.5000e-04
+Epoch 26/50
+963/963 [==============================] - ETA: 0s - loss: 0.3418 - accuracy: 0.9869
+Epoch 26: val_loss did not improve from 0.93211
+963/963 [==============================] - 325s 338ms/step - loss: 0.3418 - accuracy: 0.9869 - val_loss: 1.1205 - val_accuracy: 0.8443 - lr: 1.5000e-04
+Epoch 27/50
+963/963 [==============================] - ETA: 0s - loss: 0.3353 - accuracy: 0.9866
+Epoch 27: ReduceLROnPlateau reducing learning rate to 4.500000213738531e-05.
+
+Epoch 27: val_loss did not improve from 0.93211
+963/963 [==============================] - 346s 359ms/step - loss: 0.3353 - accuracy: 0.9866 - val_loss: 0.9994 - val_accuracy: 0.8549 - lr: 1.5000e-04
+Epoch 28/50
+963/963 [==============================] - ETA: 0s - loss: 0.3156 - accuracy: 0.9914
+Epoch 28: val_loss improved from 0.93211 to 0.92373, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 326s 338ms/step - loss: 0.3156 - accuracy: 0.9914 - val_loss: 0.9237 - val_accuracy: 0.8602 - lr: 4.5000e-05
+Epoch 29/50
+963/963 [==============================] - ETA: 0s - loss: 0.3099 - accuracy: 0.9914
+Epoch 29: val_loss did not improve from 0.92373
+963/963 [==============================] - 327s 340ms/step - loss: 0.3099 - accuracy: 0.9914 - val_loss: 0.9310 - val_accuracy: 0.8707 - lr: 4.5000e-05
+Epoch 30/50
+963/963 [==============================] - ETA: 0s - loss: 0.3042 - accuracy: 0.9925
+Epoch 30: val_loss improved from 0.92373 to 0.90397, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 326s 338ms/step - loss: 0.3042 - accuracy: 0.9925 - val_loss: 0.9040 - val_accuracy: 0.8786 - lr: 4.5000e-05
+Epoch 31/50
+963/963 [==============================] - ETA: 0s - loss: 0.2973 - accuracy: 0.9931
+Epoch 31: val_loss did not improve from 0.90397
+963/963 [==============================] - 326s 338ms/step - loss: 0.2973 - accuracy: 0.9931 - val_loss: 0.9538 - val_accuracy: 0.8681 - lr: 4.5000e-05
+Epoch 32/50
+963/963 [==============================] - ETA: 0s - loss: 0.2930 - accuracy: 0.9937
+Epoch 32: val_loss improved from 0.90397 to 0.86788, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 326s 338ms/step - loss: 0.2930 - accuracy: 0.9937 - val_loss: 0.8679 - val_accuracy: 0.8839 - lr: 4.5000e-05
+Epoch 33/50
+963/963 [==============================] - ETA: 0s - loss: 0.2878 - accuracy: 0.9942
+Epoch 33: val_loss did not improve from 0.86788
+963/963 [==============================] - 326s 338ms/step - loss: 0.2878 - accuracy: 0.9942 - val_loss: 0.8926 - val_accuracy: 0.8786 - lr: 4.5000e-05
+Epoch 34/50
+963/963 [==============================] - ETA: 0s - loss: 0.2845 - accuracy: 0.9935
+Epoch 34: val_loss did not improve from 0.86788
+963/963 [==============================] - 326s 338ms/step - loss: 0.2845 - accuracy: 0.9935 - val_loss: 0.8680 - val_accuracy: 0.8734 - lr: 4.5000e-05
+Epoch 35/50
+963/963 [==============================] - ETA: 0s - loss: 0.2826 - accuracy: 0.9936
+Epoch 35: val_loss did not improve from 0.86788
+963/963 [==============================] - 326s 338ms/step - loss: 0.2826 - accuracy: 0.9936 - val_loss: 0.9189 - val_accuracy: 0.8681 - lr: 4.5000e-05
+Epoch 36/50
+963/963 [==============================] - ETA: 0s - loss: 0.2759 - accuracy: 0.9944
+Epoch 36: val_loss did not improve from 0.86788
+963/963 [==============================] - 326s 338ms/step - loss: 0.2759 - accuracy: 0.9944 - val_loss: 0.9349 - val_accuracy: 0.8681 - lr: 4.5000e-05
+Epoch 37/50
+963/963 [==============================] - ETA: 0s - loss: 0.2700 - accuracy: 0.9950
+Epoch 37: ReduceLROnPlateau reducing learning rate to 1.3500000204658135e-05.
+
+Epoch 37: val_loss did not improve from 0.86788
+963/963 [==============================] - 326s 338ms/step - loss: 0.2700 - accuracy: 0.9950 - val_loss: 0.8736 - val_accuracy: 0.8786 - lr: 4.5000e-05
+Epoch 38/50
+963/963 [==============================] - ETA: 0s - loss: 0.2685 - accuracy: 0.9947
+Epoch 38: val_loss did not improve from 0.86788
+963/963 [==============================] - 326s 338ms/step - loss: 0.2685 - accuracy: 0.9947 - val_loss: 0.8750 - val_accuracy: 0.8734 - lr: 1.3500e-05
+Epoch 39/50
+963/963 [==============================] - ETA: 0s - loss: 0.2678 - accuracy: 0.9944
+Epoch 39: val_loss did not improve from 0.86788
+963/963 [==============================] - 326s 338ms/step - loss: 0.2678 - accuracy: 0.9944 - val_loss: 0.8855 - val_accuracy: 0.8681 - lr: 1.3500e-05
+Epoch 40/50
+963/963 [==============================] - ETA: 0s - loss: 0.2650 - accuracy: 0.9953
+Epoch 40: val_loss improved from 0.86788 to 0.85797, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 326s 338ms/step - loss: 0.2650 - accuracy: 0.9953 - val_loss: 0.8580 - val_accuracy: 0.8734 - lr: 1.3500e-05
+Epoch 41/50
+963/963 [==============================] - ETA: 0s - loss: 0.2629 - accuracy: 0.9953
+Epoch 41: val_loss improved from 0.85797 to 0.85216, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 329s 342ms/step - loss: 0.2629 - accuracy: 0.9953 - val_loss: 0.8522 - val_accuracy: 0.8786 - lr: 1.3500e-05
+Epoch 42/50
+963/963 [==============================] - ETA: 0s - loss: 0.2619 - accuracy: 0.9953
+Epoch 42: val_loss improved from 0.85216 to 0.82287, saving model to checkpoints\best_model.keras
+963/963 [==============================] - 326s 338ms/step - loss: 0.2619 - accuracy: 0.9953 - val_loss: 0.8229 - val_accuracy: 0.8813 - lr: 1.3500e-05
+Epoch 43/50
+963/963 [==============================] - ETA: 0s - loss: 0.2598 - accuracy: 0.9957
+Epoch 43: val_loss did not improve from 0.82287
+963/963 [==============================] - 326s 338ms/step - loss: 0.2598 - accuracy: 0.9957 - val_loss: 0.8362 - val_accuracy: 0.8760 - lr: 1.3500e-05
+Epoch 44/50
+963/963 [==============================] - ETA: 0s - loss: 0.2574 - accuracy: 0.9960
+Epoch 44: val_loss did not improve from 0.82287
+963/963 [==============================] - 326s 338ms/step - loss: 0.2574 - accuracy: 0.9960 - val_loss: 0.8545 - val_accuracy: 0.8813 - lr: 1.3500e-05
+Epoch 45/50
+963/963 [==============================] - ETA: 0s - loss: 0.2557 - accuracy: 0.9962
+Epoch 45: val_loss did not improve from 0.82287
+963/963 [==============================] - 326s 338ms/step - loss: 0.2557 - accuracy: 0.9962 - val_loss: 0.8827 - val_accuracy: 0.8734 - lr: 1.3500e-05
+Epoch 46/50
+963/963 [==============================] - ETA: 0s - loss: 0.2551 - accuracy: 0.9963
+Epoch 46: val_loss did not improve from 0.82287
+963/963 [==============================] - 327s 339ms/step - loss: 0.2551 - accuracy: 0.9963 - val_loss: 0.8571 - val_accuracy: 0.8786 - lr: 1.3500e-05
+Epoch 47/50
+963/963 [==============================] - ETA: 0s - loss: 0.2536 - accuracy: 0.9962
+Epoch 47: ReduceLROnPlateau reducing learning rate to 4.050000006827758e-06.
+
+Epoch 47: val_loss did not improve from 0.82287
+963/963 [==============================] - 326s 338ms/step - loss: 0.2536 - accuracy: 0.9962 - val_loss: 0.8689 - val_accuracy: 0.8760 - lr: 1.3500e-05
+Epoch 48/50
+963/963 [==============================] - ETA: 0s - loss: 0.2534 - accuracy: 0.9961
+Epoch 48: val_loss did not improve from 0.82287
+963/963 [==============================] - 326s 338ms/step - loss: 0.2534 - accuracy: 0.9961 - val_loss: 0.8548 - val_accuracy: 0.8786 - lr: 4.0500e-06
+Epoch 49/50
+963/963 [==============================] - ETA: 0s - loss: 0.2517 - accuracy: 0.9967
+Epoch 49: val_loss did not improve from 0.82287
+963/963 [==============================] - 326s 338ms/step - loss: 0.2517 - accuracy: 0.9967 - val_loss: 0.8488 - val_accuracy: 0.8786 - lr: 4.0500e-06
+Epoch 50/50
+963/963 [==============================] - ETA: 0s - loss: 0.2516 - accuracy: 0.9962
+Epoch 50: val_loss did not improve from 0.82287
+963/963 [==============================] - 326s 338ms/step - loss: 0.2516 - accuracy: 0.9962 - val_loss: 0.8463 - val_accuracy: 0.8734 - lr: 4.0500e-06
+ Training history saved/updated at 'training_history.json'
+12/12 [==============================] - 5s 477ms/step - loss: 0.8258 - accuracy: 0.8846
+Test Accuracy: 0.8846
+✅ Final model saved as 'face_recognition_attendance_final.keras'
+✅ Final model also saved as 'face_recognition_attendance_final.h5'
+ Class labels saved as 'class_labels.json'
