@@ -1,8 +1,9 @@
-tensorflow<2.11.0
-keras==2.12.0
-mediapipe==0.10.21
+tensorflow==2.10.1
+keras==2.10.0
+mediapipe
 numpy==1.23.5
-protobuf==4.25.3
+protobuf==3.19.6
+tensorboard==2.10.1
 gast==0.4.0
-tensorboard==2.12.0
 wrapt==1.14.0
+opencv-python
