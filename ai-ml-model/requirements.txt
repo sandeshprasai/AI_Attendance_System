@@ -1,5 +1,9 @@
- opencv-python
- mediapipe
- numpy
- tqdm
- pillow==10.4.0
+tensorflow==2.10.1
+keras==2.10.0
+mediapipe
+numpy==1.23.5
+protobuf==3.19.6
+tensorboard==2.10.1
+gast==0.4.0
+wrapt==1.14.0
+opencv-python
