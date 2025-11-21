@@ -1,3 +1,4 @@
+@import "tailwindcss";
 /* Reset some default browser styles */
 body, html {
   margin: 0;
@@ -8,59 +9,3 @@ body, html {
   min-height: 100vh;
 }
 
-/* Smooth transitions for interactive elements */
-a, button {
-  transition: color 0.2s, background 0.2s;
-}
-
-/* Style links */
-a {
-  color: #0984e3;
-  text-decoration: none;
-}
-a:hover {
-  color: #00b894;
-  text-decoration: underline;
-}
-
-/* Headings */
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Montserrat', 'Segoe UI', 'Roboto', sans-serif;
-  margin-top: 0;
-}
-
-/* Container utility */
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-/* Button styles */
-button {
-  background: #0984e3;
-  color: #fff;
-  border: none;
-  padding: 0.7rem 1.5rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-}
-button:hover {
-  background: #00b894;
-}
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .container {
-    padding: 1rem;
-  }
-  h1 {
-    font-size: 2rem;
-  }
-}
-
-/* Footer and Navbar spacing fix for fixed positioning */
-body {
-  padding-bottom: 60px; /* Adjust if footer height changes */
-}
