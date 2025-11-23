@@ -24,8 +24,8 @@ app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({ extended: true }));
 
 // Routes are defined after CORS middleware
-app.use("/api/auth/", authRoute);
-app.use("/api/users", userRouer);
+app.use("/api/v1/auth/", authRoute);
+app.use("/api/v1/users", userRouer);
 
 app.listen(port, () => {
   console.log(`Server is up and running at http://localhost:${port}/ `);
