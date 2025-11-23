@@ -7,6 +7,7 @@ import HomePage from "./pages/HomePage";
 import AdminDashboard from "./pages/AdminDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
+import AddStudent from "./components/AddStudent"; 
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
         <Route path="/student-dashboard" element={<StudentDashboard />} />
+        <Route path="/AddStudent" element={<AddStudent />} />
         
         {/* other routes */}
       </Routes>
