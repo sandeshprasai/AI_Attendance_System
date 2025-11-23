@@ -1,21 +1,26 @@
 import React from "react";
-import NavBar from "./components/NavBar";
-import Footer from "./components/Footer";
+// import NavBar from "./components/NavBar";
+// import Footer from "./components/Footer";
+// import LoginPage from "./pages/LoginPage";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import AdminDashboard from "./pages/AdminDashboard";
+import TeacherDashboard from "./pages/TeacherDashboard";
+import StudentDashboard from "./pages/StudentDashboard";
 
 function App() {
   return (
-    <div>
-      <NavBar />
-      {/* updated content: use lowercase <p> and clearer layout */}
-      <main className="min-h-screen flex items-center justify-center p-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold mb-2">Welcome to SmartAttendanceSystem</h1>
-          <p className="text-gray-600">System is under development.</p>
-        </div>
-      </main>
-
-      <Footer />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/dashboard" element={<HomePage />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+        <Route path="/student-dashboard" element={<StudentDashboard />} />
+        
+        {/* other routes */}
+      </Routes>
+    </BrowserRouter>
   );
 }
 
