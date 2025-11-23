@@ -3,6 +3,7 @@ const bcryptjs = require("bcryptjs");
 const generateToken = require("./../../middlewares/generateToken");
 
 const loginController = async (req, res) => {
+  console.log(req.body)
   const username = req.body.username;
   const password = req.body.password;
   const rememberMe = req.body.rememberMe;
