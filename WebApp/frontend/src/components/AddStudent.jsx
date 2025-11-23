@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Camera, Upload, X } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 
 export default function AddStudent() {
   const [formData, setFormData] = useState({
@@ -20,7 +20,6 @@ export default function AddStudent() {
   const [errors, setErrors] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
 
-  // Capitalize first letter of each word
   const capitalizeWords = (str) => {
     return str.replace(/\b\w/g, (char) => char.toUpperCase());
   };
@@ -102,7 +101,6 @@ export default function AddStudent() {
         break;
 
       case 'Section':
-        // Section is optional, no validation needed
         break;
 
       case 'FullAddress':
@@ -131,7 +129,6 @@ export default function AddStudent() {
   const handleInputChange = (e) => {
     let { name, value } = e.target;
 
-    // Auto-capitalize names
     if (name === 'FullName') {
       value = capitalizeWords(value);
     }
@@ -141,7 +138,6 @@ export default function AddStudent() {
       [name]: value
     }));
 
-    // Validate on change
     const error = validateField(name, value);
     setErrors(prev => ({
       ...prev,
@@ -265,22 +261,8 @@ export default function AddStudent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-950 via-indigo-950 to-blue-900 p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header with Icon */}
-        <div className="mb-10 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-cyan-400 to-purple-500 rounded-3xl mb-6 shadow-2xl">
-            <Camera className="w-10 h-10 text-white" />
-          </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-3">
-            SmartAttendance
-          </h1>
-          <p className="text-2xl font-semibold text-white mb-2">Add New Student</p>
-          <p className="text-cyan-300 text-lg">Enter student details for <span className="text-cyan-400 font-semibold">real-time face recognition</span> enrollment</p>
-        </div>
-
-        {/* Form Card */}
+      <div className="max-w-6xl mx-auto pt-8">
         <div className="bg-white rounded-3xl p-10 shadow-2xl">
-          {/* Profile Image Upload */}
           <div className="mb-10 flex flex-col items-center">
             <label className="block text-gray-700 font-bold text-lg mb-4 text-center">Profile Image *</label>
             <div className="relative">
@@ -312,12 +294,9 @@ export default function AddStudent() {
               )}
             </div>
             <p className="text-gray-500 text-sm mt-3">Click to upload student photo</p>
-            {errors.ProfileImagePath && <p className="text-red-500 text-sm mt-1">{errors.ProfileImagePath}</p>}
           </div>
 
-          {/* Form Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Full Name */}
             <div>
               <label className="block text-gray-700 font-semibold mb-2">Full Name *</label>
               <input
@@ -331,10 +310,8 @@ export default function AddStudent() {
                 }`}
                 placeholder="Enter full name"
               />
-              {errors.FullName && <p className="text-red-500 text-sm mt-1">{errors.FullName}</p>}
             </div>
 
-            {/* Roll Number */}
             <div>
               <label className="block text-gray-700 font-semibold mb-2">Roll Number *</label>
               <input
@@ -348,10 +325,8 @@ export default function AddStudent() {
                 }`}
                 placeholder="Enter roll number"
               />
-              {errors.RollNo && <p className="text-red-500 text-sm mt-1">{errors.RollNo}</p>}
             </div>
 
-            {/* Faculty */}
             <div>
               <label className="block text-gray-700 font-semibold mb-2">Faculty *</label>
               <input
@@ -365,10 +340,8 @@ export default function AddStudent() {
                 }`}
                 placeholder="Enter faculty"
               />
-              {errors.Faculty && <p className="text-red-500 text-sm mt-1">{errors.Faculty}</p>}
             </div>
 
-            {/* Year of Enrollment */}
             <div>
               <label className="block text-gray-700 font-semibold mb-2">Year of Enrollment *</label>
               <input
@@ -384,10 +357,8 @@ export default function AddStudent() {
                 }`}
                 placeholder="e.g., 2024"
               />
-              {errors.YearOfEnrollment && <p className="text-red-500 text-sm mt-1">{errors.YearOfEnrollment}</p>}
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-gray-700 font-semibold mb-2">Email *</label>
               <input
@@ -397,14 +368,13 @@ export default function AddStudent() {
                 onChange={handleInputChange}
                 required
                 className={`w-full px-4 py-3 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition ${
-                  errors.Email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200'
+                  errors.Email ? 'border-purple-500 focus:border-purple-500' : 'border-gray-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200'
                 }`}
                 placeholder="student@example.com"
               />
-              {errors.Email && <p className="text-red-500 text-sm mt-1">{errors.Email}</p>}
+              {errors.Email && <p className="text-purple-600 text-sm mt-1 font-semibold">{errors.Email}</p>}
             </div>
 
-            {/* Phone */}
             <div>
               <label className="block text-gray-700 font-semibold mb-2">Phone Number *</label>
               <input
@@ -418,10 +388,8 @@ export default function AddStudent() {
                 }`}
                 placeholder="9812345678"
               />
-              {errors.Phone && <p className="text-red-500 text-sm mt-1">{errors.Phone}</p>}
             </div>
 
-            {/* Date of Birth */}
             <div>
               <label className="block text-gray-700 font-semibold mb-2">Date of Birth *</label>
               <input
@@ -434,10 +402,8 @@ export default function AddStudent() {
                   errors.DateOfBirth ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200'
                 }`}
               />
-              {errors.DateOfBirth && <p className="text-red-500 text-sm mt-1">{errors.DateOfBirth}</p>}
             </div>
 
-            {/* Class */}
             <div>
               <label className="block text-gray-700 font-semibold mb-2">Class *</label>
               <input
@@ -451,10 +417,8 @@ export default function AddStudent() {
                 }`}
                 placeholder="Enter class (e.g., BSCS)"
               />
-              {errors.Class && <p className="text-red-500 text-sm mt-1">{errors.Class}</p>}
             </div>
 
-            {/* Section */}
             <div>
               <label className="block text-gray-700 font-semibold mb-2">Section</label>
               <input
@@ -467,7 +431,6 @@ export default function AddStudent() {
               />
             </div>
 
-            {/* University Registration Number */}
             <div>
               <label className="block text-gray-700 font-semibold mb-2">University Reg. Number *</label>
               <input
@@ -481,10 +444,8 @@ export default function AddStudent() {
                 }`}
                 placeholder="UNI20230012345"
               />
-              {errors.UniversityReg && <p className="text-red-500 text-sm mt-1">{errors.UniversityReg}</p>}
             </div>
 
-            {/* Full Address - Spans 2 columns */}
             <div className="md:col-span-2">
               <label className="block text-gray-700 font-semibold mb-2">Full Address *</label>
               <textarea
@@ -498,11 +459,9 @@ export default function AddStudent() {
                 }`}
                 placeholder="123 Main Street, City, State 12345"
               />
-              {errors.FullAddress && <p className="text-red-500 text-sm mt-1">{errors.FullAddress}</p>}
             </div>
           </div>
 
-          {/* Submit Buttons */}
           <div className="flex gap-4 mt-10">
             <button
               onClick={handleSubmit}
