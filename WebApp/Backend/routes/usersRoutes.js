@@ -7,6 +7,6 @@ userRouter.get("/", (req, res) => {
   res.send("You are on user routes");
 });
 
-userRouter.post("/student", sanitizeStudenstInput,addStudent);
+userRouter.post("/students", sanitizeStudenstInput,addStudent);
 
 module.exports = userRouter;
