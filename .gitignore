@@ -82,3 +82,4 @@ dist/
 .idea/
 *.swp
 *.swo
+package-lock.json
