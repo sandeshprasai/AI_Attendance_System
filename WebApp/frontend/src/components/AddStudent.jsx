@@ -19,12 +19,14 @@ export default function AddStudent() {
 
   const [errors, setErrors] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
+  const [touched, setTouched] = useState({});
 
   const capitalizeWords = (str) => {
-    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+    return (str || '').replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
   const validateField = (name, value) => {
+    value = value ?? '';
     let error = '';
 
     switch (name) {
@@ -41,8 +43,8 @@ export default function AddStudent() {
       case 'RollNo':
         if (!value) {
           error = 'Roll number is required';
-        } else if (parseInt(value) <= 0) {
-          error = 'Roll number must be positive';
+        } else if (parseInt(value, 10) <= 0 || isNaN(parseInt(value, 10))) {
+          error = 'Roll number must be a positive number';
         }
         break;
 
@@ -54,14 +56,15 @@ export default function AddStudent() {
         }
         break;
 
-      case 'YearOfEnrollment':
+      case 'YearOfEnrollment': {
         const currentYear = new Date().getFullYear();
         if (!value) {
           error = 'Year of enrollment is required';
-        } else if (parseInt(value) < 2000 || parseInt(value) > currentYear + 1) {
+        } else if (isNaN(parseInt(value, 10)) || parseInt(value, 10) < 2000 || parseInt(value, 10) > currentYear + 1) {
           error = `Year must be between 2000 and ${currentYear + 1}`;
         }
         break;
+      }
 
       case 'Email':
         if (!value.trim()) {
@@ -71,13 +74,15 @@ export default function AddStudent() {
         }
         break;
 
-      case 'Phone':
-        if (!value.trim()) {
+      case 'Phone': {
+        const cleanPhone = String(value).replace(/\s/g, '');
+        if (!cleanPhone) {
           error = 'Phone number is required';
-        } else if (!/^\d{10}$/.test(value.replace(/\s/g, ''))) {
-          error = 'Phone number must be 10 digits';
+        } else if (!/^\d{9,10}$/.test(cleanPhone)) {
+          error = 'Phone number must be 9 or 10 digits';
         }
         break;
+      }
 
       case 'DateOfBirth':
         if (!value) {
@@ -85,7 +90,11 @@ export default function AddStudent() {
         } else {
           const dob = new Date(value);
           const today = new Date();
-          const age = today.getFullYear() - dob.getFullYear();
+          let age = today.getFullYear() - dob.getFullYear();
+          const m = today.getMonth() - dob.getMonth();
+          if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+            age--;
+          }
           if (age < 10 || age > 100) {
             error = 'Age must be between 10 and 100 years';
           }
@@ -101,6 +110,7 @@ export default function AddStudent() {
         break;
 
       case 'Section':
+        // optional
         break;
 
       case 'FullAddress':
@@ -129,62 +139,101 @@ export default function AddStudent() {
   const handleInputChange = (e) => {
     let { name, value } = e.target;
 
-    if (name === 'FullName') {
-      value = capitalizeWords(value);
+    // Prevent invalid characters based on field type
+    switch (name) {
+      case 'FullName':
+        value = value.replace(/[^a-zA-Z\s]/g, '');
+        value = capitalizeWords(value);
+        break;
+
+      case 'RollNo':
+        value = value.replace(/[^0-9]/g, '');
+        break;
+
+      case 'Faculty':
+        value = value.replace(/[^a-zA-Z\s]/g, '');
+        break;
+
+      case 'YearOfEnrollment':
+        value = value.replace(/[^0-9]/g, '');
+        break;
+
+      case 'Phone':
+        value = value.replace(/[^0-9]/g, '');
+        break;
+
+      case 'Class':
+        value = value.replace(/[^a-zA-Z\s]/g, '');
+        break;
+
+      // 'Section' and others can have any characters
+      default:
+        break;
     }
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value
     }));
 
+    // live-validate field
     const error = validateField(name, value);
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
       [name]: error
     }));
   };
 
+  const handleBlur = (e) => {
+    const { name } = e.target;
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true
+    }));
+
+    // Validate on blur as well
+    const error = validateField(name, formData[name]);
+    setErrors((prev) => ({ ...prev, [name]: error }));
+  };
+
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files && e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
-        setErrors(prev => ({ ...prev, ProfileImagePath: 'Please upload a valid image file' }));
+        setErrors((prev) => ({ ...prev, ProfileImagePath: 'Please upload a valid image file' }));
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, ProfileImagePath: 'Image size must be less than 5MB' }));
+        setErrors((prev) => ({ ...prev, ProfileImagePath: 'Image size must be less than 5MB' }));
         return;
       }
 
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
-        setFormData(prev => ({ 
-          ...prev, 
+        setFormData((prev) => ({
+          ...prev,
           ProfileImagePath: reader.result
         }));
-        setErrors(prev => ({ ...prev, ProfileImagePath: '' }));
+        setErrors((prev) => ({ ...prev, ProfileImagePath: '' }));
       };
       reader.readAsDataURL(file);
     }
   };
 
   const removeImage = () => {
-    setFormData(prev => ({ ...prev, ProfileImagePath: null }));
+    setFormData((prev) => ({ ...prev, ProfileImagePath: null }));
     setImagePreview(null);
-    setErrors(prev => ({ ...prev, ProfileImagePath: '' }));
+    setErrors((prev) => ({ ...prev, ProfileImagePath: '' }));
   };
 
   const validateAllFields = () => {
     const newErrors = {};
-    Object.keys(formData).forEach(key => {
-      if (key !== 'ProfileImagePath' && key !== 'Section') {
-        const error = validateField(key, formData[key]);
-        if (error) {
-          newErrors[key] = error;
-        }
-      }
+    Object.keys(formData).forEach((key) => {
+      if (key === 'Section') return; // optional
+      if (key === 'ProfileImagePath') return; // handled separately
+      const error = validateField(key, formData[key]);
+      if (error) newErrors[key] = error;
     });
 
     if (!formData.ProfileImagePath) {
@@ -192,6 +241,14 @@ export default function AddStudent() {
     }
 
     setErrors(newErrors);
+    // mark all touched so errors show in UI
+    setTouched(
+      Object.keys(formData).reduce((acc, key) => {
+        acc[key] = true;
+        return acc;
+      }, {})
+    );
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -203,11 +260,11 @@ export default function AddStudent() {
 
     const dataToSend = {
       FullName: formData.FullName.trim(),
-      RollNo: parseInt(formData.RollNo),
+      RollNo: parseInt(formData.RollNo, 10),
       Faculty: formData.Faculty.trim(),
-      YearOfEnrollment: parseInt(formData.YearOfEnrollment),
+      YearOfEnrollment: parseInt(formData.YearOfEnrollment, 10),
       Email: formData.Email.trim().toLowerCase(),
-      Phone: formData.Phone.replace(/\s/g, ''),
+      Phone: String(formData.Phone).replace(/\s/g, ''),
       DateOfBirth: formData.DateOfBirth,
       Class: formData.Class.trim(),
       Section: formData.Section.trim() || '',
@@ -222,20 +279,37 @@ export default function AddStudent() {
       const response = await fetch('http://localhost:5000/api/students', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(dataToSend)
       });
 
       if (response.ok) {
         alert('Student added successfully!');
-        handleReset();
+        // full reset
+        setFormData({
+          FullName: '',
+          RollNo: '',
+          Faculty: '',
+          YearOfEnrollment: '',
+          Email: '',
+          Phone: '',
+          DateOfBirth: '',
+          Class: '',
+          Section: '',
+          FullAddress: '',
+          UniversityReg: '',
+          ProfileImagePath: null
+        });
+        setImagePreview(null);
+        setErrors({});
+        setTouched({});
       } else {
-        const error = await response.json();
+        const error = await response.json().catch(() => ({}));
         alert(`Error: ${error.message || 'Failed to add student'}`);
       }
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (err) {
+      console.error('Error:', err);
       alert('Failed to connect to server');
     }
   };
@@ -257,222 +331,252 @@ export default function AddStudent() {
     });
     setImagePreview(null);
     setErrors({});
+    setTouched({});
+  };
+
+  const shouldShowError = (fieldName) => {
+    // show error only when field has been touched and there is an error
+    return !!(touched[fieldName] && errors[fieldName]);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-950 via-indigo-950 to-blue-900 p-8">
-      <div className="max-w-6xl mx-auto pt-8">
-        <div className="bg-white rounded-3xl p-10 shadow-2xl">
-          <div className="mb-10 flex flex-col items-center">
-            <label className="block text-gray-700 font-bold text-lg mb-4 text-center">Profile Image *</label>
+    <div className="min-h-screen bg-gradient-to-r from-cyan-500 to-teal-500 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto pt-4 sm:pt-6 lg:pt-8">
+        <div className="bg-gradient-to-br from-cyan-400/25 via-teal-400/25 to-cyan-500/25 backdrop-blur-md rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl border border-white/40">
+          {/* Profile Image Upload Section */}
+          <div className="mb-8 sm:mb-10 flex flex-col items-center">
             <div className="relative">
               {imagePreview ? (
                 <div className="relative">
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="w-36 h-36 rounded-full object-cover border-4 border-cyan-400 shadow-lg"
+                    className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-white shadow-2xl"
                   />
                   <button
                     type="button"
                     onClick={removeImage}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition shadow-lg"
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-all duration-200 shadow-lg hover:scale-110"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
                   </button>
                 </div>
               ) : (
-                <label className="w-36 h-36 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform border-4 border-cyan-400 shadow-xl">
-                  <Upload className="w-10 h-10 text-white" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
+                <label className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-200 border-4 border-white shadow-2xl hover:shadow-cyan-400/50">
+                  <Upload className="w-10 h-10 sm:w-12 sm:h-12 text-cyan-600" strokeWidth={2.5} />
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </label>
               )}
             </div>
-            <p className="text-gray-500 text-sm mt-3">Click to upload student photo</p>
+            <p className="text-white text-xs sm:text-sm mt-3 drop-shadow-md text-center">Click to upload student photo</p>
+            {shouldShowError('ProfileImagePath') && (
+              <p className="text-red-100 text-xs sm:text-sm mt-2">{errors.ProfileImagePath}</p>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Full Name *</label>
+          {/* Title */}
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-center mb-8 sm:mb-10 drop-shadow-lg">
+            Add Student
+          </h2>
+
+          {/* Form Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            {/* Full Name */}
+            <div className="w-full">
+              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
+                Full Name <span className="text-red-200">*</span>
+              </label>
               <input
                 type="text"
                 name="FullName"
                 value={formData.FullName}
                 onChange={handleInputChange}
-                required
-                className={`w-full px-4 py-3 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition ${
-                  errors.FullName ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200'
-                }`}
+                onBlur={handleBlur}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
                 placeholder="Enter full name"
               />
+              {shouldShowError('FullName') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.FullName}</p>}
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Roll Number *</label>
+            {/* Roll Number */}
+            <div className="w-full">
+              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
+                Roll Number <span className="text-red-200">*</span>
+              </label>
               <input
-                type="number"
+                type="text"
                 name="RollNo"
                 value={formData.RollNo}
                 onChange={handleInputChange}
-                required
-                className={`w-full px-4 py-3 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition ${
-                  errors.RollNo ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200'
-                }`}
+                onBlur={handleBlur}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
                 placeholder="Enter roll number"
               />
+              {shouldShowError('RollNo') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.RollNo}</p>}
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Faculty *</label>
+            {/* Faculty */}
+            <div className="w-full">
+              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
+                Faculty <span className="text-red-200">*</span>
+              </label>
               <input
                 type="text"
                 name="Faculty"
                 value={formData.Faculty}
                 onChange={handleInputChange}
-                required
-                className={`w-full px-4 py-3 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition ${
-                  errors.Faculty ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200'
-                }`}
+                onBlur={handleBlur}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
                 placeholder="Enter faculty"
               />
+              {shouldShowError('Faculty') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.Faculty}</p>}
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Year of Enrollment *</label>
+            {/* Year of Enrollment */}
+            <div className="w-full">
+              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
+                Year of Enrollment <span className="text-red-200">*</span>
+              </label>
               <input
-                type="number"
+                type="text"
                 name="YearOfEnrollment"
                 value={formData.YearOfEnrollment}
                 onChange={handleInputChange}
-                required
-                min="2000"
-                max="2030"
-                className={`w-full px-4 py-3 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition ${
-                  errors.YearOfEnrollment ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200'
-                }`}
+                onBlur={handleBlur}
+                maxLength="4"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
                 placeholder="e.g., 2024"
               />
+              {shouldShowError('YearOfEnrollment') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.YearOfEnrollment}</p>}
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Email *</label>
+            {/* Email */}
+            <div className="w-full">
+              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
+                Email <span className="text-red-200">*</span>
+              </label>
               <input
                 type="email"
                 name="Email"
                 value={formData.Email}
                 onChange={handleInputChange}
-                required
-                className={`w-full px-4 py-3 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition ${
-                  errors.Email ? 'border-purple-500 focus:border-purple-500' : 'border-gray-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200'
+                onBlur={handleBlur}
+                className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition-all duration-200 shadow-lg text-sm sm:text-base ${
+                  shouldShowError('Email') ? 'border-purple-400 focus:border-purple-400 focus:ring-4 focus:ring-purple-200/50' : 'border-white/50 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50'
                 }`}
                 placeholder="student@example.com"
               />
-              {errors.Email && <p className="text-purple-600 text-sm mt-1 font-semibold">{errors.Email}</p>}
+              {shouldShowError('Email') && <p className="text-purple-200 text-xs sm:text-sm mt-1 font-semibold drop-shadow-md">{errors.Email}</p>}
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Phone Number *</label>
+            {/* Phone Number */}
+            <div className="w-full">
+              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
+                Phone Number <span className="text-red-200">*</span>
+              </label>
               <input
-                type="tel"
+                type="text"
                 name="Phone"
                 value={formData.Phone}
                 onChange={handleInputChange}
-                required
-                className={`w-full px-4 py-3 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition ${
-                  errors.Phone ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200'
+                onBlur={handleBlur}
+                maxLength="10"
+                className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition-all duration-200 shadow-lg text-sm sm:text-base ${
+                  shouldShowError('Phone') ? 'border-purple-400 focus:border-purple-400 focus:ring-4 focus:ring-purple-200/50' : 'border-white/50 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50'
                 }`}
                 placeholder="9812345678"
               />
+              {shouldShowError('Phone') && <p className="text-purple-200 text-xs sm:text-sm mt-1 font-semibold drop-shadow-md">{errors.Phone}</p>}
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Date of Birth *</label>
+            {/* Date of Birth */}
+            <div className="w-full">
+              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
+                Date of Birth <span className="text-red-200">*</span>
+              </label>
               <input
                 type="date"
                 name="DateOfBirth"
                 value={formData.DateOfBirth}
                 onChange={handleInputChange}
-                required
-                className={`w-full px-4 py-3 border-2 rounded-xl text-gray-800 focus:outline-none transition ${
-                  errors.DateOfBirth ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200'
-                }`}
+                onBlur={handleBlur}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
               />
+              {shouldShowError('DateOfBirth') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.DateOfBirth}</p>}
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Class *</label>
+            {/* Class */}
+            <div className="w-full">
+              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
+                Class <span className="text-red-200">*</span>
+              </label>
               <input
                 type="text"
                 name="Class"
                 value={formData.Class}
                 onChange={handleInputChange}
-                required
-                className={`w-full px-4 py-3 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition ${
-                  errors.Class ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200'
-                }`}
+                onBlur={handleBlur}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
                 placeholder="Enter class (e.g., BSCS)"
               />
+              {shouldShowError('Class') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.Class}</p>}
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">Section</label>
+            {/* Section */}
+            <div className="w-full">
+              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">Section</label>
               <input
                 type="text"
                 name="Section"
                 value={formData.Section}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200 transition"
+                onBlur={handleBlur}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
                 placeholder="Enter section (e.g., A) - Optional"
               />
             </div>
 
-            <div>
-              <label className="block text-gray-700 font-semibold mb-2">University Reg. Number *</label>
+            {/* University Reg. Number */}
+            <div className="w-full">
+              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
+                University Reg. Number <span className="text-red-200">*</span>
+              </label>
               <input
                 type="text"
                 name="UniversityReg"
                 value={formData.UniversityReg}
                 onChange={handleInputChange}
-                required
-                className={`w-full px-4 py-3 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition ${
-                  errors.UniversityReg ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200'
-                }`}
+                onBlur={handleBlur}
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
                 placeholder="UNI20230012345"
               />
+              {shouldShowError('UniversityReg') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.UniversityReg}</p>}
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-gray-700 font-semibold mb-2">Full Address *</label>
+            {/* Full Address */}
+            <div className="w-full md:col-span-2">
+              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
+                Full Address <span className="text-red-200">*</span>
+              </label>
               <textarea
                 name="FullAddress"
                 value={formData.FullAddress}
                 onChange={handleInputChange}
-                required
+                onBlur={handleBlur}
                 rows="3"
-                className={`w-full px-4 py-3 border-2 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition resize-none ${
-                  errors.FullAddress ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-200'
-                }`}
-                placeholder="123 Main Street, City, State 12345"
+                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 resize-none shadow-lg text-sm sm:text-base"
+                placeholder="Enter full address"
               />
+              {shouldShowError('FullAddress') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.FullAddress}</p>}
             </div>
           </div>
 
-          <div className="flex gap-4 mt-10">
-            <button
-              onClick={handleSubmit}
-              className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold text-lg py-4 px-8 rounded-xl hover:from-cyan-600 hover:to-blue-600 transition-all transform hover:scale-105 shadow-lg"
-            >
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8 sm:mt-10">
+            <button onClick={handleSubmit} className="flex-1 bg-white text-cyan-600 font-bold text-base sm:text-lg py-3 sm:py-4 px-6 sm:px-8 rounded-lg sm:rounded-xl hover:bg-cyan-50 transition-all duration-200 transform hover:scale-105 shadow-2xl hover:shadow-cyan-400/50">
               Add Student
             </button>
-            <button
-              onClick={handleReset}
-              className="px-10 bg-gray-200 text-gray-700 font-bold text-lg py-4 rounded-xl hover:bg-gray-300 transition-all"
-            >
+            <button onClick={handleReset} className="w-full sm:w-auto px-8 sm:px-10 bg-white/80 backdrop-blur-sm text-gray-700 font-bold text-base sm:text-lg py-3 sm:py-4 rounded-lg sm:rounded-xl hover:bg-white transition-all duration-200 shadow-xl">
               Reset
             </button>
           </div>
