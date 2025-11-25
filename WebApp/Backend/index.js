@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyparser = require("body-parser");
 const authRoute = require("./routes/authRoute");
-const userRouer = require("./routes/usersRoutes");
+const userRouter = require("./routes/usersRoutes");
 const DbConnection = require("./config/DbConfig");
 require("dotenv").config();
 const cors = require("cors");
@@ -20,12 +20,14 @@ app.use(
 );
 // -------------------------------------
 
-app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 // Routes are defined after CORS middleware
 app.use("/api/v1/auth/", authRoute);
-app.use("/api/v1/users", userRouer);
+app.use("/api/v1/users", userRouter);
+
 
 app.listen(port, () => {
   console.log(`Server is up and running at http://localhost:${port}/ `);
