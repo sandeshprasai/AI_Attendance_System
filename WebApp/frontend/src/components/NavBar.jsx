@@ -1,139 +1,167 @@
-import React, { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
+import { User, Settings, LogOut } from "lucide-react";
+import { Link } from "react-router-dom";
 
-const NavBar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  
-  const navLinks = [
-    { name: "Home", href: "#home" },
-    { name: "Add Student", href: "#add-student" },
-    { name: "Add Teacher", href: "#add-teacher" },
-    { name: "Create Classroom", href: "#create-classroom" },
-  ];
+function NavBar() {
+  const [showLogoutMenu, setShowLogoutMenu] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const menuRef = useRef(null);
 
-  // Add scroll effect for navbar background
+  const user = {
+    name: "Admin User",
+    email: "admin@example.com",
+    photoURL: "https://www.wisden.com/static-assets/images/players/3993.png?v=23.77" // Add user photo URL here
+  };
+
+  const handleLogout = () => {
+    console.log("Logged out");
+  };
+
+  // Close menu when clicking outside
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowLogoutMenu(false);
+      }
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+
+    if (showLogoutMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showLogoutMenu]);
+
+  // Reset image error when photoURL changes
+  useEffect(() => {
+    setImageError(false);
+  }, [user.photoURL]);
 
   return (
-    <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${
-      scrolled 
-        ? "bg-white/95 backdrop-blur-md shadow-lg" 
-        : "bg-gradient-to-r from-cyan-600 to-emerald-500 shadow-xl"
-    }`}>
+    <nav className="bg-gradient-to-r from-cyan-600 to-teal-600 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          
-          {/* Branding with animated logo */}
-          <div className="shrink-0 flex items-center group">
-            <div className="flex items-center space-x-2">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-300 ${
-                scrolled 
-                  ? "bg-gradient-to-br from-cyan-500 to-emerald-500" 
-                  : "bg-white/20 backdrop-blur-sm"
-              }`}>
-                <svg className={`w-6 h-6 ${scrolled ? "text-white" : "text-yellow-200"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+              <svg className="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h1 className="text-xl font-bold text-yellow-300">SmartAttendanceSystem</h1>
+          </div>
+
+          {/* Right Side: Nav Links + User Menu */}
+          <div className="flex items-center gap-8">
+            {/* Nav Links */}
+            <div className="hidden md:flex items-center gap-6">
+              <Link to="/dashboard" className="text-white font-medium transition-all duration-300 hover:text-yellow-300 hover:scale-105">
+                Home
+              </Link>
+              <Link to="/add-student" className="text-white font-medium transition-all duration-300 hover:text-yellow-300 hover:scale-105">
+                Add Student
+              </Link>
+              <Link to="/add-teacher" className="text-white font-medium transition-all duration-300 hover:text-yellow-300 hover:scale-105">
+                Add Teacher
+              </Link>
+              <Link to="/add-classroom" className="text-white font-medium transition-all duration-300 hover:text-yellow-300 hover:scale-105">
+                Create Classroom
+              </Link>
+            </div>
+
+            {/* User Menu - Improved UX */}
+            <div className="relative" ref={menuRef}>
+              {/* User Avatar Button - Shows Photo or Icon */}
+              <button
+                onClick={() => setShowLogoutMenu(!showLogoutMenu)}
+                className={`
+                  w-10 h-10 rounded-full bg-white shadow-md
+                  flex items-center justify-center
+                  transition-all duration-300 ease-out
+                  hover:scale-110 hover:shadow-lg
+                  active:scale-95
+                  overflow-hidden
+                  ${showLogoutMenu ? 'ring-4 ring-white ring-opacity-40 scale-110' : ''}
+                `}
+              >
+                {user.photoURL && !imageError ? (
+                  <img 
+                    src={user.photoURL} 
+                    alt={user.name}
+                    onError={() => setImageError(true)}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User 
+                    className={`w-5 h-5 text-cyan-600 transition-transform duration-300 ${showLogoutMenu ? 'rotate-12' : ''}`} 
+                  />
+                )}
+              </button>
+
+              {/* Dropdown Menu with Animation */}
+              <div
+                className={`
+                  absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl
+                  overflow-hidden
+                  transition-all duration-300 ease-out origin-top-right
+                  ${showLogoutMenu 
+                    ? 'opacity-100 scale-100 translate-y-0' 
+                    : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+                  }
+                `}
+              >
+                {/* User Info Section */}
+                <div className="px-4 py-4 bg-gradient-to-r from-cyan-50 to-teal-50 border-b border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-md overflow-hidden">
+                      {user.photoURL && !imageError ? (
+                        <img 
+                          src={user.photoURL} 
+                          alt={user.name}
+                          onError={() => setImageError(true)}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <User className="w-6 h-6 text-white" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
+                      <p className="text-xs text-gray-600 truncate">{user.email}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Menu Items */}
+                <div className="py-2">
+                  <button
+                    onClick={() => alert('Settings clicked')}
+                    className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-all duration-200 active:scale-95"
+                  >
+                    <Settings className="w-4 h-4 text-gray-500" />
+                    <span className="font-medium">Settings</span>
+                  </button>
+                </div>
+
+                {/* Logout Button */}
+                <div className="border-t border-gray-100 p-2">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-3 transition-all duration-200 active:scale-95"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
               </div>
-              <span className={`text-2xl font-bold tracking-wide cursor-pointer transition-colors duration-300 ${
-                scrolled ? "text-gray-800" : "text-white"
-              }`}>
-                <span className={scrolled ? "text-cyan-600" : "text-yellow-200"}>Smart</span>Attendance
-                <span className={scrolled ? "text-emerald-600" : "text-yellow-200"}>System</span>
-              </span>
             </div>
           </div>
-
-          {/* Desktop Links with hover effects */}
-          <div className="hidden md:ml-6 md:flex md:space-x-1 items-center">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 group overflow-hidden ${
-                  scrolled 
-                    ? "text-gray-700 hover:text-cyan-600 active:scale-95" 
-                    : "text-white active:scale-95"
-                }`}
-              >
-                {/* Background hover effect (desktop only) */}
-                <span className={`absolute inset-0 w-full h-full transition-all duration-300 transform scale-x-0 md:group-hover:scale-x-100 origin-left ${
-                  scrolled ? "bg-cyan-50" : "bg-white/10"
-                }`}></span>
-                
-                {/* Text with relative positioning */}
-                <span className="relative z-10">{link.name}</span>
-                
-                {/* Bottom border animation (desktop only) */}
-                <span className={`absolute bottom-0 left-0 w-0 h-0.5 transition-all duration-300 md:group-hover:w-full ${
-                  scrolled ? "bg-cyan-600" : "bg-yellow-200"
-                }`}></span>
-              </a>
-            ))}
-          </div>
-
-          {/* Mobile Menu Button with animation */}
-          <div className="flex items-center md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className={`inline-flex items-center justify-center p-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-inset ${
-                scrolled 
-                  ? "text-gray-700 hover:bg-gray-100 focus:ring-cyan-500" 
-                  : "text-white hover:bg-white/20 focus:ring-white"
-              }`}
-            >
-              <span className="sr-only">Open main menu</span>
-              <div className="w-6 h-5 relative flex flex-col justify-between">
-                <span className={`w-full h-0.5 bg-current transform transition-all duration-300 ${
-                  isOpen ? "rotate-45 translate-y-2" : ""
-                }`}></span>
-                <span className={`w-full h-0.5 bg-current transition-all duration-300 ${
-                  isOpen ? "opacity-0" : ""
-                }`}></span>
-                <span className={`w-full h-0.5 bg-current transform transition-all duration-300 ${
-                  isOpen ? "-rotate-45 -translate-y-2" : ""
-                }`}></span>
-              </div>
-            </button>
-          </div>
-          
-        </div>
-      </div>
-
-      {/* Mobile Menu with slide animation */}
-      <div className={`md:hidden overflow-hidden transition-all duration-300 ${
-        isOpen ? "max-h-96" : "max-h-0"
-      }`}>
-        <div className={`px-4 pt-2 pb-4 space-y-1 ${
-          scrolled 
-            ? "bg-white/95 backdrop-blur-md border-t border-gray-200" 
-            : "bg-cyan-700/95 backdrop-blur-sm"
-        }`}>
-          {navLinks.map((link, idx) => (
-            <a
-              key={link.name}
-              href={link.href}
-              className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 active:scale-95 ${
-                scrolled 
-                  ? "text-gray-700 active:bg-gradient-to-r active:from-cyan-100 active:to-emerald-100 active:text-cyan-700" 
-                  : "text-white active:bg-white/30 active:backdrop-blur-lg"
-              }`}
-              style={{ animationDelay: `${idx * 50}ms` }}
-              onClick={() => setIsOpen(false)}
-            >
-              {link.name}
-            </a>
-          ))}
         </div>
       </div>
     </nav>
   );
-};
+}
 
 export default NavBar;
