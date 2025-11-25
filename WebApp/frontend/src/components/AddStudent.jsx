@@ -1,20 +1,37 @@
-import React, { useState } from 'react';
-import { Upload, X } from 'lucide-react';
+// ============================================================================
+// STANDALONE ADD STUDENT COMPONENT - Pure React + Tailwind CSS
+// ============================================================================
+
+import { useState } from 'react';
+import { 
+  Upload, 
+  X, 
+  AlertCircle, 
+  CheckCircle2, 
+  User, 
+  Calendar, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Building2, 
+  GraduationCap, 
+  Hash 
+} from 'lucide-react';
 
 export default function AddStudent() {
   const [formData, setFormData] = useState({
-    FullName: '',
-    RollNo: '',
-    Faculty: '',
-    YearOfEnrollment: '',
-    Email: '',
-    Phone: '',
-    DateOfBirth: '',
-    Class: '',
-    Section: '',
-    FullAddress: '',
-    UniversityReg: '',
-    ProfileImagePath: null
+    fullName: '',
+    rollNo: '',
+    faculty: '',
+    yearOfEnrollment: '',
+    email: '',
+    phone: '',
+    dateOfBirth: '',
+    class: '',
+    section: '',
+    fullAddress: '',
+    universityReg: '',
+    profileImagePath: null
   });
 
   const [errors, setErrors] = useState({});
@@ -22,562 +39,550 @@ export default function AddStudent() {
   const [touched, setTouched] = useState({});
 
   const capitalizeWords = (str) => {
-    return (str || '').replace(/\b\w/g, (char) => char.toUpperCase());
+    return str.replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   };
 
   const validateField = (name, value) => {
-    value = value ?? '';
     let error = '';
 
     switch (name) {
-      case 'FullName':
-        if (!value.trim()) {
-          error = 'Full name is required';
-        } else if (value.trim().length < 3) {
-          error = 'Name must be at least 3 characters';
-        } else if (!/^[a-zA-Z\s]+$/.test(value)) {
-          error = 'Name can only contain letters and spaces';
-        }
+      case 'fullName':
+        if (!value.trim()) error = 'Full name is required';
+        else if (value.trim().length < 3) error = 'Name must be at least 3 characters';
+        else if (!/^[a-zA-Z\s]+$/.test(value)) error = 'Name can only contain letters and spaces';
         break;
-
-      case 'RollNo':
-        if (!value) {
-          error = 'Roll number is required';
-        } else if (parseInt(value, 10) <= 0 || isNaN(parseInt(value, 10))) {
-          error = 'Roll number must be a positive number';
-        }
+      case 'rollNo':
+        if (!value) error = 'Roll number is required';
+        else if (parseInt(value, 10) <= 0 || isNaN(parseInt(value, 10))) error = 'Roll number must be a positive number';
         break;
-
-      case 'Faculty':
-        if (!value.trim()) {
-          error = 'Faculty is required';
-        } else if (value.trim().length < 2) {
-          error = 'Faculty must be at least 2 characters';
-        }
+      case 'faculty':
+        if (!value.trim()) error = 'Faculty is required';
+        else if (value.trim().length < 2) error = 'Faculty must be at least 2 characters';
         break;
-
-      case 'YearOfEnrollment': {
+      case 'yearOfEnrollment': {
         const currentYear = new Date().getFullYear();
-        if (!value) {
-          error = 'Year of enrollment is required';
-        } else if (isNaN(parseInt(value, 10)) || parseInt(value, 10) < 2000 || parseInt(value, 10) > currentYear + 1) {
+        if (!value) error = 'Year of enrollment is required';
+        else if (isNaN(parseInt(value, 10)) || parseInt(value, 10) < 2000 || parseInt(value, 10) > currentYear + 1)
           error = `Year must be between 2000 and ${currentYear + 1}`;
-        }
         break;
       }
-
-      case 'Email':
-        if (!value.trim()) {
-          error = 'Email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          error = 'Please enter a valid email address';
-        }
+      case 'email':
+        if (!value.trim()) error = 'Email is required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.toLowerCase())) error = 'Please enter a valid email address';
         break;
-
-      case 'Phone': {
-        const cleanPhone = String(value).replace(/\s/g, '');
-        if (!cleanPhone) {
-          error = 'Phone number is required';
-        } else if (!/^\d{9,10}$/.test(cleanPhone)) {
-          error = 'Phone number must be 9 or 10 digits';
-        }
+      case 'phone': {
+        const cleanPhone = value.replace(/\s/g, '');
+        if (!cleanPhone) error = 'Phone number is required';
+        else if (!/^\d{10}$/.test(cleanPhone)) error = 'Phone number must be exactly 10 digits';
         break;
       }
-
-      case 'DateOfBirth':
+      case 'dateOfBirth':
         if (!value) {
           error = 'Date of birth is required';
         } else {
           const dob = new Date(value);
           const today = new Date();
+          if (dob > today) {
+            error = 'Date of birth cannot be in the future';
+            break;
+          }
           let age = today.getFullYear() - dob.getFullYear();
           const m = today.getMonth() - dob.getMonth();
-          if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
-            age--;
-          }
-          if (age < 10 || age > 100) {
-            error = 'Age must be between 10 and 100 years';
-          }
+          if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+          if (age < 10 || age > 100) error = 'Age must be between 10 and 100 years';
         }
         break;
-
-      case 'Class':
-        if (!value.trim()) {
-          error = 'Class is required';
-        } else if (value.trim().length < 1) {
-          error = 'Class must be at least 1 character';
-        }
+      case 'class':
+        if (!value.trim()) error = 'Class is required';
+        else if (value.trim().length < 1) error = 'Class must be at least 1 character';
         break;
-
-      case 'Section':
-        // optional
+      case 'section':
+        if (value && value.trim().length > 10) error = 'Section must be at most 10 characters';
         break;
-
-      case 'FullAddress':
-        if (!value.trim()) {
-          error = 'Address is required';
-        } else if (value.trim().length < 10) {
-          error = 'Address must be at least 10 characters';
-        }
+      case 'fullAddress':
+        if (!value.trim()) error = 'Address is required';
+        else if (value.trim().length < 10) error = 'Address must be at least 10 characters';
         break;
-
-      case 'UniversityReg':
-        if (!value.trim()) {
-          error = 'University registration number is required';
-        } else if (value.trim().length < 5) {
-          error = 'Registration number must be at least 5 characters';
-        }
-        break;
-
-      default:
+      case 'universityReg':
+        if (!value.trim()) error = 'University registration number is required';
+        else if (value.trim().length < 5) error = 'Registration number must be at least 5 characters';
         break;
     }
-
     return error;
   };
 
   const handleInputChange = (e) => {
     let { name, value } = e.target;
 
-    // Prevent invalid characters based on field type
+    // Format input based on field
     switch (name) {
-      case 'FullName':
-        value = value.replace(/[^a-zA-Z\s]/g, '');
-        value = capitalizeWords(value);
+      case 'fullName':
+        value = capitalizeWords(value.replace(/[^a-zA-Z\s]/g, ''));
         break;
-
-      case 'RollNo':
+      case 'rollNo':
         value = value.replace(/[^0-9]/g, '');
         break;
-
-      case 'Faculty':
-        value = value.replace(/[^a-zA-Z\s]/g, '');
+      case 'faculty':
+        value = value.replace(/[^a-zA-Z\s.&-]/g, '');
         break;
-
-      case 'YearOfEnrollment':
-        value = value.replace(/[^0-9]/g, '');
+      case 'yearOfEnrollment':
+        value = value.replace(/[^0-9]/g, '').slice(0, 4);
         break;
-
-      case 'Phone':
-        value = value.replace(/[^0-9]/g, '');
+      case 'phone':
+        value = value.replace(/[^0-9]/g, '').slice(0, 10);
         break;
-
-      case 'Class':
-        value = value.replace(/[^a-zA-Z\s]/g, '');
+      case 'class':
+        value = value.replace(/[^a-zA-Z0-9\s]/g, '');
         break;
-
-      // 'Section' and others can have any characters
-      default:
+      case 'section':
+        value = value.slice(0, 10);
         break;
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-
-    // live-validate field
-    const error = validateField(name, value);
-    setErrors((prev) => ({
-      ...prev,
-      [name]: error
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
   };
 
   const handleBlur = (e) => {
     const { name } = e.target;
-    setTouched((prev) => ({
-      ...prev,
-      [name]: true
-    }));
-
-    // Validate on blur as well
-    const error = validateField(name, formData[name]);
-    setErrors((prev) => ({ ...prev, [name]: error }));
+    setTouched(prev => ({ ...prev, [name]: true }));
+    setErrors(prev => ({ ...prev, [name]: validateField(name, formData[name]) }));
   };
 
   const handleImageUpload = (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        setErrors((prev) => ({ ...prev, ProfileImagePath: 'Please upload a valid image file' }));
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors((prev) => ({ ...prev, ProfileImagePath: 'Image size must be less than 5MB' }));
-        return;
-      }
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-        setFormData((prev) => ({
-          ...prev,
-          ProfileImagePath: reader.result
-        }));
-        setErrors((prev) => ({ ...prev, ProfileImagePath: '' }));
-      };
-      reader.readAsDataURL(file);
+    if (!file.type.startsWith('image/')) {
+      setErrors(prev => ({ ...prev, profileImagePath: 'Please upload a valid image file' }));
+      setTouched(prev => ({ ...prev, profileImagePath: true }));
+      return;
     }
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors(prev => ({ ...prev, profileImagePath: 'Image size must be less than 5MB' }));
+      setTouched(prev => ({ ...prev, profileImagePath: true }));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+      setFormData(prev => ({ ...prev, profileImagePath: reader.result }));
+      setErrors(prev => ({ ...prev, profileImagePath: '' }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const removeImage = () => {
-    setFormData((prev) => ({ ...prev, ProfileImagePath: null }));
+    setFormData(prev => ({ ...prev, profileImagePath: null }));
     setImagePreview(null);
-    setErrors((prev) => ({ ...prev, ProfileImagePath: '' }));
+    setErrors(prev => ({ ...prev, profileImagePath: '' }));
   };
 
   const validateAllFields = () => {
     const newErrors = {};
-    Object.keys(formData).forEach((key) => {
-      if (key === 'Section') return; // optional
-      if (key === 'ProfileImagePath') return; // handled separately
+    Object.keys(formData).forEach(key => {
+      if (key === 'section' || key === 'profileImagePath') return;
       const error = validateField(key, formData[key]);
       if (error) newErrors[key] = error;
     });
 
-    if (!formData.ProfileImagePath) {
-      newErrors.ProfileImagePath = 'Profile image is required';
-    }
+    if (!formData.profileImagePath) newErrors.profileImagePath = 'Profile image is required';
 
     setErrors(newErrors);
-    // mark all touched so errors show in UI
-    setTouched(
-      Object.keys(formData).reduce((acc, key) => {
-        acc[key] = true;
-        return acc;
-      }, {})
-    );
-
+    setTouched(Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async () => {
     if (!validateAllFields()) {
-      alert('Please fix all validation errors before submitting');
+      alert('Please fix all errors before submitting');
       return;
     }
 
-    const dataToSend = {
-      FullName: formData.FullName.trim(),
-      RollNo: parseInt(formData.RollNo, 10),
-      Faculty: formData.Faculty.trim(),
-      YearOfEnrollment: parseInt(formData.YearOfEnrollment, 10),
-      Email: formData.Email.trim().toLowerCase(),
-      Phone: String(formData.Phone).replace(/\s/g, ''),
-      DateOfBirth: formData.DateOfBirth,
-      Class: formData.Class.trim(),
-      Section: formData.Section.trim() || '',
-      FullAddress: formData.FullAddress.trim(),
-      UniversityReg: formData.UniversityReg.trim(),
-      ProfileImagePath: formData.ProfileImagePath
-    };
-
-    console.log('Sending data to API:', dataToSend);
-
-    try {
-      const response = await fetch('http://localhost:5000/api/students', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(dataToSend)
-      });
-
-      if (response.ok) {
-        alert('Student added successfully!');
-        // full reset
-        setFormData({
-          FullName: '',
-          RollNo: '',
-          Faculty: '',
-          YearOfEnrollment: '',
-          Email: '',
-          Phone: '',
-          DateOfBirth: '',
-          Class: '',
-          Section: '',
-          FullAddress: '',
-          UniversityReg: '',
-          ProfileImagePath: null
-        });
-        setImagePreview(null);
-        setErrors({});
-        setTouched({});
-      } else {
-        const error = await response.json().catch(() => ({}));
-        alert(`Error: ${error.message || 'Failed to add student'}`);
-      }
-    } catch (err) {
-      console.error('Error:', err);
-      alert('Failed to connect to server');
-    }
+    console.log('Form submitted:', formData);
+    alert('Student added successfully!');
+    handleReset();
   };
 
   const handleReset = () => {
     setFormData({
-      FullName: '',
-      RollNo: '',
-      Faculty: '',
-      YearOfEnrollment: '',
-      Email: '',
-      Phone: '',
-      DateOfBirth: '',
-      Class: '',
-      Section: '',
-      FullAddress: '',
-      UniversityReg: '',
-      ProfileImagePath: null
+      fullName: '', rollNo: '', faculty: '', yearOfEnrollment: '',
+      email: '', phone: '', dateOfBirth: '', class: '', section: '',
+      fullAddress: '', universityReg: '', profileImagePath: null
     });
     setImagePreview(null);
     setErrors({});
     setTouched({});
   };
 
-  const shouldShowError = (fieldName) => {
-    // show error only when field has been touched and there is an error
-    return !!(touched[fieldName] && errors[fieldName]);
-  };
+  const shouldShowError = (field) => !!(touched[field] && errors[field]);
+  const isFieldValid = (field) => !!(touched[field] && !errors[field] && formData[field]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-cyan-500 to-teal-500 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto pt-4 sm:pt-6 lg:pt-8">
-        <div className="bg-gradient-to-br from-cyan-400/25 via-teal-400/25 to-cyan-500/25 backdrop-blur-md rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl border border-white/40">
-          {/* Profile Image Upload Section */}
-          <div className="mb-8 sm:mb-10 flex flex-col items-center">
-            <div className="relative">
-              {imagePreview ? (
-                <div className="relative">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-white shadow-2xl"
-                  />
-                  <button
-                    type="button"
-                    onClick={removeImage}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-all duration-200 shadow-lg hover:scale-110"
-                  >
-                    <X className="w-4 h-4 sm:w-5 sm:h-5" strokeWidth={2.5} />
-                  </button>
-                </div>
-              ) : (
-                <label className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-200 border-4 border-white shadow-2xl hover:shadow-cyan-400/50">
-                  <Upload className="w-10 h-10 sm:w-12 sm:h-12 text-cyan-600" strokeWidth={2.5} />
-                  <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                </label>
-              )}
+    <div className="min-h-screen bg-gradient-to-br from-cyan-500 via-blue-600 to-purple-700 p-4 sm:p-6 lg:p-8 saturate-[0.9]">
+      {/* Header */}
+      <div className="max-w-6xl mx-auto mb-6">
+        <div className="bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 rounded-xl shadow-2xl p-6">
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center border-2 border-white/30 shadow-lg">
+              <GraduationCap className="w-8 h-8 text-white" />
             </div>
-            <p className="text-white text-xs sm:text-sm mt-3 drop-shadow-md text-center">Click to upload student photo</p>
-            {shouldShowError('ProfileImagePath') && (
-              <p className="text-red-100 text-xs sm:text-sm mt-2">{errors.ProfileImagePath}</p>
+            <div>
+              <h1 className="text-3xl font-bold text-white">SmartAttendanceSystem</h1>
+              <p className="text-white/90 text-sm">Student Management Portal</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto">
+        {/* Page Title */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border-l-4 border-purple-500">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+              <User className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-800">Add Student</h2>
+              <p className="text-gray-600 text-sm">Fill in the student information below</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Profile Image Upload */}
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600"></div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <User className="w-5 h-5 text-purple-600" />
+            Profile Photo
+          </h3>
+          <div className="flex flex-col items-center">
+            {imagePreview ? (
+              <div className="relative group mb-4">
+                <img src={imagePreview} alt="Student preview" className="w-40 h-40 rounded-full object-cover border-4 border-purple-500 shadow-2xl" />
+                <button type="button" onClick={removeImage}
+                  className="absolute -top-2 -right-2 w-10 h-10 bg-red-500 text-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center hover:bg-red-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            ) : (
+              <label className="w-40 h-40 rounded-full bg-gradient-to-br from-blue-50 to-purple-50 border-4 border-dashed border-blue-300 hover:border-purple-500 flex items-center justify-center cursor-pointer transition-all shadow-lg hover:shadow-xl mb-4 group">
+                <div className="flex flex-col items-center gap-2">
+                  <Upload className="w-12 h-12 text-blue-400 group-hover:text-purple-500 transition-colors" />
+                  <span className="text-xs text-blue-500 group-hover:text-purple-600 font-semibold">Upload Photo</span>
+                </div>
+                <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              </label>
+            )}
+            <p className="text-sm text-gray-600">Click to upload student photo</p>
+            <p className="text-xs text-gray-500 mt-1">Maximum file size: 5MB (JPG, PNG)</p>
+            {shouldShowError('profileImagePath') && (
+              <div className="flex items-center gap-2 text-red-600 text-sm mt-3 bg-red-50 px-4 py-2 rounded-lg border border-red-200">
+                <AlertCircle className="w-4 h-4" />
+                <span>{errors.profileImagePath}</span>
+              </div>
             )}
           </div>
+        </div>
 
-          {/* Title */}
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-center mb-8 sm:mb-10 drop-shadow-lg">
-            Add Student
-          </h2>
-
-          {/* Form Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        {/* Personal Information */}
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600"></div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-6 flex items-center gap-2 pb-3 border-b border-gray-200">
+            <User className="w-5 h-5 text-purple-600" />
+            Personal Information
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Full Name */}
-            <div className="w-full">
-              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
-                Full Name <span className="text-red-200">*</span>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <User className="w-4 h-4 text-gray-500" />
+                Full Name <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                name="FullName"
-                value={formData.FullName}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
-                placeholder="Enter full name"
-              />
-              {shouldShowError('FullName') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.FullName}</p>}
+              <div className="relative">
+                <input type="text" name="fullName" value={formData.fullName}
+                  onChange={handleInputChange} onBlur={handleBlur} placeholder="Enter full name"
+                  className={`w-full h-12 px-4 border-2 rounded-lg transition-all focus:outline-none focus:ring-2 ${
+                    shouldShowError('fullName') ? 'border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-200' :
+                    isFieldValid('fullName') ? 'border-green-400 bg-green-50/50 focus:border-green-500 focus:ring-green-200' :
+                    'border-gray-200 focus:border-purple-500 focus:ring-purple-500/20'
+                  }`}
+                />
+                {isFieldValid('fullName') && <CheckCircle2 className="absolute right-3 top-3.5 w-5 h-5 text-green-500" />}
+              </div>
+              {shouldShowError('fullName') && (
+                <div className="flex items-center gap-1.5 text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-md border border-red-200">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{errors.fullName}</span>
+                </div>
+              )}
             </div>
 
             {/* Roll Number */}
-            <div className="w-full">
-              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
-                Roll Number <span className="text-red-200">*</span>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <Hash className="w-4 h-4 text-gray-500" />
+                Roll Number <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                name="RollNo"
-                value={formData.RollNo}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
-                placeholder="Enter roll number"
-              />
-              {shouldShowError('RollNo') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.RollNo}</p>}
-            </div>
-
-            {/* Faculty */}
-            <div className="w-full">
-              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
-                Faculty <span className="text-red-200">*</span>
-              </label>
-              <input
-                type="text"
-                name="Faculty"
-                value={formData.Faculty}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
-                placeholder="Enter faculty"
-              />
-              {shouldShowError('Faculty') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.Faculty}</p>}
-            </div>
-
-            {/* Year of Enrollment */}
-            <div className="w-full">
-              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
-                Year of Enrollment <span className="text-red-200">*</span>
-              </label>
-              <input
-                type="text"
-                name="YearOfEnrollment"
-                value={formData.YearOfEnrollment}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                maxLength="4"
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
-                placeholder="e.g., 2024"
-              />
-              {shouldShowError('YearOfEnrollment') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.YearOfEnrollment}</p>}
-            </div>
-
-            {/* Email */}
-            <div className="w-full">
-              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
-                Email <span className="text-red-200">*</span>
-              </label>
-              <input
-                type="email"
-                name="Email"
-                value={formData.Email}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition-all duration-200 shadow-lg text-sm sm:text-base ${
-                  shouldShowError('Email') ? 'border-purple-400 focus:border-purple-400 focus:ring-4 focus:ring-purple-200/50' : 'border-white/50 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50'
-                }`}
-                placeholder="student@example.com"
-              />
-              {shouldShowError('Email') && <p className="text-purple-200 text-xs sm:text-sm mt-1 font-semibold drop-shadow-md">{errors.Email}</p>}
-            </div>
-
-            {/* Phone Number */}
-            <div className="w-full">
-              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
-                Phone Number <span className="text-red-200">*</span>
-              </label>
-              <input
-                type="text"
-                name="Phone"
-                value={formData.Phone}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                maxLength="10"
-                className={`w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none transition-all duration-200 shadow-lg text-sm sm:text-base ${
-                  shouldShowError('Phone') ? 'border-purple-400 focus:border-purple-400 focus:ring-4 focus:ring-purple-200/50' : 'border-white/50 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50'
-                }`}
-                placeholder="9812345678"
-              />
-              {shouldShowError('Phone') && <p className="text-purple-200 text-xs sm:text-sm mt-1 font-semibold drop-shadow-md">{errors.Phone}</p>}
+              <div className="relative">
+                <input type="text" name="rollNo" value={formData.rollNo}
+                  onChange={handleInputChange} onBlur={handleBlur} placeholder="Enter roll number"
+                  className={`w-full h-12 px-4 border-2 rounded-lg transition-all focus:outline-none focus:ring-2 ${
+                    shouldShowError('rollNo') ? 'border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-200' :
+                    isFieldValid('rollNo') ? 'border-green-400 bg-green-50/50 focus:border-green-500 focus:ring-green-200' :
+                    'border-gray-200 focus:border-purple-500 focus:ring-purple-500/20'
+                  }`}
+                />
+                {isFieldValid('rollNo') && <CheckCircle2 className="absolute right-3 top-3.5 w-5 h-5 text-green-500" />}
+              </div>
+              {shouldShowError('rollNo') && (
+                <div className="flex items-center gap-1.5 text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-md border border-red-200">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{errors.rollNo}</span>
+                </div>
+              )}
             </div>
 
             {/* Date of Birth */}
-            <div className="w-full">
-              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
-                Date of Birth <span className="text-red-200">*</span>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-gray-500" />
+                Date of Birth <span className="text-red-500">*</span>
               </label>
-              <input
-                type="date"
-                name="DateOfBirth"
-                value={formData.DateOfBirth}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
+              <input type="date" name="dateOfBirth" value={formData.dateOfBirth}
+                onChange={handleInputChange} onBlur={handleBlur} max={getTodayDate()}
+                className={`w-full h-12 px-4 border-2 rounded-lg transition-all focus:outline-none focus:ring-2 ${
+                  shouldShowError('dateOfBirth') ? 'border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-200' :
+                  isFieldValid('dateOfBirth') ? 'border-green-400 bg-green-50/50 focus:border-green-500 focus:ring-green-200' :
+                  'border-gray-200 focus:border-purple-500 focus:ring-purple-500/20'
+                }`}
               />
-              {shouldShowError('DateOfBirth') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.DateOfBirth}</p>}
+              {shouldShowError('dateOfBirth') && (
+                <div className="flex items-center gap-1.5 text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-md border border-red-200">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{errors.dateOfBirth}</span>
+                </div>
+              )}
             </div>
 
-            {/* Class */}
-            <div className="w-full">
-              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
-                Class <span className="text-red-200">*</span>
+            {/* Email */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <Mail className="w-4 h-4 text-gray-500" />
+                Email <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                name="Class"
-                value={formData.Class}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
-                placeholder="Enter class (e.g., BSCS)"
-              />
-              {shouldShowError('Class') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.Class}</p>}
+              <div className="relative">
+                <input type="email" name="email" value={formData.email}
+                  onChange={handleInputChange} onBlur={handleBlur} placeholder="student@example.com"
+                  className={`w-full h-12 px-4 border-2 rounded-lg transition-all focus:outline-none focus:ring-2 ${
+                    shouldShowError('email') ? 'border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-200' :
+                    isFieldValid('email') ? 'border-green-400 bg-green-50/50 focus:border-green-500 focus:ring-green-200' :
+                    'border-gray-200 focus:border-purple-500 focus:ring-purple-500/20'
+                  }`}
+                />
+                {isFieldValid('email') && <CheckCircle2 className="absolute right-3 top-3.5 w-5 h-5 text-green-500" />}
+              </div>
+              {shouldShowError('email') && (
+                <div className="flex items-center gap-1.5 text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-md border border-red-200">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{errors.email}</span>
+                </div>
+              )}
             </div>
 
-            {/* Section */}
-            <div className="w-full">
-              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">Section</label>
-              <input
-                type="text"
-                name="Section"
-                value={formData.Section}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
-                placeholder="Enter section (e.g., A) - Optional"
-              />
-            </div>
-
-            {/* University Reg. Number */}
-            <div className="w-full">
-              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
-                University Reg. Number <span className="text-red-200">*</span>
+            {/* Phone */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <Phone className="w-4 h-4 text-gray-500" />
+                Phone Number <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                name="UniversityReg"
-                value={formData.UniversityReg}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 shadow-lg text-sm sm:text-base"
-                placeholder="UNI20230012345"
-              />
-              {shouldShowError('UniversityReg') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.UniversityReg}</p>}
+              <div className="relative">
+                <input type="tel" name="phone" value={formData.phone}
+                  onChange={handleInputChange} onBlur={handleBlur} placeholder="9812345678" maxLength={10}
+                  className={`w-full h-12 px-4 border-2 rounded-lg transition-all focus:outline-none focus:ring-2 ${
+                    shouldShowError('phone') ? 'border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-200' :
+                    isFieldValid('phone') ? 'border-green-400 bg-green-50/50 focus:border-green-500 focus:ring-green-200' :
+                    'border-gray-200 focus:border-purple-500 focus:ring-purple-500/20'
+                  }`}
+                />
+                {isFieldValid('phone') && <CheckCircle2 className="absolute right-3 top-3.5 w-5 h-5 text-green-500" />}
+              </div>
+              {shouldShowError('phone') && (
+                <div className="flex items-center gap-1.5 text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-md border border-red-200">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{errors.phone}</span>
+                </div>
+              )}
             </div>
 
             {/* Full Address */}
-            <div className="w-full md:col-span-2">
-              <label className="block text-white font-semibold mb-2 text-sm sm:text-base drop-shadow-md">
-                Full Address <span className="text-red-200">*</span>
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-gray-500" />
+                Full Address <span className="text-red-500">*</span>
               </label>
-              <textarea
-                name="FullAddress"
-                value={formData.FullAddress}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-                rows="3"
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-white/95 backdrop-blur-sm border-2 border-white/50 rounded-lg sm:rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-cyan-300 focus:ring-4 focus:ring-cyan-200/50 transition-all duration-200 resize-none shadow-lg text-sm sm:text-base"
-                placeholder="Enter full address"
+              <textarea name="fullAddress" value={formData.fullAddress}
+                onChange={handleInputChange} onBlur={handleBlur} rows={3} placeholder="Enter complete address"
+                className={`w-full px-4 py-3 border-2 rounded-lg resize-none transition-all focus:outline-none focus:ring-2 ${
+                  shouldShowError('fullAddress') ? 'border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-200' :
+                  isFieldValid('fullAddress') ? 'border-green-400 bg-green-50/50 focus:border-green-500 focus:ring-green-200' :
+                  'border-gray-200 focus:border-purple-500 focus:ring-purple-500/20'
+                }`}
               />
-              {shouldShowError('FullAddress') && <p className="text-red-100 text-xs sm:text-sm mt-1 drop-shadow-md">{errors.FullAddress}</p>}
+              {shouldShowError('fullAddress') && (
+                <div className="flex items-center gap-1.5 text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-md border border-red-200">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{errors.fullAddress}</span>
+                </div>
+              )}
             </div>
           </div>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8 sm:mt-10">
-            <button onClick={handleSubmit} className="flex-1 bg-white text-cyan-600 font-bold text-base sm:text-lg py-3 sm:py-4 px-6 sm:px-8 rounded-lg sm:rounded-xl hover:bg-cyan-50 transition-all duration-200 transform hover:scale-105 shadow-2xl hover:shadow-cyan-400/50">
-              Add Student
+        {/* Academic Information */}
+        <div className="bg-white rounded-xl shadow-lg p-8 mb-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600"></div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-6 flex items-center gap-2 pb-3 border-b border-gray-200">
+            <Building2 className="w-5 h-5 text-purple-600" />
+            Academic Information
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Faculty */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-gray-500" />
+                Faculty <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input type="text" name="faculty" value={formData.faculty}
+                  onChange={handleInputChange} onBlur={handleBlur} placeholder="e.g., Science & Technology"
+                  className={`w-full h-12 px-4 border-2 rounded-lg transition-all focus:outline-none focus:ring-2 ${
+                    shouldShowError('faculty') ? 'border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-200' :
+                    isFieldValid('faculty') ? 'border-green-400 bg-green-50/50 focus:border-green-500 focus:ring-green-200' :
+                    'border-gray-200 focus:border-purple-500 focus:ring-purple-500/20'
+                  }`}
+                />
+                {isFieldValid('faculty') && <CheckCircle2 className="absolute right-3 top-3.5 w-5 h-5 text-green-500" />}
+              </div>
+              {shouldShowError('faculty') && (
+                <div className="flex items-center gap-1.5 text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-md border border-red-200">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{errors.faculty}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Year of Enrollment */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-gray-500" />
+                Year of Enrollment <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input type="text" name="yearOfEnrollment" value={formData.yearOfEnrollment}
+                  onChange={handleInputChange} onBlur={handleBlur} placeholder="e.g., 2024" maxLength={4}
+                  className={`w-full h-12 px-4 border-2 rounded-lg transition-all focus:outline-none focus:ring-2 ${
+                    shouldShowError('yearOfEnrollment') ? 'border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-200' :
+                    isFieldValid('yearOfEnrollment') ? 'border-green-400 bg-green-50/50 focus:border-green-500 focus:ring-green-200' :
+                    'border-gray-200 focus:border-purple-500 focus:ring-purple-500/20'
+                  }`}
+                />
+                {isFieldValid('yearOfEnrollment') && <CheckCircle2 className="absolute right-3 top-3.5 w-5 h-5 text-green-500" />}
+              </div>
+              {shouldShowError('yearOfEnrollment') && (
+                <div className="flex items-center gap-1.5 text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-md border border-red-200">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{errors.yearOfEnrollment}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Class */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <GraduationCap className="w-4 h-4 text-gray-500" />
+                Class <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input type="text" name="class" value={formData.class}
+                  onChange={handleInputChange} onBlur={handleBlur} placeholder="e.g., BCA 1st Year"
+                  className={`w-full h-12 px-4 border-2 rounded-lg transition-all focus:outline-none focus:ring-2 ${
+                    shouldShowError('class') ? 'border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-200' :
+                    isFieldValid('class') ? 'border-green-400 bg-green-50/50 focus:border-green-500 focus:ring-green-200' :
+                    'border-gray-200 focus:border-purple-500 focus:ring-purple-500/20'
+                  }`}
+                />
+                {isFieldValid('class') && <CheckCircle2 className="absolute right-3 top-3.5 w-5 h-5 text-green-500" />}
+              </div>
+              {shouldShowError('class') && (
+                <div className="flex items-center gap-1.5 text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-md border border-red-200">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{errors.class}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Section */}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <Hash className="w-4 h-4 text-gray-500" />
+                Section
+              </label>
+              <input type="text" name="section" value={formData.section}
+                onChange={handleInputChange} onBlur={handleBlur} placeholder="e.g., A (Optional)"
+                className="w-full h-12 px-4 border-2 border-gray-300 rounded-lg transition-all focus:outline-none focus:ring-2 focus:border-purple-500 focus:ring-purple-500/20"
+              />
+              {shouldShowError('section') && (
+                <div className="flex items-center gap-1.5 text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-md border border-red-200">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{errors.section}</span>
+                </div>
+              )}
+            </div>
+
+            {/* University Reg */}
+            <div className="space-y-2 md:col-span-2">
+              <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <Hash className="w-4 h-4 text-gray-500" />
+                University Registration Number <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input type="text" name="universityReg" value={formData.universityReg}
+                  onChange={handleInputChange} onBlur={handleBlur} placeholder="UNI20230012345"
+                  className={`w-full h-12 px-4 border-2 rounded-lg transition-all focus:outline-none focus:ring-2 ${
+                    shouldShowError('universityReg') ? 'border-red-400 bg-red-50/50 focus:border-red-500 focus:ring-red-200' :
+                    isFieldValid('universityReg') ? 'border-green-400 bg-green-50/50 focus:border-green-500 focus:ring-green-200' :
+                    'border-gray-200 focus:border-purple-500 focus:ring-purple-500/20'
+                  }`}
+                />
+                {isFieldValid('universityReg') && <CheckCircle2 className="absolute right-3 top-3.5 w-5 h-5 text-green-500" />}
+              </div>
+              {shouldShowError('universityReg') && (
+                <div className="flex items-center gap-1.5 text-red-600 text-xs bg-red-50 px-3 py-1.5 rounded-md border border-red-200">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>{errors.universityReg}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="flex flex-col sm:flex-row gap-4 justify-end">
+            <button type="button" onClick={handleReset}
+              className="h-12 px-8 border-2 border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 font-semibold text-gray-700 transition-all">
+              Reset Form
             </button>
-            <button onClick={handleReset} className="w-full sm:w-auto px-8 sm:px-10 bg-white/80 backdrop-blur-sm text-gray-700 font-bold text-base sm:text-lg py-3 sm:py-4 rounded-lg sm:rounded-xl hover:bg-white transition-all duration-200 shadow-xl">
-              Reset
+            <button type="button" onClick={handleSubmit}
+              className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all">
+              Add Student
             </button>
           </div>
         </div>
