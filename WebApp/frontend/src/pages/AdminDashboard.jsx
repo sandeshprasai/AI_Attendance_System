@@ -1,16 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { User, LogOut, Clock, Calendar, Users, UserPlus, BookOpen, Settings, Camera, TrendingUp, AlertCircle } from 'lucide-react';
+import Navbar from '../components/NavBar';
+import GreetingCard from '../components/GreetingCard';
+import { getCurrentUser } from '../api/userApi';
+
 
 export default function AdminDashboard() {
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const [showLogoutMenu, setShowLogoutMenu] = useState(false);
-  
-  // Mock user data - replace with actual logged-in user data
-  const user = {
-    name: "Admin User",
-    email: "admin@smartattendance.com",
-    role: "Administrator"
+  const mockUser = {
+  name: "Admin User",
+  email: "admin@smartattendance.com",
+  role: "Administrator",
+  photoURL: "https://www.wisden.com/static-assets/images/players/3993.png?v=23.77"
+};
+
+const [user, setUser] = useState(mockUser);
+
+  useEffect(() => {
+  const fetchUser = async () => {
+    try {
+      const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+      if (!token) return;
+
+      const currentUser = await getCurrentUser(token); // pass the token
+      if (currentUser) {
+        setUser(currentUser); // Replace mock with real data
+      }
+    } catch (err) {
+      console.error("Failed to fetch user:", err);
+    }
   };
+
+  fetchUser();
+}, []);
+
+
+  const [currentTime, setCurrentTime] = useState(new Date());
+ 
+  
+  
 
   // Mock stats - replace with actual data from your backend
   const stats = {
@@ -38,93 +65,13 @@ export default function AdminDashboard() {
     return () => clearInterval(timer);
   }, []);
 
-  const getGreeting = () => {
-    const hour = currentTime.getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 17) return "Good Afternoon";
-    return "Good Evening";
-  };
-
-  const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout?')) {
-      alert('Logging out...');
-      // window.location.href = '/login';
-    }
-  };
+ 
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Your Existing Navbar */}
-      <nav className="bg-gradient-to-r from-cyan-600 to-teal-600 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h1 className="text-xl font-bold text-yellow-300">SmartAttendanceSystem</h1>
-            </div>
-
-            {/* Right Side: Nav Links + User Menu */}
-            <div className="flex items-center gap-8">
-              {/* Nav Links */}
-              <div className="hidden md:flex items-center gap-6">
-                <a href="#" className="text-white hover:text-yellow-300 font-medium transition-colors">
-                  Home
-                </a>
-                <a href="#" className="text-white hover:text-yellow-300 font-medium transition-colors">
-                  Add Student
-                </a>
-                <a href="#" className="text-white hover:text-yellow-300 font-medium transition-colors">
-                  Add Teacher
-                </a>
-                <a href="#" className="text-white hover:text-yellow-300 font-medium transition-colors">
-                  Create Classroom
-                </a>
-              </div>
-
-              {/* User Menu - Smaller */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowLogoutMenu(!showLogoutMenu)}
-                  className="flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg px-3 py-2 transition-all"
-                >
-                  <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center">
-                    <User className="w-4 h-4 text-cyan-600" />
-                  </div>
-                  <span className="text-white font-medium text-sm hidden lg:block">Admin</span>
-                </button>
-
-                {showLogoutMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50">
-                    <div className="px-4 py-3 bg-gradient-to-r from-cyan-50 to-teal-50 border-b border-gray-200">
-                      <p className="text-sm font-semibold text-gray-800">{user.name}</p>
-                      <p className="text-xs text-gray-600">{user.email}</p>
-                    </div>
-                    <button
-                      onClick={() => alert('Settings clicked')}
-                      className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
-                    >
-                      <Settings className="w-4 h-4" />
-                      Settings
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors border-t border-gray-100"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar user={user} />
+      
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -133,46 +80,8 @@ export default function AdminDashboard() {
           {/* Left Column - Greeting & Quick Actions */}
           <div className="lg:col-span-1 space-y-6">
             {/* Greeting Card */}
-            <div className="bg-gradient-to-br from-cyan-500 via-teal-500 to-cyan-600 rounded-2xl shadow-xl p-6 text-white">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <User className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold">{getGreeting()}!</h2>
-                  <p className="text-cyan-100 text-sm">{user.name}</p>
-                </div>
-              </div>
-
-              <div className="space-y-3 mt-6">
-                <div className="flex items-center gap-3 text-cyan-50">
-                  <Clock className="w-4 h-4" />
-                  <span className="text-sm">
-                    {currentTime.toLocaleTimeString('en-US', { 
-                      hour: '2-digit', 
-                      minute: '2-digit',
-                      second: '2-digit'
-                    })}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-cyan-50">
-                  <Calendar className="w-4 h-4" />
-                  <span className="text-sm">
-                    {currentTime.toLocaleDateString('en-US', { 
-                      weekday: 'short',
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-white border-opacity-20">
-                <p className="text-sm text-cyan-50">
-                  Role: <span className="font-semibold text-white">{user.role}</span>
-                </p>
-              </div>
-            </div>
+            {/* Use Reusable Greeting Card Component */}
+            <GreetingCard user={user} />
 
             {/* Quick Access Cards */}
             <div className="bg-white rounded-2xl shadow-md p-6">

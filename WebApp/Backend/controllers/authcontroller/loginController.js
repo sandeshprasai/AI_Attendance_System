@@ -35,5 +35,26 @@ const loginController = async (req, res) => {
     return res.status(500).json({ error: `Internal server error ${err}` });
   }
 };
+// Returns currently logged-in user
+const getCurrentUser = async (req, res) => {
+  try {
+    // req.user is set by your authentication middleware after verifying token
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-module.exports = loginController;
+    // Fetch user from DB to get latest info (optional)
+    const user = await users.findById(req.user.id).select("name email role photoURL");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = {loginController, getCurrentUser};
