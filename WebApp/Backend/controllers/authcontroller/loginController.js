@@ -3,13 +3,12 @@ const bcryptjs = require("bcryptjs");
 const generateToken = require("./../../middlewares/generateToken");
 
 const loginController = async (req, res) => {
-  console.log(req.body)
   const username = req.body.username;
   const password = req.body.password;
   const rememberMe = req.body.rememberMe;
 
   try {
-    const user = await users.findOne({ email: username });
+    const user = await users.findOne({ username: username });
 
     if (!user) {
       return res.status(400).json({
@@ -24,7 +23,7 @@ const loginController = async (req, res) => {
 
     const payload = {
       id: user._id,
-      email: user.email,
+      username: user.username,
       role: user.role,
     };
 
