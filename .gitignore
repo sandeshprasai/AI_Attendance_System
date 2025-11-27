@@ -12,6 +12,8 @@ build/
 .eggs/
 *.log
 
+public/
+
 # Virtual environments
 .venv/
 venv/

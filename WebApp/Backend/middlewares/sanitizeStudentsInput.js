@@ -82,8 +82,9 @@ const sanitizeStudentInput = async (req, res, next) => {
       "string.empty": "University Registration is required",
     }),
 
-    ProfileImagePath: joi.string().uri().required().messages({
-      "string.uri": "Profile Image Path must be a valid URI",
+    ProfileImagePath: joi.string().required().messages({
+      "string.empty": "Profile Image Path Is required",
+      
     }),
   });
 

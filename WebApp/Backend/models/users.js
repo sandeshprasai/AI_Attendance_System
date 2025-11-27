@@ -22,6 +22,11 @@ const users = new mongoose.Schema(
       required: true,
       enum: ["admin", "teacher", "student"],
     },
+    ProfileImagePath: {
+      type: String, 
+      required:true,
+      trim: true,
+    },
   },
   {
     timestamps: true,
