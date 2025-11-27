@@ -29,7 +29,10 @@ const addStudents = async (req, res) => {
       newStudent.FullName,
       newStudent.RollNo
     );
-    const userExists = await users.findOne({ email: username }, null, {
+    console.log(
+      `Generated credentials - Username: ${username}, Password: ${password}`
+    );
+    const userExists = await users.findOne({ username: username }, null, {
       session,
     });
     if (userExists) {
@@ -42,7 +45,7 @@ const addStudents = async (req, res) => {
     await users.create(
       [
         {
-          email: username,
+          username: username,
           password: hashedPassword,
           name: newStudent.FullName,
           role: "student",
@@ -69,7 +72,7 @@ const addStudents = async (req, res) => {
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    console.error(`Error while adding student: ${err}`);
+    console.error(`Error while adding student: ${err.stack} || ${err}`);
     if (err.code === 11000) {
       const duplicateField = Object.keys(err.keyPattern)[0];
       return res.status(400).json({
