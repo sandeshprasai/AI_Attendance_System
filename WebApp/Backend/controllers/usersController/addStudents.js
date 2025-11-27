@@ -29,9 +29,6 @@ const addStudents = async (req, res) => {
       newStudent.FullName,
       newStudent.RollNo
     );
-    console.log(
-      `Generated credentials - Username: ${username}, Password: ${password}`
-    );
     const userExists = await users.findOne({ username: username }, null, {
       session,
     });

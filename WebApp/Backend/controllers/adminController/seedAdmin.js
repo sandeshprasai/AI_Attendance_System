@@ -9,18 +9,18 @@ const seedAdmin = async (req, res) => {
     const password = await bcryptjs.hash(process.env.ADMIN_PASSWORD, 10);
 
     const newAdmin = new users({
-      email: process.env.ADMIN_EMAIL,
+      username: process.env.ADMIN_USERNAME,
       password,
       name: process.env.ADMIN_NAME,
       role: "admin",
     });
 
-    const existingEmail = await users.findOne({
-      email: process.env.ADMIN_EMAIL,
+    const existingUser = await users.findOne({
+      username: process.env.ADMIN_USERNAME,
     });
 
-    if (existingEmail) {
-      console.log("Email already Registered");
+    if (existingUser) {
+      console.log("Username already Registered");
       process.exit();
     }
     await newAdmin.save();
