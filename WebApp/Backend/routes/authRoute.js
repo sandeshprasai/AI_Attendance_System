@@ -10,7 +10,6 @@ authRouter.get("/", (req, res) => {
 });
 
 authRouter.post("/login", sanitizeLoginInput, loginController);
-authRouter.get("/me", authMiddleware, getCurrentUser);
 
 
 module.exports = authRouter;
