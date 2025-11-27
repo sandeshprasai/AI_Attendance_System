@@ -3,30 +3,24 @@ import { Eye, EyeOff, User, Lock } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+
+  const [username, setUsername] = useState(''); 
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [emailError, setEmailError] = useState('');
+  const [usernameError, setUsernameError] = useState(''); // Added this
   const [passwordError, setPasswordError] = useState('');
- const navigate = useNavigate();
- const [rememberMe, setRememberMe] = useState(false);
+  const navigate = useNavigate();
+  const [rememberMe, setRememberMe] = useState(false);
 
-  // Email validation function
-  const validateEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  // Handle email change with validation
-  const handleEmailChange = (e) => {
-    const value = e.target.value;
-    setEmail(value);
-    
-    if (value && !validateEmail(value)) {
-      setEmailError('Please enter a valid email address');
+  // Handle username change with validation
+  const handleUsernameChange = (e) => {
+    const value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+    setUsername(value);
+    if (value && value.length < 3) {
+      setUsernameError('Username must be at least 3 characters');
     } else {
-      setEmailError('');
+      setUsernameError('');
     }
   };
 
@@ -43,103 +37,100 @@ export default function LoginPage() {
   };
 
   const handleLogin = async () => {
-  let hasError = false;
-
-  if (!email) {
-    setEmailError('Email is required');
-    hasError = true;
-  } else if (!validateEmail(email)) {
-    setEmailError('Please enter a valid email address');
-    hasError = true;
-  }
-
-  if (!password) {
-    setPasswordError('Password is required');
-    hasError = true;
-  } else if (password.length < 6) {
-    setPasswordError('Password must be at least 6 characters');
-    hasError = true;
-  }
-
-  if (hasError) return;
-
-  try {
-    setIsLoading(true);
-
-    const response = await fetch("http://localhost:9000/api/v1/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: email,
-        password,
-        rememberMe
-      })
-    });
+    let hasError = false;
     
-
-    const data = await response.json();
-    setIsLoading(false);
-
-    if (!response.ok) {
-      alert(data.message || "Login failed");
-      return;
+    // Validate username
+    if (!username) {
+      setUsernameError('Username is required');
+      hasError = true;
+    } else if (username.length < 3) {
+      setUsernameError('Username must be at least 3 characters');
+      hasError = true;
     }
 
-    // ---- Save tokens based on rememberMe ----
-    if (rememberMe) {
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
-    } else {
-      sessionStorage.setItem("accessToken", data.accessToken);
-      sessionStorage.setItem("refreshToken", data.refreshToken);
+    // Validate password
+    if (!password) {
+      setPasswordError('Password is required');
+      hasError = true;
+    } else if (password.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
+      hasError = true;
     }
 
-    // ---- Decode role from token payload ----
-    const payload = JSON.parse(atob(data.accessToken.split(".")[1]));
-    const role = payload.role;
+    if (hasError) return;
 
-    // ---- Redirect based on role ----
-    if (role === "admin") navigate("/admin-dashboard");
-    else if (role === "teacher") navigate("/teacher-dashboard");
-    else if (role === "student") navigate("/student-dashboard");
-    else navigate("/");
+    try {
+      setIsLoading(true);
 
-  } catch (err) {
-    setIsLoading(false);
-    console.error(err);
-    alert("Something went wrong!");
-  }
-};
+      const response = await fetch("http://localhost:9000/api/v1/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username, // Fixed: changed from email to username
+          password,
+          rememberMe
+        })
+      });
+
+      const data = await response.json();
+      setIsLoading(false);
+
+      if (!response.ok) {
+        alert(data.message || "Login failed");
+        return;
+      }
+
+      // Save tokens based on rememberMe
+      if (rememberMe) {
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
+      } else {
+        sessionStorage.setItem("accessToken", data.accessToken);
+        sessionStorage.setItem("refreshToken", data.refreshToken);
+      }
+
+      // Decode role from token payload
+      const payload = JSON.parse(atob(data.accessToken.split(".")[1]));
+      const role = payload.role;
+
+      // Redirect based on role
+      if (role === "admin") navigate("/admin-dashboard");
+      else if (role === "teacher") navigate("/teacher-dashboard");
+      else if (role === "student") navigate("/student-dashboard");
+      else navigate("/");
+
+    } catch (err) {
+      setIsLoading(false);
+      console.error(err);
+      alert("Something went wrong!");
+    }
+  };
+
   return (
     <div className="w-full space-y-5">
-      {/* Email Field */}
+      {/* Username Field */}
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-          Email Address
+        <label htmlFor="username" className="block text-sm font-medium text-slate-300 mb-2">
+          Username:
         </label>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <User className="h-5 w-5 text-slate-400" />
-          </div>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={handleEmailChange}
-            className={`block w-full pl-10 pr-3 py-3 bg-white bg-opacity-90 border ${
-              emailError ? 'border-purple-400 bg-purple-50' : 'border-white border-opacity-20'
-            } rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 ${
-              emailError ? 'focus:ring-purple-400' : 'focus:ring-cyan-500'
-            } focus:border-transparent transition-all duration-200 outline-none backdrop-blur-sm`}
-            placeholder="you@example.com"
-          />
-        </div>
-        {emailError && (
+        <input
+          id="username"
+          type="text"
+          value={username}
+          onChange={handleUsernameChange}
+          className={`block w-full px-3 py-3 bg-white bg-opacity-90 border ${
+            usernameError ? 'border-purple-400 bg-purple-50' : 'border-white border-opacity-20'
+          } rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 ${
+            usernameError ? 'focus:ring-purple-400' : 'focus:ring-cyan-500'
+          } focus:border-transparent transition-all duration-200 outline-none backdrop-blur-sm`}
+          placeholder="Enter username"
+        />
+        {usernameError && (
           <p className="mt-1.5 text-xs text-purple-400 flex items-center gap-1.5 animate-shake">
             <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
-            <span>{emailError}</span>
+            <span>{usernameError}</span>
           </p>
         )}
       </div>
@@ -147,7 +138,7 @@ export default function LoginPage() {
       {/* Password Field */}
       <div>
         <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">
-          Password
+          Password:
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -190,21 +181,19 @@ export default function LoginPage() {
       {/* Remember Me Checkbox */}
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-         <input
-    id="remember-me"
-    type="checkbox"
-    checked={rememberMe}
-    onChange={() => setRememberMe(!rememberMe)}
-    className="h-4 w-4 text-cyan-500 bg-white bg-opacity-10 
-               border-white border-opacity-20 rounded focus:ring-cyan-500 cursor-pointer"
-/>
+          <input
+            id="remember-me"
+            type="checkbox"
+            checked={rememberMe}
+            onChange={() => setRememberMe(!rememberMe)}
+            className="h-4 w-4 text-cyan-500 bg-white bg-opacity-10 
+                       border-white border-opacity-20 rounded focus:ring-cyan-500 cursor-pointer"
+          />
           <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-300 cursor-pointer">
             Remember me
           </label>
         </div>
       </div>
-
-      
 
       {/* Login Button */}
       <button
@@ -243,6 +232,7 @@ export default function LoginPage() {
           Forgot your password?
         </a>
       </div>
+      
       <style jsx>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0); }

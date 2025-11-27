@@ -69,18 +69,18 @@ function HomePage() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
-            <button 
-              onClick={scrollToLogin}
-              className="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl font-semibold shadow-lg hover:shadow-cyan-500/50 transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-2"
-            >
-              Get Started
-              <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-            </button>
-            
-            <button className="px-8 py-4 bg-white bg-opacity-10 backdrop-blur-md rounded-xl font-semibold border border-white border-opacity-20 hover:bg-opacity-20 transform hover:-translate-y-1 transition-all duration-300">
-              Learn More
-            </button>
-          </div>
+  <button 
+    onClick={scrollToLogin}
+    className="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl font-semibold shadow-lg hover:shadow-cyan-500/50 transform hover:-translate-y-1 transition-all duration-300 flex items-center gap-2"
+  >
+    Get Started
+    <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+  </button>
+  
+  <button className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl font-semibold shadow-lg hover:shadow-purple-500/50 transform hover:-translate-y-1 transition-all duration-300">
+    Learn More
+  </button>
+</div>
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-6 max-w-3xl mx-auto pt-12">
@@ -242,10 +242,10 @@ function HomePage() {
               <p className="text-sm text-slate-400 mb-3">
                 Need access? <a href="#" className="text-cyan-400 hover:text-cyan-300 font-semibold">Contact Administrator</a>
               </p>
-              <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
+              {/* <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
                 <Shield className="w-3 h-3" />
                 <span>Protected by end-to-end encryption</span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
