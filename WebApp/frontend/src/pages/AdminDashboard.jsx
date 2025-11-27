@@ -2,9 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { User, LogOut, Clock, Calendar, Users, UserPlus, BookOpen, Settings, Camera, TrendingUp, AlertCircle } from 'lucide-react';
 import Navbar from '../components/NavBar';
 import GreetingCard from '../components/GreetingCard';
-import { getCurrentUser } from '../api/userApi';
-
-
 export default function AdminDashboard() {
   const mockUser = {
   name: "Admin User",

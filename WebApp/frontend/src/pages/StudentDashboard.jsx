@@ -2,6 +2,7 @@
 import React from "react";
 
 const AdminDashboard = () => {
+  console.log(localStorage.getItem("role")) // Ensure role is 'Student' for this dashboard
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
       <h1>Welcome to the Student Dashboard!</h1>

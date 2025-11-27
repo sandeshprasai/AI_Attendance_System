@@ -35,9 +35,7 @@ const addStudents = async (req, res) => {
     if (userExists) {
       username = `${username}_${Math.floor(Math.random() * 1000)}`;
     }
-
     const hashedPassword = await bcryptjs.hash(password, 10);
-
     await newStudent.save({ session });
     await users.create(
       [
@@ -46,6 +44,7 @@ const addStudents = async (req, res) => {
           password: hashedPassword,
           name: newStudent.FullName,
           role: "student",
+          ProfileImagePath:req.body.ProfileImagePath ,
         },
       ],
       { session }
