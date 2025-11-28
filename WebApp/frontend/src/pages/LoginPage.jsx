@@ -84,7 +84,7 @@ export default function LoginPage() {
       localStorage.setItem("username", data.user.username);
       localStorage.setItem("name", data.user.name);
       localStorage.setItem("role", data.user.role);
-      console.log(data)
+      // console.log(data)
     } else {
       sessionStorage.setItem("accessToken", data.accessToken);
       sessionStorage.setItem("refreshToken", data.refreshToken);
@@ -92,7 +92,7 @@ export default function LoginPage() {
       sessionStorage.setItem("username", data.user.username);
        localStorage.setItem("name", data.user.name);
       sessionStorage.setItem("role", data.user.role);
-      console.log(data)
+      // console.log(data)
     }
 
     // Redirect based on role
