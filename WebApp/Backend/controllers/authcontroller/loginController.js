@@ -22,8 +22,10 @@ const loginController = async (req, res) => {
     // Payload with UI data
     const payload = {
       id: user._id,
+      name: user.name,
       username: user.username,
       role: user.role,
+
       ProfileImagePath: user.ProfileImagePath,
     };
 
@@ -33,6 +35,7 @@ const loginController = async (req, res) => {
       accessToken,
       refreshToken,
       user: {
+        name: user.name,
         username: user.username,
         role: user.role,
         ProfileImagePath: user.ProfileImagePath,

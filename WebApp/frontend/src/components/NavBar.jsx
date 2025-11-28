@@ -2,20 +2,28 @@ import { useState, useRef, useEffect } from "react";
 import { User, Settings, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 
-function NavBar() {
+function NavBar({ user: propUser, handleLogout: propLogout, links }) {
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
   const [imageError, setImageError] = useState(false);
   const menuRef = useRef(null);
 
-  const user = {
+  // Use props if provided, otherwise fallback to default hardcoded user
+  const user = propUser || {
     name: "Admin User",
-    email: "admin@example.com",
-    photoURL: "https://www.wisden.com/static-assets/images/players/3993.png?v=23.77" // Add user photo URL here
+    // email: "admin@example.com",
+    username: "adminuser",
+    photoURL: "https://www.wisden.com/static-assets/images/players/3993.png?v=23.77"
   };
 
-  const handleLogout = () => {
-    console.log("Logged out");
-  };
+  const handleLogout = propLogout || (() => console.log("Logged out"));
+
+  // Default links if none passed via props
+  const navLinks = links || [
+    { label: "Home", to: "/dashboard" },
+    { label: "Add Student", to: "/add-student" },
+    { label: "Add Teacher", to: "/add-teacher" },
+    { label: "Create Classroom", to: "/add-classroom" },
+  ];
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -57,34 +65,22 @@ function NavBar() {
           <div className="flex items-center gap-8">
             {/* Nav Links */}
             <div className="hidden md:flex items-center gap-6">
-              <Link to="/dashboard" className="text-white font-medium transition-all duration-300 hover:text-yellow-300 hover:scale-105">
-                Home
-              </Link>
-              <Link to="/add-student" className="text-white font-medium transition-all duration-300 hover:text-yellow-300 hover:scale-105">
-                Add Student
-              </Link>
-              <Link to="/add-teacher" className="text-white font-medium transition-all duration-300 hover:text-yellow-300 hover:scale-105">
-                Add Teacher
-              </Link>
-              <Link to="/add-classroom" className="text-white font-medium transition-all duration-300 hover:text-yellow-300 hover:scale-105">
-                Create Classroom
-              </Link>
+              {navLinks.map((link, i) => (
+                <Link
+                  key={i}
+                  to={link.to}
+                  className="text-white font-medium transition-all duration-300 hover:text-yellow-300 hover:scale-105"
+                >
+                  {link.label}
+                </Link>
+              ))}
             </div>
 
-            {/* User Menu - Improved UX */}
+            {/* User Menu - no change */}
             <div className="relative" ref={menuRef}>
-              {/* User Avatar Button - Shows Photo or Icon */}
               <button
                 onClick={() => setShowLogoutMenu(!showLogoutMenu)}
-                className={`
-                  w-10 h-10 rounded-full bg-white shadow-md
-                  flex items-center justify-center
-                  transition-all duration-300 ease-out
-                  hover:scale-110 hover:shadow-lg
-                  active:scale-95
-                  overflow-hidden
-                  ${showLogoutMenu ? 'ring-4 ring-white ring-opacity-40 scale-110' : ''}
-                `}
+                className={`w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-300 ease-out hover:scale-110 hover:shadow-lg active:scale-95 overflow-hidden ${showLogoutMenu ? 'ring-4 ring-white ring-opacity-40 scale-110' : ''}`}
               >
                 {user.photoURL && !imageError ? (
                   <img 
@@ -100,41 +96,23 @@ function NavBar() {
                 )}
               </button>
 
-              {/* Dropdown Menu with Animation */}
-              <div
-                className={`
-                  absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl
-                  overflow-hidden
-                  transition-all duration-300 ease-out origin-top-right
-                  ${showLogoutMenu 
-                    ? 'opacity-100 scale-100 translate-y-0' 
-                    : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
-                  }
-                `}
-              >
-                {/* User Info Section */}
+              <div className={`absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ease-out origin-top-right ${showLogoutMenu ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
                 <div className="px-4 py-4 bg-gradient-to-r from-cyan-50 to-teal-50 border-b border-gray-100">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-md overflow-hidden">
                       {user.photoURL && !imageError ? (
-                        <img 
-                          src={user.photoURL} 
-                          alt={user.name}
-                          onError={() => setImageError(true)}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={user.photoURL} alt={user.name} onError={() => setImageError(true)} className="w-full h-full object-cover" />
                       ) : (
                         <User className="w-6 h-6 text-white" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
-                      <p className="text-xs text-gray-600 truncate">{user.email}</p>
+                    <p className="text-gray-800 font-semibold text-sm">{user?.name || 'Guest'}</p>
+<p className="text-gray-700 text-sm">{user?.username || 'username'}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Menu Items */}
                 <div className="py-2">
                   <button
                     onClick={() => alert('Settings clicked')}
@@ -145,7 +123,6 @@ function NavBar() {
                   </button>
                 </div>
 
-                {/* Logout Button */}
                 <div className="border-t border-gray-100 p-2">
                   <button
                     onClick={handleLogout}

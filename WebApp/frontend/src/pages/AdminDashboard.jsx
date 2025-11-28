@@ -11,7 +11,7 @@ export default function AdminDashboard() {
 
   const defaultUser = {
   name: "Admin User",
-  email: "admin@smartattendance.com",
+  username: "adminuser",
   role: "Administrator",
   photoURL: "https://www.wisden.com/static-assets/images/players/3993.png?v=23.77"
 };
@@ -25,11 +25,13 @@ useEffect(() => {
     localStorage.getItem("role") || sessionStorage.getItem("role");
   const storedPhoto =
     localStorage.getItem("ProfileImagePath") || sessionStorage.getItem("ProfileImagePath");
+    const storedName =localStorage.getItem("name") || sessionStorage.getItem("name");
 
   if (storedUsername) {
     const updatedUser = {
-      name: storedUsername,
-      email: `${storedUsername}@smartattendance.com`,
+      name: storedName,
+      username: storedUsername,
+      // email: `${storedUsername}@smartattendance.com`,
       role: storedRole || "Administrator",
       photoURL: storedPhoto
         ? `http://localhost:9000/public/${storedPhoto}` // ✅ point to backend
