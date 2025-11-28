@@ -8,13 +8,13 @@ const seedAdmin = async (req, res) => {
     DataBaseConnection();
     const password = await bcryptjs.hash(process.env.ADMIN_PASSWORD, 10);
 
-    const newAdmin = new users({
-      username: process.env.ADMIN_USERNAME,
-      password,
-      name: process.env.ADMIN_NAME,
-      role: "admin",
-    });
-
+   const newAdmin = new users({
+  username: process.env.ADMIN_USER,
+  password,
+  name: process.env.ADMIN_NAME,
+  role: "admin",
+  ProfileImagePath: "ProfileImagePath-1764237999077.jpg"   // ONLY filename
+});
     const existingUser = await users.findOne({
       username: process.env.ADMIN_USERNAME,
     });
