@@ -38,7 +38,8 @@ useEffect(() => {
         : "https://www.wisden.com/static-assets/images/players/3993.png?v=23.77"
     };
 
-    console.log("Updated user object:", updatedUser);
+    // console.log("Updated user object:", updatedUser);
+    console.log("Welcome to home page,", storedName);
     setUser(updatedUser);
   }
 }, []);
