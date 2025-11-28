@@ -39,7 +39,9 @@ const upload = (req, res, next) => {
 
     // ✔️ If a file was uploaded, add its path to req.body
     if (req.file) {
-      req.body.ProfileImagePath = "/public/" + req.file.filename;
+      // req.body.ProfileImagePath = "/public/" + req.file.filename;
+      //this line of code was returning wrong path in frontend that's why changed it
+      req.body.ProfileImagePath = req.file.filename;
     }
 
     next();
