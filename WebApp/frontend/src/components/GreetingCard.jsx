@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { User, Clock, Calendar } from 'lucide-react';
 
+
+
 export default function GreetingCard({ user }) {
   const [currentTime, setCurrentTime] = useState(new Date());
 

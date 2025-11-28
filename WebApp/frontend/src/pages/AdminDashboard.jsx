@@ -2,34 +2,44 @@ import React, { useState, useEffect } from 'react';
 import { User, LogOut, Clock, Calendar, Users, UserPlus, BookOpen, Settings, Camera, TrendingUp, AlertCircle } from 'lucide-react';
 import Navbar from '../components/NavBar';
 import GreetingCard from '../components/GreetingCard';
+
+
+
+
 export default function AdminDashboard() {
-  const mockUser = {
+
+
+  const defaultUser = {
   name: "Admin User",
   email: "admin@smartattendance.com",
   role: "Administrator",
   photoURL: "https://www.wisden.com/static-assets/images/players/3993.png?v=23.77"
 };
 
-const [user, setUser] = useState(mockUser);
+const [user, setUser] = useState(defaultUser);
 
-  useEffect(() => {
-  const fetchUser = async () => {
-    try {
-      const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
-      if (!token) return;
+useEffect(() => {
+  const storedUsername =
+    localStorage.getItem("username") || sessionStorage.getItem("username");
+  const storedRole =
+    localStorage.getItem("role") || sessionStorage.getItem("role");
+  const storedPhoto =
+    localStorage.getItem("ProfileImagePath") || sessionStorage.getItem("ProfileImagePath");
 
-      const currentUser = await getCurrentUser(token); // pass the token
-      if (currentUser) {
-        setUser(currentUser); // Replace mock with real data
-      }
-    } catch (err) {
-      console.error("Failed to fetch user:", err);
-    }
-  };
+  if (storedUsername) {
+    const updatedUser = {
+      name: storedUsername,
+      email: `${storedUsername}@smartattendance.com`,
+      role: storedRole || "Administrator",
+      photoURL: storedPhoto
+        ? `http://localhost:9000/public/${storedPhoto}` // ✅ point to backend
+        : "https://www.wisden.com/static-assets/images/players/3993.png?v=23.77"
+    };
 
-  fetchUser();
+    console.log("Updated user object:", updatedUser);
+    setUser(updatedUser);
+  }
 }, []);
-
 
   const [currentTime, setCurrentTime] = useState(new Date());
  
