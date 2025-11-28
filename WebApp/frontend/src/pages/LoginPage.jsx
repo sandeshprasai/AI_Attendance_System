@@ -82,6 +82,7 @@ export default function LoginPage() {
       localStorage.setItem("refreshToken", data.refreshToken);
       localStorage.setItem("ProfileImagePath", data.user.ProfileImagePath);
       localStorage.setItem("username", data.user.username);
+      localStorage.setItem("name", data.user.name);
       localStorage.setItem("role", data.user.role);
       console.log(data)
     } else {
@@ -89,6 +90,7 @@ export default function LoginPage() {
       sessionStorage.setItem("refreshToken", data.refreshToken);
       sessionStorage.setItem("ProfileImagePath", data.user.ProfileImagePath);
       sessionStorage.setItem("username", data.user.username);
+       localStorage.setItem("name", data.user.name);
       sessionStorage.setItem("role", data.user.role);
       console.log(data)
     }

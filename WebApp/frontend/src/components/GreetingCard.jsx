@@ -36,6 +36,7 @@ export default function GreetingCard({ user }) {
         <div>
           <h2 className="text-2xl font-bold">{getGreeting()}!</h2>
           <p className="text-cyan-100 text-sm">{user?.name || 'Guest'}</p>
+          <p className="text-cyan-100 text-sm">{user?.username || 'username'}</p>
         </div>
       </div>
 
