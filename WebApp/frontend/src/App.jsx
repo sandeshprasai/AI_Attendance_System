@@ -11,7 +11,7 @@ import Unauthorized from "./pages/Unauthorized";
    // ✅ Correct import
 
 // components
-import AddStudent from "./components/AddStudent";
+import AddStudent from "./pages/AddStudent";
 
 // route protection
 import RoleProtectedRoute from "./routes/RoleProtectedRoute";

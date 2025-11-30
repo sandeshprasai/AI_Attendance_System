@@ -14,11 +14,24 @@ const students = new mongoose.Schema(
       min: 1,
       unique: true,
     },
-    Faculty: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+ Faculty: {
+  type: String,
+  required: true,
+  trim: true,
+  enum: {
+    values: [
+      "CIVIL",
+      "COMPUTER",
+      "BE IT",
+      "BBA",
+      "ARCHITECTURE",
+      "ELECTRONICS",
+      "BE SOFTWARE",
+      "BE INFORMATION"
+    ],
+    message: "{VALUE} is not a valid faculty"
+  }
+},
     YearOfEnrollment: {
       type: Number,
       required: true,
