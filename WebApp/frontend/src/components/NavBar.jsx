@@ -68,10 +68,10 @@ function NavBar({ user: propUser, handleLogout: propLogout, links }) {
   });
 
   const navLinks = links || [
-    { label: "Home", to: "/dashboard" },
+    { label: "Home", to: "/" },
     { label: "Add Student", to: "/add-student" },
     { label: "Add Teacher", to: "/add-teacher" },
-    { label: "Create Classroom", to: "/add-classroom" },
+    { label: "Create Classroom", to: "/create-classroom" },
   ];
 
   useEffect(() => {
