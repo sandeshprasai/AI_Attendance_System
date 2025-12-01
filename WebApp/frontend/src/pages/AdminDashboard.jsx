@@ -2,47 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { User, LogOut, Clock, Calendar, Users, UserPlus, BookOpen, Settings, Camera, TrendingUp, AlertCircle } from 'lucide-react';
 import Navbar from '../components/NavBar';
 import GreetingCard from '../components/GreetingCard';
+import { useAuth } from '.././context/AuthContext';
 
 
 
 
 export default function AdminDashboard() {
+    const { user } = useAuth();
 
 
-  const defaultUser = {
-  name: "Admin User",
-  username: "adminuser",
-  role: "Administrator",
-  photoURL: "https://www.wisden.com/static-assets/images/players/3993.png?v=23.77"
-};
-
-const [user, setUser] = useState(defaultUser);
-
-useEffect(() => {
-  const storedUsername =
-    localStorage.getItem("username") || sessionStorage.getItem("username");
-  const storedRole =
-    localStorage.getItem("role") || sessionStorage.getItem("role");
-  const storedPhoto =
-    localStorage.getItem("ProfileImagePath") || sessionStorage.getItem("ProfileImagePath");
-    const storedName =localStorage.getItem("name") || sessionStorage.getItem("name");
-
-  if (storedUsername) {
-    const updatedUser = {
-      name: storedName,
-      username: storedUsername,
-      // email: `${storedUsername}@smartattendance.com`,
-      role: storedRole || "Administrator",
-      photoURL: storedPhoto
-        ? `http://localhost:9000/public/${storedPhoto}` // ✅ point to backend
-        : "https://www.wisden.com/static-assets/images/players/3993.png?v=23.77"
-    };
-
-    // console.log("Updated user object:", updatedUser);
-    console.log("Welcome to home page,", storedName);
-    setUser(updatedUser);
-  }
-}, []);
+  
 
   const [currentTime, setCurrentTime] = useState(new Date());
  
@@ -80,7 +49,7 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Your Existing Navbar */}
-      <Navbar user={user} />
+      <Navbar  />
       
 
       {/* Main Content */}
@@ -91,7 +60,7 @@ useEffect(() => {
           <div className="lg:col-span-1 space-y-6">
             {/* Greeting Card */}
             {/* Use Reusable Greeting Card Component */}
-            <GreetingCard user={user} />
+            <GreetingCard  />
 
             {/* Quick Access Cards */}
             <div className="bg-white rounded-2xl shadow-md p-6">
