@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Eye, EyeOff, User, Lock } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // import hook
 
 export default function LoginPage() {
+   const { setUser } = useAuth(); // get context setter
 
   const [username, setUsername] = useState(''); 
   const [password, setPassword] = useState('');
@@ -94,6 +96,15 @@ export default function LoginPage() {
       sessionStorage.setItem("role", data.user.role);
       // console.log(data)
     }
+    // UPDATE CONTEXT SO COMPONENTS RE-RENDER
+    setUser({
+      name: data.user.name,
+      username: data.user.username,
+      role: data.user.role,
+      photoURL: data.user.ProfileImagePath
+        ? `http://localhost:9000/public/${data.user.ProfileImagePath}`
+        : "https://www.wisden.com/static-assets/images/players/3993.png?v=23.77",
+    });
 
     // Redirect based on role
     const role = data.user.role;
