@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { User, Clock, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { User, Clock, Calendar } from "lucide-react";
+import { useAuth } from "../context/AuthContext"; // use the same context
 
-
-
-export default function GreetingCard({ user }) {
+export default function GreetingCard() {
+  const { user } = useAuth(); // get user from AuthContext
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -23,20 +23,19 @@ export default function GreetingCard({ user }) {
       <div className="flex items-center gap-4 mb-4">
         <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm overflow-hidden">
           {user?.photoURL ? (
-            <img 
-              src={user.photoURL} 
+            <img
+              src={user.photoURL}
               alt={user.name}
               className="w-full h-full object-cover"
             />
-            
           ) : (
             <User className="w-8 h-8 text-white" />
           )}
         </div>
         <div>
           <h2 className="text-2xl font-bold">{getGreeting()}!</h2>
-          <p className="text-cyan-100 text-sm">{user?.name || 'Guest'}</p>
-          <p className="text-cyan-100 text-sm">{user?.username || 'username'}</p>
+          <p className="text-cyan-100 text-sm">{user?.name || "Guest"}</p>
+          <p className="text-cyan-100 text-sm">{user?.username || "username"}</p>
         </div>
       </div>
 
@@ -44,20 +43,20 @@ export default function GreetingCard({ user }) {
         <div className="flex items-center gap-3 text-cyan-50">
           <Clock className="w-4 h-4" />
           <span className="text-sm">
-            {currentTime.toLocaleTimeString('en-US', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              second: '2-digit'
+            {currentTime.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
             })}
           </span>
         </div>
         <div className="flex items-center gap-3 text-cyan-50">
           <Calendar className="w-4 h-4" />
           <span className="text-sm">
-            {currentTime.toLocaleDateString('en-US', { 
-              weekday: 'short',
-              month: 'short',
-              day: 'numeric'
+            {currentTime.toLocaleDateString("en-US", {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
             })}
           </span>
         </div>
