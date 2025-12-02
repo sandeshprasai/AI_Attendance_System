@@ -1,7 +1,7 @@
 import { User, Mail, Phone, MapPin, Calendar, Hash } from "lucide-react";
 import InputGroup from "../ui/InputGroup";
 
-export default function PersonalInfoSection({ formData, handleInputChange, errors }) {
+export default function PersonalInfoSection({ formData, handleInputChange, errors,loading, }) {
   return (
     <div className="bg-white p-6 rounded-xl shadow space-y-6">
       <h3 className="text-xl font-bold text-emerald-600 flex items-center gap-2">
@@ -17,6 +17,7 @@ export default function PersonalInfoSection({ formData, handleInputChange, error
           onChange={handleInputChange}
           Icon={User}
           error={errors?.FullName}
+          disabled={loading}
         />
 
         <InputGroup
@@ -27,6 +28,7 @@ export default function PersonalInfoSection({ formData, handleInputChange, error
           onChange={handleInputChange}
           Icon={Hash}
           error={errors?.RollNo}
+          disabled={loading}
         />
 
         <InputGroup
@@ -37,6 +39,7 @@ export default function PersonalInfoSection({ formData, handleInputChange, error
           onChange={handleInputChange}
           Icon={Calendar}
           error={errors?.DateOfBirth}
+          disabled={loading}
         />
 
         <InputGroup
@@ -47,6 +50,7 @@ export default function PersonalInfoSection({ formData, handleInputChange, error
           onChange={handleInputChange}
           Icon={Mail}
           error={errors?.Email}
+          disabled={loading}
         />
 
         <InputGroup
@@ -57,6 +61,7 @@ export default function PersonalInfoSection({ formData, handleInputChange, error
           onChange={handleInputChange}
           Icon={Phone}
           error={errors?.Phone}
+          disabled={loading}
         />
 
         <div className="md:col-span-2">

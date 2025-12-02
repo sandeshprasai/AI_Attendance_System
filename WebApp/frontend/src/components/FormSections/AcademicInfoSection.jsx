@@ -1,7 +1,7 @@
 import InputGroup from "../ui/InputGroup";
 import { Building2, Calendar, GraduationCap, Hash } from "lucide-react";
 
-export default function AcademicInfoSection({ formData, handleInputChange, facultyOptions, errors }) {
+export default function AcademicInfoSection({ formData, handleInputChange, facultyOptions, errors,loading, }) {
   return (
     <div className="bg-white p-6 rounded-xl shadow space-y-6">
       <h3 className="text-xl font-bold text-cyan-600 flex items-center gap-2">
@@ -32,6 +32,7 @@ export default function AcademicInfoSection({ formData, handleInputChange, facul
           onChange={handleInputChange}
           Icon={Calendar}
           error={errors?.YearOfEnrollment}
+          disabled={loading}
         />
 
         <InputGroup
@@ -42,6 +43,7 @@ export default function AcademicInfoSection({ formData, handleInputChange, facul
           onChange={handleInputChange}
           Icon={GraduationCap}
           error={errors?.Class}
+          disabled={loading}
         />
 
         <InputGroup
@@ -52,6 +54,7 @@ export default function AcademicInfoSection({ formData, handleInputChange, facul
           onChange={handleInputChange}
           Icon={Hash}
           error={errors?.Section}
+          disabled={loading}
         />
 
         <InputGroup
@@ -62,6 +65,7 @@ export default function AcademicInfoSection({ formData, handleInputChange, facul
           onChange={handleInputChange}
           Icon={Hash}
           error={errors?.UniversityReg}
+          disabled={loading}
         />
       </div>
     </div>
