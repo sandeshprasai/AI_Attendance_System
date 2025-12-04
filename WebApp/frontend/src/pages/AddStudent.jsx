@@ -46,6 +46,7 @@ export default function AddStudent() {
 
   const [imagePreview, setImagePreview] = useState(null);
   const [toast, setToast] = useState(null);
+  
 
   const facultyOptions = [
     "CIVIL",
@@ -126,6 +127,7 @@ export default function AddStudent() {
   };
 
   const handleSubmit = async () => {
+    
     if (loading) return; // block double submit
 
     // Run validation
@@ -151,6 +153,9 @@ export default function AddStudent() {
     if (hasErrors) return;
 
     try {
+
+      const token = localStorage.getItem("accessToken")|| sessionStorage.getItem("accessToken");
+     
        setLoading(true); // START LOADING
       const data = new FormData();
       for (const key in formData) {
@@ -162,12 +167,15 @@ export default function AddStudent() {
       }
 
       const res = await axios.post(
-        "http://localhost:9000/api/v1/users/students",
-        data,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+  "http://localhost:9000/api/v1/users/students",
+  data,
+  {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Authorization": token,   // MUST be inside headers
+    },
+  }
+);
 
       setToast({ message: "Student added successfully!", type: "success" });
 
