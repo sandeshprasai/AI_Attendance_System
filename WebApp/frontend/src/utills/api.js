@@ -9,8 +9,8 @@ const API = axios.create({
 
 // Attach JWT token dynamically
 API.interceptors.request.use(config => {
-  const token = localStorage.getItem("accessToken");
-  if (token) config.headers.authorization = token;
+  const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+  if (token) config.headers.authorization = `Bearer ${token}`; // note "Bearer"
   return config;
 });
 
