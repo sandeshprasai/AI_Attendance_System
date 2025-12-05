@@ -8,36 +8,40 @@ const students = new mongoose.Schema(
       trim: true,
       maxLength: 100,
     },
+
     RollNo: {
       type: Number,
       required: true,
       min: 1,
       unique: true,
     },
- Faculty: {
-  type: String,
-  required: true,
-  trim: true,
-  enum: {
-    values: [
-      "CIVIL",
-      "COMPUTER",
-      "BE IT",
-      "BBA",
-      "ARCHITECTURE",
-      "ELECTRONICS",
-      "BE SOFTWARE",
-      "BE INFORMATION"
-    ],
-    message: "{VALUE} is not a valid faculty"
-  }
-},
+
+    Faculty: {
+      type: String,
+      required: true,
+      trim: true,
+      enum: {
+        values: [
+          "CIVIL",
+          "COMPUTER",
+          "BE IT",
+          "BBA",
+          "ARCHITECTURE",
+          "ELECTRONICS",
+          "BE SOFTWARE",
+          "BE INFORMATION",
+        ],
+        message: "{VALUE} is not a valid faculty",
+      },
+    },
+
     YearOfEnrollment: {
       type: Number,
       required: true,
       min: 2000,
       max: new Date().getFullYear(),
     },
+
     Email: {
       type: String,
       required: true,
@@ -48,11 +52,13 @@ const students = new mongoose.Schema(
         "Please enter a valid email",
       ],
     },
+
     Phone: {
       type: String,
       required: true,
       match: [/^\d{10}$/, "Please enter a valid 10-digit phone number"],
     },
+
     DateOfBirth: {
       type: Date,
       required: true,
@@ -63,31 +69,42 @@ const students = new mongoose.Schema(
         message: "Date of birth must be in the past",
       },
     },
+
     Class: {
       type: String,
       required: true,
       trim: true,
     },
+
     Section: {
       type: String,
       trim: true,
       uppercase: true,
       maxLength: 2,
     },
+
     FullAddress: {
       type: String,
       required: true,
       trim: true,
     },
+
     UniversityReg: {
       type: String,
       required: true,
       trim: true,
       unique: true,
     },
-     ProfileImagePath: {
-      type: String, 
-      required:true,
+
+    ProfileImagePath: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+
+    CloudinaryPublicId: {
+      type: String,
+      default: null,
       trim: true,
     },
   },
