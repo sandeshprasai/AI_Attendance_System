@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, LogOut, Clock, Calendar, Users, UserPlus, BookOpen, Settings, Camera, TrendingUp, AlertCircle } from 'lucide-react';
 import Navbar from '../components/NavBar';
 import GreetingCard from '../components/GreetingCard';
+import UserCard from"../components/cards/UserCard";
 import { useAuth } from '.././context/AuthContext';
 
 
@@ -109,37 +110,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Users Card */}
-            <div className="bg-white rounded-2xl shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5 text-orange-600" />
-                Users
-              </h3>
-              <div className="space-y-3">
-                <button 
-                  onClick={() => alert('Redirecting to All Users page...')}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all transform hover:-translate-y-0.5 font-medium shadow-md text-left flex items-center justify-between"
-                >
-                  <span>View All Users</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </button>
-                <div className="pt-2 space-y-2 text-sm">
-                  <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
-                    <span className="text-gray-700">Students</span>
-                    <span className="font-bold text-blue-600">{stats.totalStudents}</span>
-                  </div>
-                  <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
-                    <span className="text-gray-700">Teachers</span>
-                    <span className="font-bold text-green-600">{stats.totalTeachers}</span>
-                  </div>
-                  <div className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
-                    <span className="text-gray-700">Admins</span>
-                    <span className="font-bold text-purple-600">3</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+           <UserCard />
           </div>
 
           {/* Right Column - Main Dashboard */}

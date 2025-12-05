@@ -8,6 +8,7 @@ import StudentDashboard from "./pages/StudentDashboard";
 import AddTeacher from "./components/AddTeacher";
 import CreateClassroom from "./components/CreateClassroom";
 import Unauthorized from "./pages/Unauthorized";  
+import UsersPage from "./pages/UsersPage";
    // ✅ Correct import
 
 // components
@@ -57,6 +58,14 @@ export default function App() {
           element={
             <RoleProtectedRoute allowedRoles={["admin"]}>
               <CreateClassroom />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <UsersPage />
             </RoleProtectedRoute>
           }
         />
