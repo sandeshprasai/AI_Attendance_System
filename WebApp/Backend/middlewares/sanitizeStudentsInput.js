@@ -84,12 +84,15 @@ const sanitizeStudentInput = async (req, res, next) => {
 
     ProfileImagePath: joi.string().required().messages({
       "string.empty": "Profile Image Path Is required",
-      
     }),
+    CloudinaryPublicId: joi.string().optional(),
   });
 
   try {
-    await Schema.validateAsync(req.body, { abortEarly: false });
+    await Schema.validateAsync(req.body, {
+      abortEarly: false,
+      allowUnknown: true,
+    });
     next();
   } catch (error) {
     return res.status(400).json({

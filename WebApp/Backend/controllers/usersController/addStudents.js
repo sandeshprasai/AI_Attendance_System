@@ -6,12 +6,19 @@ const users = require("./../../models/users");
 const logger = require("./../../logger/logger"); // Import Winston logger
 
 const addStudents = async (req, res) => {
-  const { RollNo, FullName, Email, ProfileImagePath } = req.body;
+  const {
+    RollNo,
+    FullName,
+    Email,
+    ProfileImagePath,
+    CloudinaryPublicId,   // <-- ADDED
+  } = req.body;
 
-  logger.info(`ADD_STUDENT request received: RollNo=${RollNo}, FullName=${FullName}, IP=${req.ip}`);
+  logger.info(
+    `ADD_STUDENT request received: RollNo=${RollNo}, FullName=${FullName}, IP=${req.ip}`
+  );
 
   try {
-    // Check if student exists
     const existingStudent = await students.findOne({ RollNo });
     if (existingStudent) {
       logger.warn(`ADD_STUDENT failed: RollNo ${RollNo} already registered`);
@@ -20,8 +27,13 @@ const addStudents = async (req, res) => {
       });
     }
 
-    // Create new student instance
-    const newStudent = new students({ ...req.body });
+    // Create new student instance WITH Cloudinary fields
+    const newStudent = new students({
+      ...req.body,
+      ProfileImagePath,        // Cloudinary URL
+      CloudinaryPublicId,      // NEW field saved to DB
+    });
+
     let { username, password } = generateCredentials(FullName, RollNo);
 
     // Ensure unique username
@@ -38,14 +50,16 @@ const addStudents = async (req, res) => {
     await newStudent.save();
     logger.info(`Student record created: RollNo=${RollNo}, Name=${FullName}`);
 
-    // Create associated user
+    // Create associated user with Cloudinary profile image
     await users.create({
       username,
       password: hashedPassword,
       name: FullName,
       role: "student",
-      ProfileImagePath,
+      ProfileImagePath,      // Cloudinary URL saved here also
+      CloudinaryPublicId,    // OPTIONAL: save for user too
     });
+
     logger.info(`User account created for student: username=${username}`);
 
     // Send credentials email
@@ -73,7 +87,6 @@ const addStudents = async (req, res) => {
       });
     }
 
-    // Generic server error
     return res.status(500).json({
       error: "An error occurred while adding student.",
     });
