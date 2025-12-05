@@ -172,7 +172,7 @@ export default function AddStudent() {
   {
     headers: {
       "Content-Type": "multipart/form-data",
-      "Authorization": token,   // MUST be inside headers
+      "authorization": `Bearer ${token}`,   // MUST be inside headers
     },
   }
 );
