@@ -14,6 +14,9 @@ build/
 
 public/
 .ipynb_checkpoints/
+*.jpg
+*.png
+
 
 # Virtual environments
 .venv/
@@ -42,6 +45,8 @@ AI_And_ML_Model/datasets/
 AI_And_ML_Model/datasets/train/
 AI_And_ML_Model/datasets/test
 AI_And_ML_Model/datasets/val/
+logs/
+checkpoints/
 
 # Large model files
 *.h5
@@ -91,6 +96,8 @@ dist/
 *.swp
 *.swo
 package-lock.json
+.virtual_documents/
+
 
 
 # =========================
