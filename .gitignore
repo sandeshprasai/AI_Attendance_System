@@ -13,6 +13,10 @@ build/
 *.log
 
 public/
+.ipynb_checkpoints/
+*.jpg
+*.png
+
 
 # Virtual environments
 .venv/
@@ -25,13 +29,14 @@ myvenv/
 myvenv/Scripts/
 env.bak/
 
+
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
-
 # =========================
 # Data & Models
 # =========================
 # Ignore full datasets (keep only small samples)
+AI_And_ML_Model/
 AI_And_ML_Model/data/raw/
 AI_And_ML_Model/data/processed/
 AI_And_ML_Model/data/normalized/
@@ -40,6 +45,8 @@ AI_And_ML_Model/datasets/
 AI_And_ML_Model/datasets/train/
 AI_And_ML_Model/datasets/test
 AI_And_ML_Model/datasets/val/
+logs/
+checkpoints/
 
 # Large model files
 *.h5
@@ -49,6 +56,7 @@ AI_And_ML_Model/datasets/val/
 *.pt
 *.pth
 *.onnx
+*.keras
 
 # =========================
 # Node / React (Frontend)
@@ -76,6 +84,9 @@ dist/
 .env
 *.sqlite3
 *.db
+*.h5
+*.keras
+
 
 # =========================
 # VSCode / IDE
@@ -85,3 +96,11 @@ dist/
 *.swp
 *.swo
 package-lock.json
+.virtual_documents/
+
+
+
+# =========================
+# YOLO runs
+# =========================
+runs/
