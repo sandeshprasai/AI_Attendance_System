@@ -10,7 +10,6 @@ const getAllUsers = async (req, res) => {
 
     const filter = {};
 
-    // Role filter (case-insensitive)
     if (role) {
       filter.role = new RegExp(`^${role.trim()}$`, "i");
     }
