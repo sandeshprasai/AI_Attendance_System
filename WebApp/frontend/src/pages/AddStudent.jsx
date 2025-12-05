@@ -16,7 +16,7 @@ import {
   validateAddress,
   validateUniversityReg,
   validateProfileImage,
-} from "../../utills/validations";
+} from "../utills/validations";
 
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
