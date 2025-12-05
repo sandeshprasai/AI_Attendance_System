@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const defaultUser = {
     name: "Admin User",
     username: "adminuser",
@@ -15,23 +15,27 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const storedUsername =
-      localStorage.getItem("username") || sessionStorage.getItem("username");
+      localStorage.getItem("username") ||
+      sessionStorage.getItem("username");
+
     const storedRole =
-      localStorage.getItem("role") || sessionStorage.getItem("role");
-    const storedPhoto =
-      localStorage.getItem("ProfileImagePath") ||
-      sessionStorage.getItem("ProfileImagePath");
+      localStorage.getItem("role") ||
+      sessionStorage.getItem("role");
+
+    const storedPhotoURL =
+      localStorage.getItem("ProfileImageURL") ||
+      sessionStorage.getItem("ProfileImageURL");
+
     const storedName =
-      localStorage.getItem("name") || sessionStorage.getItem("name");
+      localStorage.getItem("name") ||
+      sessionStorage.getItem("name");
 
     if (storedUsername) {
       setUser({
-        name: storedName,
+        name: storedName || defaultUser.name,
         username: storedUsername,
-        role: storedRole || "Administrator",
-        photoURL: storedPhoto
-          ? `http://localhost:9000/public/${storedPhoto}`
-          : defaultUser.photoURL,
+        role: storedRole || defaultUser.role,
+        photoURL: storedPhotoURL || defaultUser.photoURL,
       });
     }
   }, []);
@@ -41,6 +45,8 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  return useContext(AuthContext);
+}

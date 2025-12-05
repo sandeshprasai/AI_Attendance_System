@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff, User, Lock } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // import hook
+import { AuthProvider, useAuth } from "../context/AuthContext"; // import hook
 
 export default function LoginPage() {
    const { setUser } = useAuth(); // get context setter
@@ -38,7 +38,7 @@ export default function LoginPage() {
     }
   };
 
- const handleLogin = async () => {
+const handleLogin = async () => {
   let hasError = false;
 
   // Validate username
@@ -78,36 +78,29 @@ export default function LoginPage() {
       return;
     }
 
-    // Save tokens
-    if (rememberMe) {
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
-      localStorage.setItem("ProfileImagePath", data.user.ProfileImagePath);
-      localStorage.setItem("username", data.user.username);
-      localStorage.setItem("name", data.user.name);
-      localStorage.setItem("role", data.user.role);
-      // console.log(data)
-    } else {
-      sessionStorage.setItem("accessToken", data.accessToken);
-      sessionStorage.setItem("refreshToken", data.refreshToken);
-      sessionStorage.setItem("ProfileImagePath", data.user.ProfileImagePath);
-      sessionStorage.setItem("username", data.user.username);
-       localStorage.setItem("name", data.user.name);
-      sessionStorage.setItem("role", data.user.role);
-      // console.log(data)
-    }
-    // UPDATE CONTEXT SO COMPONENTS RE-RENDER
+    // -----🔥 STORE LOGIN DATA -----
+    const storage = rememberMe ? localStorage : sessionStorage;
+
+    storage.setItem("accessToken", data.accessToken);
+    storage.setItem("refreshToken", data.refreshToken);
+    storage.setItem("username", data.user.username);
+    storage.setItem("name", data.user.name);
+    storage.setItem("role", data.user.role);
+
+    // Store Cloudinary URL directly
+    storage.setItem("ProfileImageURL", data.user.ProfileImagePath);
+
+    // -----🔥 UPDATE CONTEXT -----
     setUser({
       name: data.user.name,
       username: data.user.username,
       role: data.user.role,
-      photoURL: data.user.ProfileImagePath
-        ? `http://localhost:9000/public/${data.user.ProfileImagePath}`
-        : "https://www.wisden.com/static-assets/images/players/3993.png?v=23.77",
+      photoURL: data.user.ProfileImagePath, // DIRECT Cloudinary URL
     });
 
-    // Redirect based on role
+    // -----🔥 REDIRECT BASED ON ROLE -----
     const role = data.user.role;
+
     if (role === "admin") navigate("/admin-dashboard");
     else if (role === "teacher") navigate("/teacher-dashboard");
     else if (role === "student") navigate("/student-dashboard");
