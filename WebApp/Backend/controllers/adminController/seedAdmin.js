@@ -14,21 +14,16 @@ const seedUsers = async () => {
         password: process.env.ADMIN_PASSWORD,
         name: process.env.ADMIN_NAME,
         role: "admin",
-        ProfileImagePath: "santu.jpg",
+        ProfileImagePath:
+          "https://res.cloudinary.com/dckkxkwcg/image/upload/v1764951407/WhatsApp_Image_2025-12-05_at_21.59.21_cd7aa9ed_qwmkjf.jpg",
       },
       {
         username: process.env.USER1_USERNAME,
         password: process.env.USER1_PASSWORD,
         name: process.env.USER1_NAME,
         role: "admin",
-        ProfileImagePath: "ProfileImagePath-1764237999077.jpg",
-      },
-      {
-        username: process.env.USER2_USERNAME,
-        password: process.env.USER2_PASSWORD,
-        name: process.env.USER2_NAME,
-        role: "admin",
-        ProfileImagePath: "shiv.jpg",
+        ProfileImagePath:
+          "https://res.cloudinary.com/dckkxkwcg/image/upload/v1764951569/WhatsApp_Image_2025-12-05_at_22.03.54_e4ee571a_zwo0gf.jpg",
       },
     ];
 

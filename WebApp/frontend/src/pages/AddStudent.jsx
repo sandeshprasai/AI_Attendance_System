@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-
 import axios from "axios";
 import {
   validateForm,
@@ -46,7 +45,7 @@ export default function AddStudent() {
 
   const [imagePreview, setImagePreview] = useState(null);
   const [toast, setToast] = useState(null);
-  
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const facultyOptions = [
     "CIVIL",
@@ -122,28 +121,42 @@ export default function AddStudent() {
 
   const removeImage = () => {
     setFormData((prev) => ({ ...prev, ProfileImagePath: null }));
-    setErrors((prev) => ({ ...prev, ProfileImagePath: "Profile image is required." }));
+    setErrors((prev) => ({
+      ...prev,
+      ProfileImagePath: "Profile image is required.",
+    }));
     setImagePreview(null);
   };
 
   const handleSubmit = async () => {
-    
     if (loading) return; // block double submit
 
     // Run validation
     const validationErrors = validateForm({
       FullName: { value: formData.FullName, validator: validateName },
       RollNo: { value: formData.RollNo, validator: validateRollNo },
-      Faculty: { value: formData.Faculty, validator: (val) => validateFaculty(val, facultyOptions) },
-      YearOfEnrollment: { value: formData.YearOfEnrollment, validator: validateYearOfEnrollment },
+      Faculty: {
+        value: formData.Faculty,
+        validator: (val) => validateFaculty(val, facultyOptions),
+      },
+      YearOfEnrollment: {
+        value: formData.YearOfEnrollment,
+        validator: validateYearOfEnrollment,
+      },
       Email: { value: formData.Email, validator: validateEmail },
       Phone: { value: formData.Phone, validator: validatePhone },
       DateOfBirth: { value: formData.DateOfBirth, validator: validateDOB },
       Class: { value: formData.Class, validator: validateClass },
       Section: { value: formData.Section, validator: validateSection },
       FullAddress: { value: formData.FullAddress, validator: validateAddress },
-      UniversityReg: { value: formData.UniversityReg, validator: validateUniversityReg },
-      ProfileImagePath: { value: formData.ProfileImagePath, validator: validateProfileImage },
+      UniversityReg: {
+        value: formData.UniversityReg,
+        validator: validateUniversityReg,
+      },
+      ProfileImagePath: {
+        value: formData.ProfileImagePath,
+        validator: validateProfileImage,
+      },
     });
 
     setErrors(validationErrors);
@@ -153,10 +166,11 @@ export default function AddStudent() {
     if (hasErrors) return;
 
     try {
+      const token =
+        localStorage.getItem("accessToken") ||
+        sessionStorage.getItem("accessToken");
 
-      const token = localStorage.getItem("accessToken")|| sessionStorage.getItem("accessToken");
-     
-       setLoading(true); // START LOADING
+      setLoading(true); // START LOADING
       const data = new FormData();
       for (const key in formData) {
         if (key === "ProfileImagePath" && formData[key]) {
@@ -166,16 +180,12 @@ export default function AddStudent() {
         }
       }
 
-      const res = await axios.post(
-  "http://localhost:9000/api/v1/users/students",
-  data,
-  {
-    headers: {
-      "Content-Type": "multipart/form-data",
-      "authorization": `Bearer ${token}`,   // MUST be inside headers
-    },
-  }
-);
+      const res = await axios.post(`${API_URL}api/v1/users/students`, data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          authorization: `Bearer ${token}`, // MUST be inside headers
+        },
+      });
 
       setToast({ message: "Student added successfully!", type: "success" });
 
@@ -201,24 +211,22 @@ export default function AddStudent() {
       const message =
         error.response?.data?.error || "Failed to add student. Server error.";
       setToast({ message, type: "error" });
+    } finally {
+      setLoading(false); // END LOADING
     }
-    finally {
-    setLoading(false); // END LOADING
-  }
   };
 
   return (
-   <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen">
       <NavBar />
 
-       <div className="max-w-5xl mx-auto p-6 space-y-8 mb-16">
+      <div className="max-w-5xl mx-auto p-6 space-y-8 mb-16">
         <ProfilePhotoSection
           imagePreview={imagePreview}
           handleImageUpload={handleImageUpload}
           removeImage={removeImage}
           error={errors.ProfileImagePath}
           loading={loading}
-          
         />
 
         <PersonalInfoSection
@@ -227,7 +235,6 @@ export default function AddStudent() {
           errors={errors}
           loading={loading}
         />
-       
 
         <AcademicInfoSection
           formData={formData}
@@ -237,29 +244,29 @@ export default function AddStudent() {
           loading={loading}
         />
 
-       <button
-  disabled={loading}
-  className={`px-6 py-3 rounded-xl text-white flex items-center justify-center gap-2
+        <button
+          disabled={loading}
+          className={`px-6 py-3 rounded-xl text-white flex items-center justify-center gap-2
     ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-emerald-600"}`}
-  onClick={handleSubmit}
->
-  {loading && (
-    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-  )}
-  {loading ? "Saving..." : "Submit"}
-</button>
+          onClick={handleSubmit}
+        >
+          {loading && (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          )}
+          {loading ? "Saving..." : "Submit"}
+        </button>
       </div>
 
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
 
-        {loading && (
-  <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-    <div className="bg-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3">
-      <div className="w-6 h-6 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-      <p className="text-gray-700 font-medium">Saving student data...</p>
-    </div>
-  </div>
-)}
+      {loading && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3">
+            <div className="w-6 h-6 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-700 font-medium">Saving student data...</p>
+          </div>
+        </div>
+      )}
       <Footer />
     </div>
   );

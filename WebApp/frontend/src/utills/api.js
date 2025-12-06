@@ -1,33 +1,42 @@
 import axios from "axios";
 
-const BACKEND_URL = "http://localhost:9000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const API = axios.create({
-  baseURL: `${BACKEND_URL}/api/v1`,
-  headers: { "Content-Type": "application/json" }
+  baseURL: `${API_URL}api/v1`,
+  headers: { "Content-Type": "application/json" },
 });
 
 // Attach JWT token dynamically
-API.interceptors.request.use(config => {
-  const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
-  if (token) config.headers.authorization = `Bearer ${token}`; // note "Bearer"
+API.interceptors.request.use((config) => {
+  const token =
+    localStorage.getItem("accessToken") ||
+    sessionStorage.getItem("accessToken");
+
+  if (token) config.headers.authorization = `Bearer ${token}`;
   return config;
 });
 
-// Helper function to get image URL or fetch image blob
+// Build final image URL
 export const getUserImageURL = (filename) => {
-  if (!filename) return "/default-avatar.png"; // fallback
-  return `${BACKEND_URL}/public/${filename}`;
+  if (!filename) return "/default-avatar.png";
+
+  // If Cloudinary URL → return as is
+  if (filename.startsWith("http")) return filename;
+
+  // Local uploaded images
+  return `${API_URL}/public/${filename}`;
 };
 
-// Optional: fetch image as blob (if you need to process it)
+// Fetch raw image (optional)
 export const fetchUserImage = async (filename) => {
   if (!filename) return null;
+
   try {
-    const response = await axios.get(`${BACKEND_URL}/public/${filename}`, {
-      responseType: "blob"
+    const response = await axios.get(`${API_URL}/public/${filename}`, {
+      responseType: "blob",
     });
-    return URL.createObjectURL(response.data); // returns a local URL for the blob
+    return URL.createObjectURL(response.data);
   } catch (err) {
     console.error("Failed to fetch image", err);
     return "/default-avatar.png";
