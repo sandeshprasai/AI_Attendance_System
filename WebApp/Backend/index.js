@@ -14,12 +14,15 @@ const port = process.env.PORT || 5500;
 const app = express();
 DbConnection();
 
-app.use(requstID)
-app.use(morganMiddleware)
+app.use(requstID);
+app.use(morganMiddleware);
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://ai-attendance-system-three.vercel.app",
+    ],
     credentials: true,
   })
 );
