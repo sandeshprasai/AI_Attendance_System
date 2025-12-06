@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import API from ".././utills/api";
+import API, { getUserImageURL } from "../utills/api";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -13,12 +13,13 @@ export default function UsersPage() {
     try {
       const params = { page, limit, search, role };
       const { data } = await API.get("/users/all", { params });
+
       if (data.success) {
         setUsers(data.users);
         setTotalPages(data.pages);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Failed fetching users:", err);
     }
   };
 
@@ -36,12 +37,18 @@ export default function UsersPage() {
           type="text"
           placeholder="Search by name or username"
           value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           className="border p-2 rounded w-1/2"
         />
         <select
           value={role}
-          onChange={e => { setRole(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setRole(e.target.value);
+            setPage(1);
+          }}
           className="border p-2 rounded"
         >
           <option value="">All Roles</option>
@@ -61,19 +68,20 @@ export default function UsersPage() {
             <th className="border p-2">Profile Image</th>
           </tr>
         </thead>
+
         <tbody>
-          {users.map(u => (
+          {users.map((u) => (
             <tr key={u._id}>
               <td className="border p-2">{u.name}</td>
               <td className="border p-2">{u.username}</td>
               <td className="border p-2 capitalize">{u.role}</td>
               <td className="border p-2">
-               <img
-  src={`http://localhost:9000/public/${u.ProfileImagePath}`}
-  alt={u.name}
-  className="w-10 h-10 rounded-full object-cover"
-  onError={e => { e.target.src = "/images/default-user.png"; }}
-/>
+                <img
+                  src={getUserImageURL(u.ProfileImagePath)}
+                  alt={u.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                  onError={(e) => (e.target.src = "/default-avatar.png")}
+                />
               </td>
             </tr>
           ))}
@@ -82,9 +90,25 @@ export default function UsersPage() {
 
       {/* Pagination */}
       <div className="flex gap-2 mt-4">
-        <button disabled={page === 1} onClick={() => setPage(prev => prev - 1)} className="px-3 py-1 border rounded">Prev</button>
-        <span className="px-3 py-1">{page} / {totalPages}</span>
-        <button disabled={page === totalPages} onClick={() => setPage(prev => prev + 1)} className="px-3 py-1 border rounded">Next</button>
+        <button
+          disabled={page === 1}
+          onClick={() => setPage((prev) => prev - 1)}
+          className="px-3 py-1 border rounded"
+        >
+          Prev
+        </button>
+
+        <span className="px-3 py-1">
+          {page} / {totalPages}
+        </span>
+
+        <button
+          disabled={page === totalPages}
+          onClick={() => setPage((prev) => prev + 1)}
+          className="px-3 py-1 border rounded"
+        >
+          Next
+        </button>
       </div>
     </div>
   );
