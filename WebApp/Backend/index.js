@@ -21,7 +21,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://ai-attendance-system-three.vercel.app",
+      "https://ai-attendance-system-three.vercel.app/",
     ],
     credentials: true,
   })

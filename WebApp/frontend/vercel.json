@@ -1,0 +1,14 @@
+{
+  "rewrites": [
+    { "source": "/admin-dashboard", "destination": "/index.html" },
+    { "source": "/teacher-dashboard", "destination": "/index.html" },
+    { "source": "/student-dashboard", "destination": "/index.html" },
+    { "source": "/add-student", "destination": "/index.html" },
+    { "source": "/add-teacher", "destination": "/index.html" },
+    { "source": "/create-classroom", "destination": "/index.html" },
+    { "source": "/admin/users", "destination": "/index.html" },
+    { "source": "/unauthorized", "destination": "/index.html" },
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
