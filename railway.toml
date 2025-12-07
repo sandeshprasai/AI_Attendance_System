@@ -1,19 +1,15 @@
 # railway.toml
 
-[build]
-# Tell Railway where the backend lives
-builder = "NIXPACKS"
+[services.backend]
+# Path to your Node.js backend code
+path = "WebApp/backend"
 
-# Set the working directory to your backend folder
-[build.nixpacks]
-workspace_dir = "WebApp/backend"
+# Build & start commands
+builder = "nixpacks"
+build = "npm install"
+start = "npm start"
 
-[start]
-# Command Railway should run to start your backend
-cmd = "npm install && npm run start"
-
-[deploy]
-# Railway automatically injects PORT
-startCommand = "npm start"
+# Railway deploy config
+[services.backend.deploy]
 restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
+restartPolicyMaxRetries = 5
