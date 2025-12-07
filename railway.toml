@@ -5,7 +5,7 @@
 path = "WebApp/backend"
 
 # Build & start commands
-builder = "nixpacks"
+builder = "nodejs"
 build = "npm install"
 start = "npm start"
 
