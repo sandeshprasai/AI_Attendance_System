@@ -11,7 +11,7 @@ const addStudents = async (req, res) => {
     FullName,
     Email,
     ProfileImagePath,
-    CloudinaryPublicId,   // <-- ADDED
+    CloudinaryPublicId, // <-- ADDED
   } = req.body;
 
   logger.info(
@@ -30,39 +30,42 @@ const addStudents = async (req, res) => {
     // Create new student instance WITH Cloudinary fields
     const newStudent = new students({
       ...req.body,
-      ProfileImagePath,        // Cloudinary URL
-      CloudinaryPublicId,      // NEW field saved to DB
+      ProfileImagePath,
+      CloudinaryPublicId,
     });
 
     let { username, password } = generateCredentials(FullName, RollNo);
 
-    // Ensure unique username
-    const userExists = await users.findOne({ username });
-    if (userExists) {
-      const oldUsername = username;
-      username = `${username}_${Math.floor(Math.random() * 1000)}`;
-      logger.info(`Username conflict resolved: ${oldUsername} -> ${username}`);
+    let isUnique = false;
+    while (!isUnique) {
+      const userExists = await users.findOne({ username });
+      if (!userExists) {
+        isUnique = true;
+      } else {
+        const oldUsername = username;
+        username = `${username}_${Math.floor(Math.random() * 1000)}`;
+        logger.info(
+          `Username conflict resolved: ${oldUsername} -> ${username}`
+        );
+      }
     }
 
     const hashedPassword = await bcryptjs.hash(password, 10);
 
-    // Save student to DB
     await newStudent.save();
     logger.info(`Student record created: RollNo=${RollNo}, Name=${FullName}`);
 
-    // Create associated user with Cloudinary profile image
     await users.create({
       username,
       password: hashedPassword,
       name: FullName,
       role: "student",
-      ProfileImagePath,      // Cloudinary URL saved here also
-      CloudinaryPublicId,    // OPTIONAL: save for user too
+      ProfileImagePath,
+      CloudinaryPublicId,
     });
 
     logger.info(`User account created for student: username=${username}`);
 
-    // Send credentials email
     const emailSent = await sendCredentialsEmail(Email, username, password);
     if (emailSent) {
       logger.info(`Credentials email sent successfully to ${Email}`);
@@ -74,14 +77,15 @@ const addStudents = async (req, res) => {
       success: true,
       message: "Student registered and user account created",
     });
-
   } catch (err) {
     logger.error(`Error while adding student: ${err.stack || err}`);
 
     // Duplicate key error
     if (err.code === 11000) {
       const duplicateField = Object.keys(err.keyPattern)[0];
-      logger.warn(`ADD_STUDENT duplicate key error on field '${duplicateField}'`);
+      logger.warn(
+        `ADD_STUDENT duplicate key error on field '${duplicateField}'`
+      );
       return res.status(400).json({
         error: `Duplicate value for field '${duplicateField}'.`,
       });
