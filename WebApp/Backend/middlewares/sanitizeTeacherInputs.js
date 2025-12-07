@@ -49,11 +49,6 @@ const sanitizeTeacherInputs = (req, res, next) => {
         "array.base": "AssignedClass must be an array",
         "array.includes": "Invalid class ID format",
       }),
-
-    ProfileImagePath: Joi.string().required().messages({
-      "string.empty": "Profile Image Path is required",
-      "any.required": "Profile Image Path is required",
-    }),
   });
 
   const { error } = Schema.validate(req.body, {
