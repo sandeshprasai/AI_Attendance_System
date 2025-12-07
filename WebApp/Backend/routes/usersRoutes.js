@@ -1,13 +1,12 @@
 const express = require("express");
 const userRouter = express.Router();
 
-// Middlewares
+
 const preventAccess = require("./../middlewares/adminAccessControl");
 const uploadFile = require("./../middlewares/profileImageHelper");
 const sanitizeStudentInput = require("./../middlewares/sanitizeStudentsInput");
 const sanitizeTeacherInput = require("./../middlewares/sanitizeTeacherInputs");
 
-// Controllers
 const addStudent = require("./../controllers/usersController/addStudents");
 const addTeacher = require("./../controllers/usersController/addTeachers");
 const getUserStats = require("./../controllers/usersController/getUserStats");
