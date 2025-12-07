@@ -2,7 +2,7 @@
 
 [services.backend]
 # Path to your Node.js backend code
-path = "WebApp/backend"
+path = "WebApp/Backend"
 
 # Build & start commands
 builder = "nodejs"
