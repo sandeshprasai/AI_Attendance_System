@@ -1,0 +1,15 @@
+# railway.toml
+
+# Project settings
+[project]
+name = "AI_Attendance_System"
+
+
+
+# Services
+[services]
+
+# The backend service
+[services.backend]
+path = "AI_Attendance_System/WebApp/Backend"
+start = "npm install && npm run start"
