@@ -1,15 +1,19 @@
 # railway.toml
 
-# Project settings
-[project]
-name = "AI_Attendance_System"
+[build]
+# Tell Railway where the backend lives
+builder = "NIXPACKS"
 
+# Set the working directory to your backend folder
+[build.nixpacks]
+workspace_dir = "WebApp/backend"
 
+[start]
+# Command Railway should run to start your backend
+cmd = "npm install && npm run start"
 
-# Services
-[services]
-
-# The backend service
-[services.backend]
-path = "AI_Attendance_System/WebApp/Backend"
-start = "npm install && npm run start"
+[deploy]
+# Railway automatically injects PORT
+startCommand = "npm start"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
