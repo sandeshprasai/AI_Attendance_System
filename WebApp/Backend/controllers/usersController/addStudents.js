@@ -1,74 +1,93 @@
 const students = require("./../../models/students");
+const users = require("./../../models/users");
+const bcryptjs = require("bcryptjs");
+const logger = require("./../../logger/logger");
 const generateCredentials = require("./../../middlewares/generateCredentials");
 const sendCredentialsEmail = require("./../../middlewares/mailCredentials");
-const bcryptjs = require("bcryptjs");
-const users = require("./../../models/users");
-const logger = require("./../../logger/logger"); // Import Winston logger
+const uploadToCloudinary = require("./../../middlewares/cloudinaryUpload");
 
 const addStudents = async (req, res) => {
-  const {
-    RollNo,
-    FullName,
-    Email,
-    ProfileImagePath,
-    CloudinaryPublicId,   // <-- ADDED
-  } = req.body;
-
-  logger.info(
-    `ADD_STUDENT request received: RollNo=${RollNo}, FullName=${FullName}, IP=${req.ip}`
-  );
+  logger.info(`ADD_STUDENT request received: RollNo=${req.body?.RollNo}, IP=${req.ip}`);
 
   try {
-    const existingStudent = await students.findOne({ RollNo });
-    if (existingStudent) {
-      logger.warn(`ADD_STUDENT failed: RollNo ${RollNo} already registered`);
-      return res.status(400).json({
-        error: "Student with provided Roll No already registered",
-      });
+  
+    const {
+      RollNo,
+      FullName,
+      Email,
+      UniversityReg,
+      FullAddress,
+      Class,
+      DateOfBirth,
+      Phone,
+      YearOfEnrollment,
+      Faculty,
+    } = req.body;
+
+    if (!RollNo || !FullName || !Email) {
+      return res.status(400).json({ error: "Required fields missing" });
     }
 
-    // Create new student instance WITH Cloudinary fields
-    const newStudent = new students({
-      ...req.body,
-      ProfileImagePath,        // Cloudinary URL
-      CloudinaryPublicId,      // NEW field saved to DB
+    
+    const existingStudent = await students.findOne({ RollNo });
+    if (existingStudent) {
+      logger.warn(`Student with RollNo ${RollNo} already exists`);
+      return res.status(400).json({ error: "Student already registered" });
+    }
+    logger.info("Uploading student image to Cloudinary...");
+
+    let profileImageUrl = null;
+    let cloudinaryId = null;
+
+    if (req.file) {
+      const uploadResult = await uploadToCloudinary(req.file, "students");
+      profileImageUrl = uploadResult.secure_url;
+      cloudinaryId = uploadResult.public_id;
+
+      logger.info(`Uploaded Student Image: ${profileImageUrl}`);
+    } else {
+      logger.warn("No image uploaded for student.");
+    }
+
+    const newStudent = await students.create({
+      RollNo,
+      FullName,
+      Email,
+      UniversityReg,
+      FullAddress,
+      Class,
+      DateOfBirth,
+      Phone,
+      YearOfEnrollment,
+      Faculty,
+      ProfileImagePath: profileImageUrl,
+      CloudinaryPublicId: cloudinaryId,
     });
+
+    logger.info(`Student record created: RollNo=${RollNo}, Name=${FullName}`);
 
     let { username, password } = generateCredentials(FullName, RollNo);
 
-    // Ensure unique username
-    const userExists = await users.findOne({ username });
-    if (userExists) {
-      const oldUsername = username;
+  
+    while (await users.findOne({ username })) {
       username = `${username}_${Math.floor(Math.random() * 1000)}`;
-      logger.info(`Username conflict resolved: ${oldUsername} -> ${username}`);
     }
 
     const hashedPassword = await bcryptjs.hash(password, 10);
 
-    // Save student to DB
-    await newStudent.save();
-    logger.info(`Student record created: RollNo=${RollNo}, Name=${FullName}`);
-
-    // Create associated user with Cloudinary profile image
     await users.create({
       username,
       password: hashedPassword,
       name: FullName,
       role: "student",
-      ProfileImagePath,      // Cloudinary URL saved here also
-      CloudinaryPublicId,    // OPTIONAL: save for user too
+      ProfileImagePath: profileImageUrl,
+      CloudinaryPublicId: cloudinaryId,
     });
 
-    logger.info(`User account created for student: username=${username}`);
+    logger.info(`User account created: username=${username}`);
 
-    // Send credentials email
-    const emailSent = await sendCredentialsEmail(Email, username, password);
-    if (emailSent) {
-      logger.info(`Credentials email sent successfully to ${Email}`);
-    } else {
-      logger.warn(`Failed to send credentials email to ${Email}`);
-    }
+  
+    await sendCredentialsEmail(Email, username, password);
 
     return res.status(200).json({
       success: true,
@@ -76,19 +95,11 @@ const addStudents = async (req, res) => {
     });
 
   } catch (err) {
-    logger.error(`Error while adding student: ${err.stack || err}`);
-
-    // Duplicate key error
-    if (err.code === 11000) {
-      const duplicateField = Object.keys(err.keyPattern)[0];
-      logger.warn(`ADD_STUDENT duplicate key error on field '${duplicateField}'`);
-      return res.status(400).json({
-        error: `Duplicate value for field '${duplicateField}'.`,
-      });
-    }
+    logger.error(`Error adding student: ${err.stack || err}`);
 
     return res.status(500).json({
-      error: "An error occurred while adding student.",
+      error: "An error occurred while adding the student",
+      details: err.message,
     });
   }
 };
