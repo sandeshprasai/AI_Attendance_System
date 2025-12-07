@@ -220,7 +220,7 @@ export default function AddStudent() {
     <div className="bg-gray-50 min-h-screen">
       <NavBar />
 
-      <div className="max-w-5xl mx-auto p-6 space-y-8 mb-16">
+      <div className="max-w-5xl mx-auto p-6 space-y-8 mb-16 pt-24">
         <ProfilePhotoSection
           imagePreview={imagePreview}
           handleImageUpload={handleImageUpload}

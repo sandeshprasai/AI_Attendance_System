@@ -16,6 +16,49 @@ API.interceptors.request.use((config) => {
   if (token) config.headers.authorization = `Bearer ${token}`;
   return config;
 });
+// Response interceptor to handle 401 errors
+API.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If 401 and we haven't retried yet
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      try {
+        // Call your refresh endpoint
+        const refreshToken =
+          localStorage.getItem("refreshToken") ||
+          sessionStorage.getItem("refreshToken");
+
+        if (!refreshToken) throw new Error("No refresh token available");
+
+        const { data } = await axios.post(
+          import.meta.env.VITE_API_URL + "api/v1/auth/refresh",
+          { refreshToken }
+        );
+
+        // Save new access token
+        localStorage.setItem("accessToken", data.accessToken);
+
+        // Retry original request with new token
+        originalRequest.headers.authorization = `Bearer ${data.accessToken}`;
+        return axios(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed, logout user or redirect to login
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = "/"; // redirect to login
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+
 
 // Build final image URL
 export const getUserImageURL = (filename) => {
