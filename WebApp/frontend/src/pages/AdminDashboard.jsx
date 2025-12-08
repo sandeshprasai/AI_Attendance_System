@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, LogOut, Clock, Calendar, Users, UserPlus, BookOpen, Settings, Camera, TrendingUp, AlertCircle } from 'lucide-react';
 import Navbar from '../components/NavBar';
+import Footer from '../components/Footer';
 import GreetingCard from '../components/GreetingCard';
 import UserCard from"../components/cards/UserCard";
 import { useAuth } from '.././context/AuthContext';
@@ -48,13 +49,15 @@ export default function AdminDashboard() {
  
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-screen flex flex-col">
       {/* Your Existing Navbar */}
       <Navbar  />
       
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+       {/* Scrollable Area */}
+ 
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           
           {/* Left Column - Greeting & Quick Actions */}
@@ -496,6 +499,8 @@ export default function AdminDashboard() {
           </div>
         </div>
       </main>
+      {/* Your Existing Footer */}
+      <Footer />
     </div>
   );
 }
