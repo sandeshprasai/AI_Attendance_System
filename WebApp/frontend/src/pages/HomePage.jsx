@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import LoginPage from "./LoginPage";
+import ContactAdministrator from "./ContactUs";
 import { Camera, Brain, Zap, Shield, CheckCircle, ChevronDown, Sparkles } from "lucide-react";
 
 function HomePage() {
@@ -240,7 +241,7 @@ function HomePage() {
             {/* Footer */}
             <div className="bg-gradient-to-r from-slate-900/50 to-slate-800/50 px-8 py-6 text-center border-t border-white/10">
               <p className="text-sm text-slate-400 mb-3">
-                Need access? <a href="#" className="text-cyan-400 hover:text-cyan-300 font-semibold">Contact Administrator</a>
+                Need access? <a href="/contact" className="text-cyan-400 hover:text-cyan-300 font-semibold">Contact Administrator</a>
               </p>
               {/* <div className="flex items-center justify-center gap-2 text-xs text-slate-500">
                 <Shield className="w-3 h-3" />

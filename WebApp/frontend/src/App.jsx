@@ -9,6 +9,7 @@ import AddTeacher from "./components/AddTeacher";
 import CreateClassroom from "./components/CreateClassroom";
 import Unauthorized from "./pages/Unauthorized";  
 import UsersPage from "./pages/UsersPage";
+import ContactAdministrator from "./pages/ContactUs";
    // ✅ Correct import
 
 // components
@@ -25,6 +26,7 @@ export default function App() {
 
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/contact" element={<ContactAdministrator />} />
         
 
         {/* ADMIN ONLY */}
