@@ -9,11 +9,12 @@ import AddTeacher from "./components/AddTeacher";
 import CreateClassroom from "./components/CreateClassroom";
 import Unauthorized from "./pages/Unauthorized";  
 import UsersPage from "./pages/UsersPage";
+
    // ✅ Correct import
 
 // components
 import AddStudent from "./pages/AddStudent";
-
+import ContactPage from "./pages/ContactUs";
 // route protection
 import RoleProtectedRoute from "./routes/RoleProtectedRoute";
 
