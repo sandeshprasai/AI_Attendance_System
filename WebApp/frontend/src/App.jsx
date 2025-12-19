@@ -5,28 +5,25 @@ import HomePage from "./pages/HomePage";
 import AdminDashboard from "./pages/AdminDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
-import AddTeacher from "./components/AddTeacher";
-import CreateClassroom from "./components/CreateClassroom";
-import Unauthorized from "./pages/Unauthorized";  
+import Unauthorized from "./pages/Unauthorized";
 import UsersPage from "./pages/UsersPage";
-
-   // ✅ Correct import
+import ContactUs from "./pages/ContactUs";
 
 // components
+import AddTeacher from "./components/AddTeacher";
+import CreateClassroom from "./components/CreateClassroom";
 import AddStudent from "./pages/AddStudent";
-import ContactPage from "./pages/ContactUs";
+
 // route protection
 import RoleProtectedRoute from "./routes/RoleProtectedRoute";
-
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
-        
+        <Route path="/contact" element={<ContactUs />} />
 
         {/* ADMIN ONLY */}
         <Route
@@ -46,6 +43,7 @@ export default function App() {
             </RoleProtectedRoute>
           }
         />
+
         <Route
           path="/add-teacher"
           element={
@@ -54,6 +52,7 @@ export default function App() {
             </RoleProtectedRoute>
           }
         />
+
         <Route
           path="/create-classroom"
           element={
@@ -62,6 +61,7 @@ export default function App() {
             </RoleProtectedRoute>
           }
         />
+
         <Route
           path="/admin/users"
           element={
@@ -91,10 +91,8 @@ export default function App() {
           }
         />
 
-        {/* UNAUTHORIZED PAGE */}
+        {/* UNAUTHORIZED */}
         <Route path="/unauthorized" element={<Unauthorized />} />
-        
-
       </Routes>
     </BrowserRouter>
   );
