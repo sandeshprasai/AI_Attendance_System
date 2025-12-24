@@ -10,9 +10,10 @@ import UsersPage from "./pages/UsersPage";
 import ContactUs from "./pages/ContactUs";
 
 // components
-import AddTeacher from "./components/AddTeacher";
+
 import CreateClassroom from "./components/CreateClassroom";
 import AddStudent from "./pages/AddStudent";
+import AddTeacher from "./pages/AddTeacher";
 
 // route protection
 import RoleProtectedRoute from "./routes/RoleProtectedRoute";

@@ -41,6 +41,7 @@ const sanitizeStudentInput = async (req, res, next) => {
         "any.required": "Year of Enrollment is required",
       }),
 
+
     Email: joi
       .string()
       .required()
@@ -64,6 +65,18 @@ const sanitizeStudentInput = async (req, res, next) => {
       "date.max": "Date of birth cannot be in the future",
       "any.required": "Date of birth is required",
     }),
+    GuardianName: joi.string().optional().messages({
+      "string.empty": "Guardian Name is required",
+    }),
+
+    GuardianPhone: joi
+      .string()
+      .pattern(/^[0-9]{10}$/)
+      .optional()
+      .messages({
+        "string.pattern.base": "Guardian Phone number must be 10 digits",
+        "string.empty": "Guardian Phone number is required",
+      }), 
 
     Class: joi.string().required().messages({
       "string.empty": "Class is required",
