@@ -18,18 +18,9 @@ export default function PersonalInfoSection({ formData, handleInputChange, error
           Icon={User}
           error={errors?.FullName}
           disabled={loading}
+          placeholder="Enter full name."
         />
-
-        <InputGroup
-          label="Roll Number"
-          name="RollNo"
-          type="text"
-          value={formData.RollNo}
-          onChange={handleInputChange}
-          Icon={Hash}
-          error={errors?.RollNo}
-          disabled={loading}
-        />
+       
 
         <InputGroup
           label="Date of Birth"
@@ -40,6 +31,7 @@ export default function PersonalInfoSection({ formData, handleInputChange, error
           Icon={Calendar}
           error={errors?.DateOfBirth}
           disabled={loading}
+          placeholder="Select date of birth."
         />
 
         <InputGroup
@@ -51,6 +43,7 @@ export default function PersonalInfoSection({ formData, handleInputChange, error
           Icon={Mail}
           error={errors?.Email}
           disabled={loading}
+          placeholder="Enter email address."
         />
 
         <InputGroup
@@ -62,6 +55,7 @@ export default function PersonalInfoSection({ formData, handleInputChange, error
           Icon={Phone}
           error={errors?.Phone}
           disabled={loading}
+          placeholder="Enter valid phone number."
         />
 
         <div className="md:col-span-2">
@@ -73,11 +67,14 @@ export default function PersonalInfoSection({ formData, handleInputChange, error
             name="FullAddress"
             value={formData.FullAddress}
             onChange={handleInputChange}
+            disabled={loading}
+            placeholder="Enter your complete address."
             className="w-full border-2 rounded-xl p-3"
           />
           {errors?.FullAddress && (
             <p className="text-red-500 text-sm mt-1">{errors.FullAddress}</p>
           )}
+          
         </div>
       </div>
     </div>

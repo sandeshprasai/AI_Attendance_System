@@ -1,25 +1,31 @@
 const Joi = require("joi");
-const JoiObjectId = require("joi-objectid")(Joi);
 
 const sanitizeTeacherInputs = (req, res, next) => {
   const Schema = Joi.object({
+    EmployeeId: Joi.string().allow("").optional(),
+
     FullName: Joi.string()
       .required()
       .pattern(/^[A-Za-z]+(?:\s+[A-Za-z]+)+$/)
       .messages({
         "string.pattern.base":
-          "Name should at least contain first and last name",
+          "Name should contain first and last name",
         "string.empty": "Full Name cannot be empty",
         "any.required": "Full Name is required",
       }),
 
-    Email: Joi.string()
+    DateOfBirth: Joi.string()
       .required()
-      .pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)
       .messages({
-        "string.empty": "Email address is required",
-        "string.pattern.base": "Email should be in a valid format",
-        "any.required": "Email is required",
+        "string.empty": "Date of Birth is required",
+        "any.required": "Date of Birth is required",
+      }),
+
+    FullAddress: Joi.string()
+      .required()
+      .messages({
+        "string.empty": "Address is required",
+        "any.required": "Address is required",
       }),
 
     Phone: Joi.string()
@@ -31,35 +37,74 @@ const sanitizeTeacherInputs = (req, res, next) => {
         "any.required": "Phone number is required",
       }),
 
-    Departments: Joi.string().required().messages({
-      "string.empty": "Department is required",
-      "any.required": "Department is required",
-    }),
-
-    AssignedClass: Joi.array()
-      .items(
-        Joi.number().integer().positive().messages({
-          "number.base": "Class ID must be a number",
-          "number.integer": "Class ID must be an integer",
-          "number.positive": "Class ID must be a positive number",
-        })
-      )
-      .optional()
+    Email: Joi.string()
+      .email()
+      .required()
       .messages({
-        "array.base": "AssignedClass must be an array",
-        "array.includes": "Invalid class ID format",
+        "string.email": "Email should be in valid format",
+        "string.empty": "Email is required",
+        "any.required": "Email is required",
       }),
+
+    Faculty: Joi.string()
+      .valid(
+        "Civil Engineering",
+        "Computer Engineering",
+        "IT Engineering",
+        "Electronics & Communication",
+        "BBA",
+        "Architecture"
+      )
+      .required()
+      .messages({
+        "any.only": "Invalid Faculty selected",
+        "string.empty": "Faculty is required",
+        "any.required": "Faculty is required",
+      }),
+
+    Subject: Joi.string()
+      .valid(
+        "Mathematics",
+        "Physics",
+        "Chemistry",
+        "Operating System",
+        "English",
+        "DSA",
+        "ICT PM",
+        "OOP in C++",
+        "Economics",
+        "SPIT",
+        "Cloud Computing",
+        "Programming in C"
+      )
+      .required()
+      .messages({
+        "any.only": "Invalid Subject selected",
+        "string.empty": "Subject is required",
+        "any.required": "Subject is required",
+      }),
+
+    JoinedYear: Joi.string()
+      .required()
+      .messages({
+        "string.empty": "Joined Year is required",
+        "any.required": "Joined Year is required",
+      }),
+
+    ProfileImagePath: Joi.any().allow(null),
   });
 
   const { error } = Schema.validate(req.body, {
     abortEarly: false,
     allowUnknown: true,
   });
-  if (error)
+
+  if (error) {
     return res.status(400).json({
       success: false,
       message: error.details[0].message,
     });
+  }
 
   next();
 };

@@ -69,7 +69,17 @@ const students = new mongoose.Schema(
         message: "Date of birth must be in the past",
       },
     },
-
+    GuardianName: {
+      type: String,
+      required: false,
+      trim: true,
+      maxLength: 100,
+    },
+    GuardianPhone: {
+      type: String,
+      required: false,
+      match: [/^\d{10}$/, "Please enter a valid 10-digit phone number"],
+    },
     Class: {
       type: String,
       required: true,
