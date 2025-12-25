@@ -24,6 +24,7 @@ import Toast from "../components/ui/Toast";
 import PersonalInfoSection from "../components/FormSections/PersonalInfoSection";
 import AcademicInfoSection from "../components/FormSections/AcademicInfoSection";
 import ProfilePhotoSection from "../components/FormSections/ProfilePhotoSection";
+import GuardianInfoSection from "../components/FormSections/GuardianInfoSection";
 
 export default function AddStudent() {
   const [loading, setLoading] = useState(false);
@@ -36,6 +37,8 @@ export default function AddStudent() {
     Email: "",
     Phone: "",
     DateOfBirth: "",
+    GuardianName: "",
+    GuardianPhone: "",
     Class: "",
     Section: "",
     FullAddress: "",
@@ -54,8 +57,7 @@ export default function AddStudent() {
     "BBA",
     "ARCHITECTURE",
     "ELECTRONICS",
-    "BE SOFTWARE",
-    "BE INFORMATION",
+    "BE SOFTWARE"
   ];
 
   const handleInputChange = (e) => {
@@ -86,6 +88,12 @@ export default function AddStudent() {
       case "DateOfBirth":
         error = validateDOB(value);
         break;
+      case "GuardianName":
+        error = validateName(value);
+        break;
+      case "GuardianPhone":
+        error = validatePhone(value);
+        break;  
       case "Class":
         error = validateClass(value);
         break;
@@ -139,6 +147,8 @@ export default function AddStudent() {
         value: formData.Faculty,
         validator: (val) => validateFaculty(val, facultyOptions),
       },
+      GuardianName: { value: formData.GuardianName, validator: validateName },
+      GuardianPhone: { value: formData.GuardianPhone, validator: validatePhone },
       YearOfEnrollment: {
         value: formData.YearOfEnrollment,
         validator: validateYearOfEnrollment,
@@ -188,6 +198,7 @@ export default function AddStudent() {
       });
 
       setToast({ message: "Student added successfully!", type: "success" });
+      console.log(formData);
 
       setFormData({
         FullName: "",
@@ -197,6 +208,8 @@ export default function AddStudent() {
         Email: "",
         Phone: "",
         DateOfBirth: "",
+        GuardianName: "",
+        GuardianPhone: "",
         Class: "",
         Section: "",
         FullAddress: "",
@@ -221,6 +234,7 @@ export default function AddStudent() {
       <NavBar />
 
       <div className="max-w-5xl mx-auto p-6 space-y-8 mb-16 pt-24">
+         <h1 className="text-3xl font-bold text-gray-800">Add New Student</h1>
         <ProfilePhotoSection
           imagePreview={imagePreview}
           handleImageUpload={handleImageUpload}
@@ -230,6 +244,12 @@ export default function AddStudent() {
         />
 
         <PersonalInfoSection
+          formData={formData}
+          handleInputChange={handleInputChange}
+          errors={errors}
+          loading={loading}
+        />
+        <GuardianInfoSection
           formData={formData}
           handleInputChange={handleInputChange}
           errors={errors}

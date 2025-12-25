@@ -30,6 +30,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 const path = require("path");
 app.use("/public", express.static(path.join(__dirname, "public")));
 

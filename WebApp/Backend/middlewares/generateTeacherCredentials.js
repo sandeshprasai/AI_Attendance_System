@@ -5,7 +5,7 @@ function generateTeacherCredentials(fullName, mongoId) {
 
   const last4 = mongoId.toString().slice(-4);
 
-  const username = `${firstName}${lastName}_${last4}`;
+  const username = `${firstName}${lastName}${last4}`;
   const randomChars = Math.random().toString(36).substring(2, 4);
   const password = `Teach@${last4}${randomChars}`;
 

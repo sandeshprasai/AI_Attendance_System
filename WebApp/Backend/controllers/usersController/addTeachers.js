@@ -8,52 +8,81 @@ const uploadBufferToCloudinary = require("../../middlewares/cloudinaryUpload");
 
 const addTeachers = async (req, res) => {
   try {
-    const { FullName, Email, Phone, Departments, AssignedClass = [] } = req.body;
+    const {
+      EmployeeId,
+      FullName,
+      DateOfBirth,
+      FullAddress,
+      Phone,
+      Email,
+      Faculty,
+      Subject,
+      JoinedYear,
+    } = req.body;
 
     logger.info(
-      `ADD_TEACHER request → ${FullName}, ${Email}, ${Phone}, ${Departments}, ${AssignedClass}`
+      `ADD_TEACHER → ${EmployeeId}, ${FullName}, ${Email}, ${Faculty}, ${Subject}`
     );
 
-
-    const existingTeacher = await teachers.findOne({ Email });
+    // 🔍 Check existing teacher by EmployeeId
+    const existingTeacher = await teachers.findOne({ EmployeeId });
     if (existingTeacher) {
-      logger.warn(`Teacher with email ${Email} already exists`);
+      logger.warn(`Teacher with EmployeeId ${EmployeeId} already exists`);
       return res.status(400).json({
         success: false,
-        message: "The teacher with the provided Email already exists",
+        message: "The teacher with the provided Employee ID already exists",
       });
     }
 
-  
-    let ProfileImagePath = null;
-    let CloudinaryPublicId = null;
+   // 📷 Profile image (REQUIRED by schema)
+let ProfileImagePath = null;
 
-    if (req.file && req.file.buffer) {
-      try {
-        const cloudResult = await uploadBufferToCloudinary(req.file, "teachers");
-        ProfileImagePath = cloudResult.secure_url;
-        CloudinaryPublicId = cloudResult.public_id;
-        logger.info(`Image uploaded to Cloudinary: ${ProfileImagePath}`);
-      } catch (err) {
-        logger.error("Cloudinary upload failed:", err);
-        return res.status(500).json({
-          success: false,
-          message: "Failed to upload profile image",
-        });
-      }
-    }
+try {
+  if (req.file && req.file.buffer) {
+    // If file uploaded, upload to Cloudinary
+    const cloudResult = await uploadBufferToCloudinary(req.file, "teachers");
+    ProfileImagePath = cloudResult.secure_url;
+    logger.info(`Profile image uploaded → ${ProfileImagePath}`);
+  } else if (req.body.ProfileImagePath) {
+    // If image URL provided in JSON, use it directly
+    ProfileImagePath = req.body.ProfileImagePath;
+    logger.info(`Profile image provided via JSON → ${ProfileImagePath}`);
+  }
 
+  if (!ProfileImagePath) {
+    return res.status(400).json({
+      success: false,
+      message: "Profile image is required",
+    });
+  }
+} catch (err) {
+  logger.error("Profile image handling failed:", err);
+  return res.status(500).json({
+    success: false,
+    message: "Failed to process profile image",
+  });
+}
+
+    // 🧑‍🏫 Create teacher
     const newTeacher = await teachers.create({
+      EmployeeId,
       FullName,
-      Email,
+      DateOfBirth,
+      FullAddress,
       Phone,
-      Departments,
-      AssignedClass,
+      Email,
+      Faculty,
+      Subject,
+      JoinedYear,
       ProfileImagePath,
-      CloudinaryPublicId,
     });
 
-    let { username, password } = generateTeacherCredentials(FullName, newTeacher._id);
+    // 🔐 Create user credentials
+    let { username, password } = generateTeacherCredentials(
+      FullName,
+      newTeacher._id
+    );
+
     while (await users.findOne({ username })) {
       username = `${username}_${Math.floor(Math.random() * 1000)}`;
     }
@@ -66,12 +95,11 @@ const addTeachers = async (req, res) => {
       name: FullName,
       role: "teacher",
       ProfileImagePath,
-      CloudinaryPublicId,
     });
 
-    logger.info(`User account created for teacher → username=${username}`);
+    logger.info(`User created → username=${username}`);
 
-  
+    // 📧 Send credentials email
     const emailSent = await sendCredentialsEmail(Email, username, password);
     if (emailSent) {
       logger.info(`Credentials email sent → ${Email}`);

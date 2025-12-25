@@ -71,6 +71,24 @@ export const validateYearOfEnrollment = (year) => {
   return "";
 };
 
+
+// Faculty Section validations
+export const validateJoinYear=(year)=>{
+  if (!year) return "Joined Year is required.";
+  if(isNaN(year)) return "Year must be a number.";
+  const currentYear=new Date().getFullYear();
+  if(year<2010 || year>currentYear) return `Year must be between 2010 and ${currentYear}.`;
+  return "";
+
+};
+export const validateEmployeeID=(empID)=>{
+  if (!empID) return "Employee ID is required.";
+  if (isNaN(empID)) return "Employee ID must be a number.";
+  if (empID.length < 5) return "Employee ID must be at least 5 characters.";
+  return "";
+};
+
+
 export const validateClass = (cls) => {
   if (!cls) return "Class is required.";
   return "";

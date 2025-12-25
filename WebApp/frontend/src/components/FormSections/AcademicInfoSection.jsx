@@ -23,6 +23,17 @@ export default function AcademicInfoSection({ formData, handleInputChange, facul
           </select>
           {errors?.Faculty && <p className="text-red-500 text-sm mt-1">{errors.Faculty}</p>}
         </div>
+        <InputGroup
+          label="Roll Number"
+          name="RollNo"
+          type="text"
+          value={formData.RollNo}
+          onChange={handleInputChange}
+          Icon={Hash}
+          error={errors?.RollNo}
+          disabled={loading}
+          placeholder="Enter your class roll number."
+        />
 
         <InputGroup
           label="Enrollment Year"
@@ -33,6 +44,7 @@ export default function AcademicInfoSection({ formData, handleInputChange, facul
           Icon={Calendar}
           error={errors?.YearOfEnrollment}
           disabled={loading}
+          placeholder="Enter enrollment year."
         />
 
         <InputGroup
@@ -44,6 +56,7 @@ export default function AcademicInfoSection({ formData, handleInputChange, facul
           Icon={GraduationCap}
           error={errors?.Class}
           disabled={loading}
+          placeholder="Enter classroom number."
         />
 
         <InputGroup
@@ -55,6 +68,7 @@ export default function AcademicInfoSection({ formData, handleInputChange, facul
           Icon={Hash}
           error={errors?.Section}
           disabled={loading}
+          placeholder="Enter section."
         />
 
         <InputGroup
@@ -66,6 +80,7 @@ export default function AcademicInfoSection({ formData, handleInputChange, facul
           Icon={Hash}
           error={errors?.UniversityReg}
           disabled={loading}
+          placeholder="Enter university registration number."
         />
       </div>
     </div>
