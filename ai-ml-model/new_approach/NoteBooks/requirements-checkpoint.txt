@@ -1,7 +1,0 @@
-tensorflow<2.11
-tensorflow-addons
-opencv-python
-pillow 
-tqdm 
-scikit-learn
-seaborn
