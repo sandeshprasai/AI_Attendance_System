@@ -1,528 +1,237 @@
 import { useState } from 'react';
-import { User, GraduationCap, Upload, X } from 'lucide-react';
+import axios from 'axios';
+import PersonalInfoSection from '../components/FormSections/PersonalInfoSection';
+import ProfilePhotoSection from '../components/FormSections/ProfilePhotoSection';
+import FacultyInfoSection from '../components/FormSections/FacultyInfoSection';
+import Toast from '../components/ui/Toast';
+import NavBar from '../components/NavBar';
+import Footer from '../components/Footer';
+import {
+  validateName,
+  validateEmail,
+  validatePhone,
+  validateAddress,
+  validateDOB,
+  isRequired,
+  validateJoinYear,
+  validateEmployeeID,
+  validateProfileImage
+} from '../utills/validations';
 
-// ImageUploader Component
-function ImageUploader({ imagePreview, onUpload, onRemove }) {
-  const handleFileChange = (e) => {
+
+
+export default function AddTeacherPage() {
+  const [imagePreview, setImagePreview] = useState(null);
+  const [formData, setFormData] = useState({
+    EmployeeId: '',
+    FullName: '',
+    DateOfBirth: '',
+    FullAddress: '',
+    Phone: '',
+    Email: '',
+    Faculty: '',
+    Subject: '',
+    JoinedYear: '',
+    ProfileImagePath: null
+  });
+
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null);
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 1 * 1024 * 1024) {
-        alert('File size should be less than 1MB');
+      // Validate using utility function
+      const error = validateProfileImage(file);
+      if (error) {
+        setToast({ message: error, type: 'error' });
+        setErrors({ ...errors, photo: error });
         return;
       }
-      if (!file.type.startsWith('image/')) {
-        alert('Please upload an image file');
-        return;
-      }
+
+      setFormData((prev) => ({ ...prev, ProfileImagePath: file }));
+      setErrors((prev) => ({ ...prev, photo: '' }));
+
       const reader = new FileReader();
       reader.onloadend = () => {
-        onUpload(reader.result);
+        setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  return (
-    <div className="flex justify-center">
-      {imagePreview ? (
-        <div className="relative">
-          <img
-            src={imagePreview}
-            alt="Preview"
-            className="w-32 h-32 rounded-full object-cover border-4 border-cyan-100"
-          />
-          <button
-            onClick={onRemove}
-            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      ) : (
-        <label className="cursor-pointer">
-          <div className="w-32 h-32 rounded-full border-2 border-dashed border-cyan-400 flex flex-col items-center justify-center hover:border-cyan-600 transition bg-cyan-50">
-            <Upload className="w-8 h-8 text-cyan-600 mb-2" />
-            <span className="text-xs text-cyan-600 font-medium">Upload</span>
-          </div>
-          <input
-            type="file"
-            className="hidden"
-            accept="image/*"
-            onChange={handleFileChange}
-          />
-        </label>
-      )}
-    </div>
-  );
-}
-
-// ProfilePhotoSection Component
-function ProfilePhotoSection({ imagePreview, handleImageUpload, removeImage, error }) {
-  return (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-      <h3 className="text-base font-semibold text-gray-800 flex items-center gap-2 mb-3">
-        <div className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
-          <User className="w-4 h-4 text-cyan-600" />
-        </div>
-        Profile Photo
-      </h3>
-
-      <ImageUploader
-        imagePreview={imagePreview}
-        onUpload={handleImageUpload}
-        onRemove={removeImage}
-      />
-
-      {error && (
-        <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
-          <span className="font-bold">⚠</span> {error}
-        </p>
-      )}
-    </div>
-  );
-}
-
-export default function AddTeacherPage() {
-  const [imagePreview, setImagePreview] = useState(null);
-  const [formData, setFormData] = useState({
-    employeeId: '',
-    fullName: '',
-    dob: '',
-    address: '',
-    phone: '',
-    email: '',
-    faculty: '',
-    subjects: '',
-    joinedYear: ''
-  });
-
-  const [errors, setErrors] = useState({});
-  const [touched, setTouched] = useState({});
-
-  const handleImageUpload = (preview) => {
-    setImagePreview(preview);
-    setErrors({ ...errors, photo: '' });
-  };
-
   const removeImage = () => {
     setImagePreview(null);
+    setFormData((prev) => ({ ...prev, ProfileImagePath: null }));
+    setErrors((prev) => ({ ...prev, photo: 'Profile photo is required.' }));
   };
 
-  const handleChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
     
-    if (touched[name]) {
-      validateField(name, value);
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: '' });
     }
-  };
-
-  const handleBlur = (e) => {
-    const { name, value } = e.target;
-    setTouched({ ...touched, [name]: true });
-    validateField(name, value);
-  };
-
-  const validateField = (name, value) => {
-    let newErrors = { ...errors };
-
-    switch (name) {
-      case 'employeeId':
-        if (!value.trim()) {
-          newErrors.employeeId = 'Employee ID is required';
-        } else {
-          delete newErrors.employeeId;
-        }
-        break;
-      case 'fullName':
-        if (!value.trim()) {
-          newErrors.fullName = 'Full Name is required';
-        } else if (value.trim().length < 3) {
-          newErrors.fullName = 'Name must be at least 3 characters';
-        } else {
-          delete newErrors.fullName;
-        }
-        break;
-      case 'dob':
-        if (!value) {
-          newErrors.dob = 'Date of Birth is required';
-        } else {
-          const age = new Date().getFullYear() - new Date(value).getFullYear();
-          if (age < 22 || age > 70) {
-            newErrors.dob = 'Age must be between 22 and 70';
-          } else {
-            delete newErrors.dob;
-          }
-        }
-        break;
-      case 'address':
-        if (!value.trim()) {
-          newErrors.address = 'Address is required';
-        } else {
-          delete newErrors.address;
-        }
-        break;
-      case 'phone':
-        const phoneRegex = /^[0-9]{10}$/;
-        if (!value.trim()) {
-          newErrors.phone = 'Phone number is required';
-        } else if (!phoneRegex.test(value)) {
-          newErrors.phone = 'Phone number must be 10 digits';
-        } else {
-          delete newErrors.phone;
-        }
-        break;
-      case 'email':
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!value.trim()) {
-          newErrors.email = 'Email is required';
-        } else if (!emailRegex.test(value)) {
-          newErrors.email = 'Invalid email format';
-        } else {
-          delete newErrors.email;
-        }
-        break;
-      case 'faculty':
-        if (!value) {
-          newErrors.faculty = 'Faculty is required';
-        } else {
-          delete newErrors.faculty;
-        }
-        break;
-      case 'subjects':
-        if (!value.trim()) {
-          newErrors.subjects = 'Subjects are required';
-        } else {
-          delete newErrors.subjects;
-        }
-        break;
-      case 'joinedYear':
-        const currentYear = new Date().getFullYear();
-        if (!value.trim()) {
-          newErrors.joinedYear = 'Joined Year is required';
-        } else if (value < 1990 || value > currentYear) {
-          newErrors.joinedYear = `Year must be between 1990 and ${currentYear}`;
-        } else {
-          delete newErrors.joinedYear;
-        }
-        break;
-      default:
-        break;
-    }
-
-    setErrors(newErrors);
   };
 
   const validateForm = () => {
     let newErrors = {};
 
+    // Profile photo validation
     if (!imagePreview) {
       newErrors.photo = 'Profile photo is required';
     }
 
-    Object.keys(formData).forEach(key => {
-      validateField(key, formData[key]);
-    });
+    // Using validation utilities
+    newErrors.EmployeeId = isRequired(formData.EmployeeId);
+    newErrors.FullName = validateName(formData.FullName);
+    newErrors.DateOfBirth = validateDOB(formData.DateOfBirth);
+    
+    // Additional age validation for teachers
+    if (!newErrors.DateOfBirth) {
+      const age = new Date().getFullYear() - new Date(formData.DateOfBirth).getFullYear();
+      if (age < 22 || age > 70) {
+        newErrors.DateOfBirth = 'Age must be between 22 and 70';
+      }
+    }
 
-    newErrors = { ...newErrors, ...errors };
-    setErrors(newErrors);
-    setTouched({
-      employeeId: true,
-      fullName: true,
-      dob: true,
-      address: true,
-      phone: true,
-      email: true,
-      faculty: true,
-      subjects: true,
-      joinedYear: true
-    });
+    newErrors.FullAddress = validateAddress(formData.FullAddress);
+    newErrors.Phone = validatePhone(formData.Phone);
+    newErrors.Email = validateEmail(formData.Email);
+    newErrors.Faculty = isRequired(formData.Faculty);
+    newErrors.Subject = isRequired(formData.Subject);
+    newErrors.JoinedYear = validateJoinYear(formData.JoinedYear);
+    newErrors.EmployeeId = validateEmployeeID(formData.EmployeeId);
 
-    return Object.keys(newErrors).length === 0;
+    // Filter out empty error messages
+    const filteredErrors = Object.fromEntries(
+      Object.entries(newErrors).filter(([_, value]) => value !== '')
+    );
+
+    setErrors(filteredErrors);
+    return Object.keys(filteredErrors).length === 0;
   };
 
-  const handleSubmit = () => {
-    if (validateForm()) {
-      console.log('Form submitted:', { ...formData, photo: imagePreview });
-      alert('Teacher added successfully!');
+  const handleSubmit = async () => {
+    if (loading) return; // Prevent double submit
+
+    if (!validateForm()) {
+      setToast({ message: 'Please fix all errors before submitting', type: 'error' });
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+      
+      setLoading(true);
+      
+      const data = new FormData();
+      for (const key in formData) {
+        if (key === 'ProfileImagePath' && formData[key]) {
+          data.append(key, formData[key]);
+        } else {
+          data.append(key, formData[key]);
+        }
+      }
+
+      const res = await axios.post(`${API_URL}api/v1/users/teachers`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          authorization: `Bearer ${token}`,
+        },
+      });
+
+      setToast({ message: 'Teacher added successfully!', type: 'success' });
+      
       // Reset form
       setFormData({
-        employeeId: '',
-        fullName: '',
-        dob: '',
-        address: '',
-        phone: '',
-        email: '',
-        faculty: '',
-        subjects: '',
-        joinedYear: ''
+        EmployeeId: '',
+        FullName: '',
+        DateOfBirth: '',
+        FullAddress: '',
+        Phone: '',
+        Email: '',
+        Faculty: '',
+        Subject: '',
+        JoinedYear: '',
+        ProfileImagePath: null
       });
       setImagePreview(null);
       setErrors({});
-      setTouched({});
+    } catch (error) {
+      console.error(error);
+      console.error('SERVER ERROR:', error.response?.data);
+      const message = error.response?.data?.error || 'Failed to add teacher. Server error.';
+      setToast({ message, type: 'error' });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-50 p-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Add New Teacher</h1>
+    <div className="bg-gray-50 min-h-screen">
+      <NavBar />
+
+      <div className="max-w-5xl mx-auto p-6 space-y-8 mb-16 pt-24">
+        <h1 className="text-3xl font-bold text-gray-800">Add New Teacher</h1>
         
-        <div className="space-y-6">
-          {/* Profile Photo Section */}
-          <ProfilePhotoSection
-            imagePreview={imagePreview}
-            handleImageUpload={handleImageUpload}
-            removeImage={removeImage}
-            error={errors.photo}
-          />
+        {/* Profile Photo Section */}
+        <ProfilePhotoSection
+          imagePreview={imagePreview}
+          handleImageUpload={handleImageUpload}
+          removeImage={removeImage}
+          error={errors.photo}
+          loading={loading}
+        />
 
-          {/* Personal Information Section */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-base font-semibold text-gray-800 flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
-                <User className="w-4 h-4 text-cyan-600" />
-              </div>
-              Personal Information
-            </h3>
+        {/* Personal Information Section - Reusing component */}
+        <PersonalInfoSection
+          formData={formData}
+          handleInputChange={handleInputChange}
+          errors={errors}
+          loading={loading}
+        />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Employee ID */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  🆔 Employee ID
-                </label>
-                <input
-                  type="text"
-                  name="employeeId"
-                  value={formData.employeeId}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2.5 border ${
-                    errors.employeeId && touched.employeeId
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-200 focus:ring-cyan-500'
-                  } rounded-lg focus:outline-none focus:ring-2 transition`}
-                  placeholder="Enter employee ID"
-                />
-                {errors.employeeId && touched.employeeId && (
-                  <p className="text-red-500 text-xs mt-1">{errors.employeeId}</p>
-                )}
-              </div>
+        {/* Faculty Information Section - Reusing component */}
+        <FacultyInfoSection
+          formData={formData}
+          handleInputChange={handleInputChange}
+          errors={errors}
+          loading={loading}
+        />
 
-              {/* Full Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  👤 Full Name
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2.5 border ${
-                    errors.fullName && touched.fullName
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-200 focus:ring-cyan-500'
-                  } rounded-lg focus:outline-none focus:ring-2 transition`}
-                  placeholder="Enter full name"
-                />
-                {errors.fullName && touched.fullName && (
-                  <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
-                )}
-              </div>
-
-              {/* Date of Birth */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  📅 Date of Birth
-                </label>
-                <input
-                  type="date"
-                  name="dob"
-                  value={formData.dob}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2.5 border ${
-                    errors.dob && touched.dob
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-200 focus:ring-cyan-500'
-                  } rounded-lg focus:outline-none focus:ring-2 transition`}
-                />
-                {errors.dob && touched.dob && (
-                  <p className="text-red-500 text-xs mt-1">{errors.dob}</p>
-                )}
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  📧 Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2.5 border ${
-                    errors.email && touched.email
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-200 focus:ring-cyan-500'
-                  } rounded-lg focus:outline-none focus:ring-2 transition`}
-                  placeholder="Enter email address"
-                />
-                {errors.email && touched.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                )}
-              </div>
-
-              {/* Phone */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  📞 Phone
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2.5 border ${
-                    errors.phone && touched.phone
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-200 focus:ring-cyan-500'
-                  } rounded-lg focus:outline-none focus:ring-2 transition`}
-                  placeholder="Enter phone number"
-                />
-                {errors.phone && touched.phone && (
-                  <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
-                )}
-              </div>
-
-              {/* Address - Full Width */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  🏠 Full Address
-                </label>
-                <textarea
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  rows="3"
-                  className={`w-full px-4 py-2.5 border ${
-                    errors.address && touched.address
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-200 focus:ring-cyan-500'
-                  } rounded-lg focus:outline-none focus:ring-2 transition resize-none`}
-                  placeholder="Enter full address"
-                />
-                {errors.address && touched.address && (
-                  <p className="text-red-500 text-xs mt-1">{errors.address}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Academic Information Section */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-base font-semibold text-gray-800 flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
-                <GraduationCap className="w-4 h-4 text-cyan-600" />
-              </div>
-              Academic Information
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Faculty */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  🏫 Faculty
-                </label>
-                <select
-                  name="faculty"
-                  value={formData.faculty}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2.5 border ${
-                    errors.faculty && touched.faculty
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-200 focus:ring-cyan-500'
-                  } rounded-lg focus:outline-none focus:ring-2 transition bg-white`}
-                >
-                  <option value="">Select Faculty</option>
-                  <option value="Science">Science</option>
-                  <option value="Arts">Arts</option>
-                  <option value="Commerce">Commerce</option>
-                  <option value="Engineering">Engineering</option>
-                  <option value="Management">Management</option>
-                </select>
-                {errors.faculty && touched.faculty && (
-                  <p className="text-red-500 text-xs mt-1">{errors.faculty}</p>
-                )}
-              </div>
-
-              {/* Joined Year */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  📆 Joined Year
-                </label>
-                <input
-                  type="number"
-                  name="joinedYear"
-                  value={formData.joinedYear}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2.5 border ${
-                    errors.joinedYear && touched.joinedYear
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-200 focus:ring-cyan-500'
-                  } rounded-lg focus:outline-none focus:ring-2 transition`}
-                  placeholder="Enter joined year"
-                  min="1990"
-                  max={new Date().getFullYear()}
-                />
-                {errors.joinedYear && touched.joinedYear && (
-                  <p className="text-red-500 text-xs mt-1">{errors.joinedYear}</p>
-                )}
-              </div>
-
-              {/* Subjects - Full Width */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  📚 Subjects
-                </label>
-                <input
-                  type="text"
-                  name="subjects"
-                  value={formData.subjects}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full px-4 py-2.5 border ${
-                    errors.subjects && touched.subjects
-                      ? 'border-red-300 focus:ring-red-500'
-                      : 'border-gray-200 focus:ring-cyan-500'
-                  } rounded-lg focus:outline-none focus:ring-2 transition`}
-                  placeholder="Enter subjects (e.g., Mathematics, Physics)"
-                />
-                {errors.subjects && touched.subjects && (
-                  <p className="text-red-500 text-xs mt-1">{errors.subjects}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            onClick={handleSubmit}
-            className="w-full md:w-auto px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105"
-          >
-            Submit
-          </button>
-        </div>
+        {/* Submit Button */}
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className={`px-6 py-3 rounded-xl text-white flex items-center justify-center gap-2
+            ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+        >
+          {loading && (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          )}
+          {loading ? 'Saving...' : 'Add Teacher'}
+        </button>
       </div>
+
+      {/* Toast Notification */}
+      {toast && <Toast {...toast} onClose={() => setToast(null)} />}
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3">
+            <div className="w-6 h-6 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-700 font-medium">Saving teacher data...</p>
+          </div>
+        </div>
+      )}
+
+      <Footer />
     </div>
   );
 }
