@@ -37,6 +37,7 @@ env.bak/
 # =========================
 # Ignore full datasets (keep only small samples)
 AI_And_ML_Model/
+DataSets/
 AI_And_ML_Model/data/raw/
 AI_And_ML_Model/data/processed/
 AI_And_ML_Model/data/normalized/
