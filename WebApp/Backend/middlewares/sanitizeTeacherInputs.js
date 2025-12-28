@@ -2,7 +2,7 @@ const Joi = require("joi");
 
 const sanitizeTeacherInputs = (req, res, next) => {
   const Schema = Joi.object({
-    EmployeeId: Joi.string().allow("").optional(),
+    EmployeeId: Joi.string().allow("").required(),
 
     FullName: Joi.string()
       .required()
@@ -100,11 +100,14 @@ const sanitizeTeacherInputs = (req, res, next) => {
   });
 
   if (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.details[0].message,
-    });
-  }
+  return res.status(400).json({
+    message: "Validation error",
+    errors: error.details.map(detail => ({
+      field: detail.path.join("."), // handles nested fields safely
+      message: detail.message
+    }))
+  });
+}
 
   next();
 };
