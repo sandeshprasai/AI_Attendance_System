@@ -23,12 +23,15 @@ public/
 venv/
 env/
 ENV/
-face_crop_env/
+FaceEnv/
 venv/
 myvenv/
 myvenv/Scripts/
 env.bak/
 
+# logs file 
+
+logs/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/

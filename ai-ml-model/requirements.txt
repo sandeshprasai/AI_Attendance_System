@@ -1,53 +1,53 @@
 # ===============================
-# Core Deep Learning (STRICT)
+# Core Deep Learning
 # ===============================
-tensorflow==2.10.1
-keras==2.10.0
-numpy==1.23.5
+tensorflow==2.19.0
+keras==3.12.0
+numpy>=1.26.0,<2.2.0
 
 # ===============================
 # Data Processing & Analysis
 # ===============================
-pandas==1.5.3
-scikit-learn==1.1.3
-scipy==1.9.3
+pandas>=2.0.3,<2.2
+scikit-learn>=1.3.0,<1.5
+scipy>=1.11.0,<1.13
 
 # ===============================
 # Image Processing & Visualization
 # ===============================
-Pillow==9.5.0
-opencv-python==4.7.0.72
-matplotlib==3.6.3
-seaborn==0.12.2
+Pillow>=10.0.0,<11
+opencv-python>=4.8.0,<4.10
+matplotlib>=3.8.0,<3.9
+seaborn>=0.13.2,<0.14
 
 # ===============================
 # Image Augmentation
 # ===============================
-albumentations==1.3.0
-imgaug==0.4.0
-scikit-image==0.21.0
+albumentations>=1.3.1,<1.4
+imgaug>=0.4.0,<0.5
+scikit-image>=0.21.0,<0.23
 
 # ===============================
 # Utilities
 # ===============================
-tqdm==4.65.0
-joblib==1.2.0
-pyyaml==6.0
-h5py==3.11.0
-typing-extensions==4.13.2
+tqdm>=4.65.0,<4.71
+joblib>=1.3.0,<1.4
+pyyaml>=6.0,<6.1
+h5py>=3.10.0,<3.15
+typing-extensions>=4.7.1,<5
 
 # ===============================
 # TensorFlow Runtime Dependencies
+# (DO NOT pin estimator – TF 2.19 removes it)
 # ===============================
-protobuf<4
-grpcio==1.70.0
-tensorboard==2.10.1
-tensorboard-data-server==0.6.1
-tensorflow-estimator==2.10.0
-tensorflow-io-gcs-filesystem==0.31.0
+protobuf>=3.20.3,<5
+grpcio>=1.59.0,<1.71
+tensorboard>=2.19.0,<2.20
+tensorboard-data-server>=0.7.2,<0.8
+tensorflow-io-gcs-filesystem>=0.31.0
 
 # ===============================
 # Model Visualization
 # ===============================
-pydot==1.4.2
-graphviz==0.20.1
+pydot>=1.4.2,<2
+graphviz>=0.20.1,<0.21
