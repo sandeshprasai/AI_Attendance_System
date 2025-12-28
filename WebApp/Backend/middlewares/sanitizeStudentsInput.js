@@ -7,9 +7,9 @@ const sanitizeStudentInput = async (req, res, next) => {
       .required()
       .pattern(/^[A-Za-z]+(?:\s+[A-Za-z]+)+$/)
       .messages({
-        "string.pattern.base":
-          "Name should at least contain first and last name",
-        "string.empty": "Full Name cannot be Empty",
+        "string.pattern.base": "Name should contain first and last name",
+        "string.empty": "Full Name cannot be empty",
+        "any.required": "Full Name is required",
       }),
 
     RollNo: joi.number().integer().positive().required().messages({
@@ -40,7 +40,6 @@ const sanitizeStudentInput = async (req, res, next) => {
         "number.max": "Year of enrollment cannot be in the future",
         "any.required": "Year of Enrollment is required",
       }),
-
 
     Email: joi
       .string()
@@ -76,7 +75,7 @@ const sanitizeStudentInput = async (req, res, next) => {
       .messages({
         "string.pattern.base": "Guardian Phone number must be 10 digits",
         "string.empty": "Guardian Phone number is required",
-      }), 
+      }),
 
     Class: joi.string().required().messages({
       "string.empty": "Class is required",
@@ -94,6 +93,7 @@ const sanitizeStudentInput = async (req, res, next) => {
     UniversityReg: joi.string().required().messages({
       "string.empty": "University Registration is required",
     }),
+    ProfileImagePath: joi.any().allow(null).required(),
   });
 
   try {
