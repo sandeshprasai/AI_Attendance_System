@@ -30,7 +30,6 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 const path = require("path");
 app.use("/public", express.static(path.join(__dirname, "public")));
 
@@ -39,4 +38,12 @@ app.use("/api/v1/users", userRouter);
 
 app.listen(port, () => {
   console.log(`Server is up and running at http://localhost:${port}/ `);
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal Server error",
+  });
 });
