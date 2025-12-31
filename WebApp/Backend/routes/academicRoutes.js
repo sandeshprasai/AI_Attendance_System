@@ -24,7 +24,7 @@ const getAllSubjects = require("../controllers/academicController/getSubjects")
 
 // ------------------------------------------------All get requests Completed------------------------------------------------
 
-academicRoutes.get("/allDepaerments", preventAccess, getAllDepartments)
+academicRoutes.get("/allDepartments", preventAccess, getAllDepartments)
 academicRoutes.get("/allSubjects/",preventAccess,getAllSubjects)
 
 // ------------------------------------------------All Post requests ------------------------------------------------
