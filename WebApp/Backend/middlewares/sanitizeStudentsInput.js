@@ -93,7 +93,7 @@ const sanitizeStudentInput = async (req, res, next) => {
     UniversityReg: joi.string().required().messages({
       "string.empty": "University Registration is required",
     }),
-    ProfileImagePath: joi.any().allow(null).required(),
+    ProfileImagePath: joi.any().allow(null).optional(),
   });
 
   try {
