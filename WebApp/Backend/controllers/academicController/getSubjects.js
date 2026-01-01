@@ -1,4 +1,3 @@
-const { log } = require("winston");
 const logger = require("../../logger/logger");
 const Subjects = require("../../models/subjects");
 const Department = require("../../models/department");
@@ -47,7 +46,7 @@ const getAllSubjects = async (req, res) => {
       });
     }
 
-    logger.info(`Fetched ${subjects.length} Subjects`);
+    logger.info(`Fetched ${subjects.length} subjects`);
     return res.status(200).json({
       success: true,
       message: `Fetched ${subjects.length} Subjects`,
