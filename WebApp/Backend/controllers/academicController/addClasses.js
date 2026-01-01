@@ -59,7 +59,6 @@ const addMultipleClasses = async (req, res) => {
       });
     }
 
-    // 🔴 UNEXPECTED ERROR
     logger.error(`Failed to create classes from ${req.ip}`, {
       error: error.message,
     });
