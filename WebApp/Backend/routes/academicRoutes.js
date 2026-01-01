@@ -6,6 +6,7 @@ const academicRoutes = express.Router();
 const preventAccess = require("../middlewares/adminAccessControl");
 const validateDepartment = require("../middlewares/validateDepartment");
 const validateSubject = require("../middlewares/validateSubject");
+const validateClass = require("../middlewares/validateClass");
 
 // ------------------------------------------------Import Middleware Compleyed ------------------------------------------------
 
@@ -35,7 +36,7 @@ academicRoutes.post(
   addDepartments
 );
 academicRoutes.post("/subjects", preventAccess, validateSubject, addSubjects);
-academicRoutes.post("/classes", addClasses);
+academicRoutes.post("/classes", validateClass,addClasses);
 
 // ------------------------------------------------All Post request  completed ------------------------------------------------
 
