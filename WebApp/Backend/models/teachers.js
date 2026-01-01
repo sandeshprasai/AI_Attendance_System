@@ -3,7 +3,9 @@ const mongoose = require("mongoose");
 const teachersSchema = new mongoose.Schema(
   {
     EmployeeId: {
-      type: String,
+       type: String,
+  unique: true,   // ensures no duplicates in the database
+  required: true, // optional, ensures this field is always provided
     },
 
     FullName: {
@@ -26,35 +28,15 @@ const teachersSchema = new mongoose.Schema(
       type: String,
     },
 
-    Faculty: {
-      type: String,
-      enum: [
-        "Civil Engineering",
-        "Computer Engineering",
-        "IT Engineering",
-        "Electronics & Communication",
-        "BBA",
-        "Architecture",
-      ],
-    },
+   Faculty: {
+  type: String,
+  required: true,
+},
 
     Subject: {
-      type: String,
-      enum: [
-        "Mathematics",
-        "Physics",
-        "Chemistry",
-        "Operating System",
-        "English",
-        "DSA",
-        "ICT PM",
-        "OOP in C++",
-        "Economics",
-        "SPIT",
-        "Cloud Computing",
-        "Programming in C",
-      ],
-    },
+  type: [String], // array of strings
+  required: true,
+},
 
     JoinedYear: {
       type: String,

@@ -65,11 +65,11 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
 
-      const response = await fetch(`${API_URL}api/v1/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password, rememberMe }),
-      });
+     const response = await fetch(`${API_URL}api/v1/auth/login`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ username, password, rememberMe }),
+});
 
       const data = await response.json();
       setIsLoading(false);
@@ -173,7 +173,7 @@ export default function LoginPage() {
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={handlePasswordChange}
-            className={`block w-full pl-10 pr-12 py-3 bg-white bg-opacity-90 border ${
+            className={`block w-full px-3 py-3 bg-white bg-opacity-90 border  ${
               passwordError
                 ? "border-purple-400 bg-purple-50"
                 : "border-white border-opacity-20"
