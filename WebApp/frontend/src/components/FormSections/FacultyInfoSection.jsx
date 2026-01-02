@@ -1,40 +1,25 @@
 import { useState, useEffect } from "react";
-import { GraduationCap, Hash, Calendar, BookOpen, Briefcase } from "lucide-react";
+import { GraduationCap, Hash, Calendar, Briefcase, BookOpen } from "lucide-react";
 import InputGroup from "../ui/InputGroup";
-import MultiSelect from "../ui/MultiSelect";
+import Select from "react-select";
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-export default function FacultyInfoSection({
-  formData,
-  handleInputChange,
-  errors,
-  loading,
-}) {
+export default function FacultyInfoSection({ formData, handleInputChange, errors, loading }) {
   const currentYear = new Date().getFullYear();
 
   const [departments, setDepartments] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [dataLoading, setDataLoading] = useState(false);
 
-  /* -------------------------------
-   * Helper: get token from storage
-   * ------------------------------- */
   const getToken = () => {
-    return (
-      localStorage.getItem("accessToken") ||
-      sessionStorage.getItem("accessToken") ||
-      null
-    );
+    return localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken") || null;
   };
 
   const getAuthConfig = (params = {}) => {
     const token = getToken();
-    if (!token) {
-      console.error("No access token found in localStorage or sessionStorage");
-      return null;
-    }
+    if (!token) return null;
 
     return {
       headers: {
@@ -45,9 +30,7 @@ export default function FacultyInfoSection({
     };
   };
 
-  /* -------------------------------
-   * 1️⃣ Fetch departments on mount
-   * ------------------------------- */
+  // Fetch all departments on mount
   useEffect(() => {
     const fetchDepartments = async () => {
       setDataLoading(true);
@@ -55,22 +38,15 @@ export default function FacultyInfoSection({
         const config = getAuthConfig();
         if (!config) return;
 
-        const response = await axios.get(
-          `${API_URL}api/v1/academics/allDepartments`,
-          config
-        );
-
-        if (response.data.success && response.data.data) {
-          const departmentNames = response.data.data.map(
-            (dept) => dept.DepartmentName
-          );
-          setDepartments(departmentNames);
+        const res = await axios.get(`${API_URL}api/v1/academics/allDepartments`, config);
+        if (res.data.success && res.data.data) {
+          const deptNames = res.data.data.map((d) => d.DepartmentName);
+          setDepartments(deptNames);
         }
-      } catch (error) {
-        console.error("Error fetching departments:", error);
+      } catch (err) {
+        console.error("Error fetching departments:", err);
         setDepartments([]);
-
-        if (error.response?.status === 401) {
+        if (err.response?.status === 401) {
           localStorage.removeItem("accessToken");
           sessionStorage.removeItem("accessToken");
           window.location.href = "/login";
@@ -83,9 +59,7 @@ export default function FacultyInfoSection({
     fetchDepartments();
   }, []);
 
-  /* -------------------------------
-   * 2️⃣ Fetch subjects when Faculty changes
-   * ------------------------------- */
+  // Fetch subjects when faculty changes
   useEffect(() => {
     const fetchSubjects = async () => {
       if (!formData.Faculty) {
@@ -94,27 +68,19 @@ export default function FacultyInfoSection({
       }
 
       setDataLoading(true);
-
       try {
-        const config = getAuthConfig({
-          DepartmentName: formData.Faculty,
-        });
+        const config = getAuthConfig({ DepartmentName: formData.Faculty });
         if (!config) return;
 
-        const response = await axios.get(
-          `${API_URL}api/v1/academics/allSubjects`,
-          config
-        );
-
-        if (response.data.success && response.data.data) {
-          const subjectNames = response.data.data.map((sub) => sub.SubjectName);
-          setSubjects(subjectNames);
+        const res = await axios.get(`${API_URL}api/v1/academics/allSubjects`, config);
+        if (res.data.success && res.data.data) {
+          const subjectNames = res.data.data.map((s) => s.SubjectName);
+          setSubjects(subjectNames.map((s) => ({ label: s, value: s })));
         }
-      } catch (error) {
-        console.error("Error fetching subjects:", error);
+      } catch (err) {
+        console.error("Error fetching subjects:", err);
         setSubjects([]);
-
-        if (error.response?.status === 401) {
+        if (err.response?.status === 401) {
           localStorage.removeItem("accessToken");
           sessionStorage.removeItem("accessToken");
           window.location.href = "/login";
@@ -127,26 +93,16 @@ export default function FacultyInfoSection({
     fetchSubjects();
   }, [formData.Faculty]);
 
-  /* -------------------------------
-   * 3️⃣ Clear selected subjects on faculty change
-   * ------------------------------- */
+  // Clear selected subjects when faculty changes
   useEffect(() => {
-    handleInputChange({
-      target: {
-        name: "Subject",
-        value: [],
-      },
-    });
+    handleInputChange({ target: { name: "Subject", value: [] } });
   }, [formData.Faculty]);
 
-  /* -------------------------------
-   * Render UI
-   * ------------------------------- */
   return (
     <div className="bg-white p-6 rounded-xl shadow space-y-6">
       <h3 className="text-xl font-bold text-cyan-600 flex items-center gap-2">
         <GraduationCap className="w-6 h-6" />
-        Faculty Information
+        Faculty & Subject Information
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -163,13 +119,12 @@ export default function FacultyInfoSection({
           placeholder="Enter employee ID"
         />
 
-        {/* Faculty / Department */}
+        {/* Faculty */}
         <div className="space-y-1">
           <label className="text-sm font-bold flex items-center gap-2">
             <Briefcase className="w-4 h-4 text-emerald-600" />
             Faculty
           </label>
-
           <select
             name="Faculty"
             value={formData.Faculty}
@@ -184,16 +139,13 @@ export default function FacultyInfoSection({
             <option value="">
               {dataLoading ? "Loading faculties..." : "Select Faculty"}
             </option>
-            {departments.map((department, index) => (
-              <option key={index} value={department}>
-                {department}
+            {departments.map((dept) => (
+              <option key={dept} value={dept}>
+                {dept}
               </option>
             ))}
           </select>
-
-          {errors?.Faculty && (
-            <p className="text-red-500 text-sm">{errors.Faculty}</p>
-          )}
+          {errors?.Faculty && <p className="text-red-500 text-sm">{errors.Faculty}</p>}
         </div>
 
         {/* Joined Year */}
@@ -209,25 +161,37 @@ export default function FacultyInfoSection({
           placeholder={`Year must be between 2010 and ${currentYear}`}
         />
 
-        {/* Subjects */}
-        <MultiSelect
-          label="Subjects"
-          name="Subject"
-          value={formData.Subject || []}
-          onChange={handleInputChange}
-          options={subjects}
-          error={errors?.Subject}
-          disabled={loading || dataLoading || !formData.Faculty}
-          Icon={BookOpen}
-          placeholder={
-            !formData.Faculty
-              ? "Select faculty first"
-              : dataLoading
-              ? "Loading subjects..."
-              : "Select subjects"
-          }
-          searchable
-        />
+        {/* Subjects using React-Select */}
+        <div className="space-y-1 md:col-span-2">
+          <label className="text-sm font-bold flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-emerald-600" />
+            Subjects
+          </label>
+          <Select
+            isMulti
+            name="Subject"
+            value={formData.Subject.map((s) => ({ label: s, value: s }))}
+            onChange={(selected) =>
+              handleInputChange({
+                target: {
+                  name: "Subject",
+                  value: selected ? selected.map((s) => s.value) : [],
+                },
+              })
+            }
+            options={subjects}
+            isDisabled={loading || dataLoading || !formData.Faculty}
+            placeholder={
+              !formData.Faculty
+                ? "Select faculty first"
+                : dataLoading
+                ? "Loading subjects..."
+                : "Select subjects"
+            }
+            classNamePrefix="react-select"
+          />
+          {errors?.Subject && <p className="text-red-500 text-sm mt-1">{errors.Subject}</p>}
+        </div>
       </div>
     </div>
   );
