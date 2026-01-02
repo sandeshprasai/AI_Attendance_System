@@ -13,11 +13,12 @@ function NavBar({ links }) {
   const [imageError, setImageError] = useState(false);
   const menuRef = useRef(null);
 
-  // 🔥 Default links (same as before)
+  // 🔥 Default links with Add Academics added
   const navLinks = links || [
     { label: "Home", to: "/admin-dashboard" },
     { label: "Add Student", to: "/add-student" },
     { label: "Add Teacher", to: "/add-teacher" },
+    { label: "Add Academics", to: "/add-academics" }, // 🆕 Added here
     { label: "Create Classroom", to: "/create-classroom" },
   ];
 

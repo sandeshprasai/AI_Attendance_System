@@ -10,10 +10,10 @@ import UsersPage from "./pages/UsersPage";
 import ContactUs from "./pages/ContactUs";
 
 // components
-
 import CreateClassroom from "./components/CreateClassroom";
 import AddStudent from "./pages/AddStudent";
 import AddTeacher from "./pages/AddTeacher";
+import AddAcademics from "./pages/AddAcademics"; // 🆕 Added import
 
 // route protection
 import RoleProtectedRoute from "./routes/RoleProtectedRoute";
@@ -50,6 +50,16 @@ export default function App() {
           element={
             <RoleProtectedRoute allowedRoles={["admin"]}>
               <AddTeacher />
+            </RoleProtectedRoute>
+          }
+        />
+
+        {/* 🆕 Add Academics Route */}
+        <Route
+          path="/add-academics"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AddAcademics />
             </RoleProtectedRoute>
           }
         />
