@@ -31,7 +31,6 @@ academicRoutes.get("/allSubjects/", preventAccess, getAllSubjects);
 
 academicRoutes.post(
   "/departments",
-  preventAccess,
   validateDepartment,
   addDepartments
 );

@@ -3,41 +3,60 @@ const logger = require("../../logger/logger");
 
 const addDepartment = async (req, res) => {
   try {
-    const { DepartmentCode, DepartmentName } = req.body;
+    const departments = req.body; // Expecting an array of departments
 
-    logger.info(
-      `Add Department request | Code: ${DepartmentCode} | IP: ${req.ip}`
-    );
-
-    // Check for existing department
-    const existingDepartment = await Department.findOne({ DepartmentCode });
-    if (existingDepartment) {
-      logger.warn(
-        `Duplicate Department | Code: ${DepartmentCode} | IP: ${req.ip}`
-      );
-      return res.status(409).json({
+    if (!Array.isArray(departments) || departments.length === 0) {
+      return res.status(400).json({
         success: false,
-        message: `Department code ${DepartmentCode} already exists for ${existingDepartment.DepartmentName}`,
+        message: "Request body must be an array of departments.",
       });
     }
 
-    await Department.create({ DepartmentCode, DepartmentName });
+    // Loop through each department and check for duplicates
+    for (const department of departments) {
+      const { DepartmentCode, DepartmentName } = department;
+
+      if (!DepartmentCode || !DepartmentName) {
+        return res.status(400).json({
+          success: false,
+          message: "DepartmentCode and DepartmentName are required for each department.",
+        });
+      }
+
+      logger.info(`Add Department request | Code: ${DepartmentCode} | IP: ${req.ip}`);
+
+      // Check for existing department by DepartmentCode
+      const existingDepartment = await Department.findOne({ DepartmentCode });
+      if (existingDepartment) {
+        logger.warn(
+          `Duplicate Department | Code: ${DepartmentCode} | IP: ${req.ip}`
+        );
+        return res.status(409).json({
+          success: false,
+          message: `Department code ${DepartmentCode} already exists for ${existingDepartment.DepartmentName}`,
+        });
+      }
+    }
+
+    // Create departments in bulk
+    const createdDepartments = await Department.insertMany(departments);
 
     logger.info(
-      `Department created successfully | Code: ${DepartmentCode} | Name: ${DepartmentName}`
+      `Departments created successfully | Count: ${createdDepartments.length}`
     );
 
     return res.status(201).json({
       success: true,
-      message: "Department created successfully",
+      message: `${createdDepartments.length} departments created successfully`,
+      data: createdDepartments,
     });
   } catch (error) {
     logger.error(
-      `Add Department failed | Error: ${error.message} | IP: ${req.ip}`
+      `Add Departments failed | Error: ${error.message} | IP: ${req.ip}`
     );
     return res.status(500).json({
       success: false,
-      message: "Internal server error while creating department",
+      message: "Internal server error while creating departments",
     });
   }
 };

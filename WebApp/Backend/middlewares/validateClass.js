@@ -12,10 +12,7 @@ const validateClass = (req, res, next) => {
     classes: Joi.array()
       .items(
         Joi.object({
-          Class: Joi.number().integer().min(1).required().messages({
-            "number.base": "Class must be a number",
-            "number.integer": "Class must be an integer",
-            "number.min": "Class must be a positive integer",
+          Class: Joi.string().required().messages({
             "any.required": "Class is required",
           }),
 
