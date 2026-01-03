@@ -4,6 +4,7 @@ const logger = require("../../logger/logger");
 
 const addSubjects = async (req, res) => {
   try {
+    console.log(req.body);
     const subjects = req.body; // Expecting an array of subjects
 
     if (!Array.isArray(subjects) || subjects.length === 0) {

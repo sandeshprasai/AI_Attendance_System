@@ -3,15 +3,10 @@ const mongoose = require("mongoose");
 const classesSchema = new mongoose.Schema(
   {
     class: {
-      type: Number,
+      type: String,
       required: true,
       unique: true,
       min: 1,
-      validate: {
-        validator: Number.isInteger,
-        message: (props) =>
-          `Class number must be a positive integer. Current value: ${props.value}`,
-      },
     },
 
     capacity: {
