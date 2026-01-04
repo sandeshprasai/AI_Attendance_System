@@ -6,6 +6,7 @@ import FacultyInfoSection from "../components/FormSections/FacultyInfoSection";
 import Toast from "../components/ui/Toast";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
+import useDepartments from "../../hooks/useDepartments";
 import {
   validateName,
   validateEmail,
@@ -28,7 +29,7 @@ export default function AddTeacherPage() {
     Phone: "",
     Email: "",
     Faculty: "",
-    Subject: [], // array for multi-select
+    Subject: [],
     JoinedYear: "",
     ProfileImagePath: null,
   });
@@ -36,7 +37,11 @@ export default function AddTeacherPage() {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
+
   const API_URL = import.meta.env.VITE_API_URL;
+
+  // ✅ REUSED HOOK
+  const { departments, loading: facultyLoading } = useDepartments();
 
   // ---------------- Handle Profile Image ----------------
   const handleImageUpload = (e) => {
@@ -72,14 +77,12 @@ export default function AddTeacherPage() {
     const { name, value } = e.target;
 
     if (name === "Subject") {
-      // Multi-select Subjects
-      setFormData((prev) => ({ ...prev, [name]: value || [] }));
-      if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+      setFormData((prev) => ({ ...prev, Subject: value || [] }));
+      if (errors.Subject) setErrors((prev) => ({ ...prev, Subject: "" }));
       return;
     }
 
     setFormData((prev) => ({ ...prev, [name]: value }));
-
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
@@ -90,34 +93,31 @@ export default function AddTeacherPage() {
     if (!formData.ProfileImagePath)
       newErrors.ProfileImagePath = "Profile photo is required";
 
-    newErrors.EmployeeId = isRequired(formData.EmployeeId);
+    newErrors.EmployeeId = validateEmployeeID(formData.EmployeeId);
     newErrors.FullName = validateName(formData.FullName);
     newErrors.DateOfBirth = validateDOB(formData.DateOfBirth);
     newErrors.FullAddress = validateAddress(formData.FullAddress);
     newErrors.Phone = validatePhone(formData.Phone);
     newErrors.Email = validateEmail(formData.Email);
     newErrors.Faculty = isRequired(formData.Faculty);
-    newErrors.Subject =
-      !formData.Subject || formData.Subject.length === 0
-        ? "At least one subject must be selected"
-        : "";
     newErrors.JoinedYear = validateJoinYear(formData.JoinedYear);
-    newErrors.EmployeeId = validateEmployeeID(formData.EmployeeId);
+    newErrors.Subject =
+      formData.Subject.length === 0 ? "Select at least one subject" : "";
 
     const filteredErrors = Object.fromEntries(
-      Object.entries(newErrors).filter(([_, value]) => value !== "")
+      Object.entries(newErrors).filter(([_, v]) => v)
     );
 
     setErrors(filteredErrors);
     return Object.keys(filteredErrors).length === 0;
   };
 
-  // ---------------- Handle Form Submission ----------------
+  // ---------------- Submit ----------------
   const handleSubmit = async () => {
     if (loading) return;
 
     if (!validateForm()) {
-      setToast({ message: "Please fix all errors before submitting", type: "error" });
+      setToast({ message: "Please fix all errors", type: "error" });
       return;
     }
 
@@ -125,36 +125,30 @@ export default function AddTeacherPage() {
       setLoading(true);
 
       const token =
-        localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
-      if (!token) throw new Error("Authentication token not found");
+        localStorage.getItem("accessToken") ||
+        sessionStorage.getItem("accessToken");
 
       const data = new FormData();
-
-      // Append profile image
       data.append("ProfileImagePath", formData.ProfileImagePath);
 
-      // Append other fields
-      for (const key in formData) {
-        if (key === "ProfileImagePath") continue;
-
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === "ProfileImagePath") return;
         if (key === "Subject") {
-          // Send Subjects as JSON string for backend parsing
-          data.append("Subject", JSON.stringify(formData.Subject));
+          data.append("Subject", JSON.stringify(value));
         } else {
-          data.append(key, formData[key]);
+          data.append(key, value);
         }
-      }
+      });
 
-      const res = await axios.post(`${API_URL}api/v1/users/teachers`, data, {
+      await axios.post(`${API_URL}api/v1/users/teachers`, data, {
         headers: {
-          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
       });
 
-      setToast({ message: "Teacher added successfully!", type: "success" });
+      setToast({ message: "Teacher added successfully", type: "success" });
 
-      // Reset form
       setFormData({
         EmployeeId: "",
         FullName: "",
@@ -167,23 +161,28 @@ export default function AddTeacherPage() {
         JoinedYear: "",
         ProfileImagePath: null,
       });
+
       setImagePreview(null);
       setErrors({});
-    } catch (error) {
-      console.error("SERVER ERROR:", error.response?.data || error.message);
-      const message = error.response?.data?.message || "Failed to add teacher";
-      setToast({ message, type: "error" });
+    } catch (err) {
+      setToast({
+        message: err.response?.data?.message || "Failed to add teacher",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  // -------------------- Render --------------------
+  // ---------------- Render ----------------
   return (
     <div className="bg-gray-50 min-h-screen">
       <NavBar />
-      <div className="max-w-5xl mx-auto p-6 space-y-8 mb-16 pt-24">
-        <h1 className="text-3xl font-bold text-gray-800">Add New Teacher</h1>
+
+      <div className="max-w-5xl mx-auto p-6 space-y-8 pt-24 mb-16">
+        <h1 className="text-3xl font-bold text-gray-800">
+          Add New Teacher
+        </h1>
 
         <ProfilePhotoSection
           imagePreview={imagePreview}
@@ -203,34 +202,26 @@ export default function AddTeacherPage() {
         <FacultyInfoSection
           formData={formData}
           handleInputChange={handleInputChange}
+          facultyOptions={departments}
           errors={errors}
-          loading={loading}
+          loading={loading || facultyLoading}
         />
 
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className={`px-6 py-3 rounded-xl text-white flex items-center justify-center gap-2
-            ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-700"}`}
+          className={`px-6 py-3 rounded-xl text-white
+            ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-emerald-600 hover:bg-emerald-700"
+            }`}
         >
-          {loading && (
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          )}
           {loading ? "Saving..." : "Add Teacher"}
         </button>
       </div>
 
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
-
-      {loading && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3">
-            <div className="w-6 h-6 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-gray-700 font-medium">Saving teacher data...</p>
-          </div>
-        </div>
-      )}
-
       <Footer />
     </div>
   );

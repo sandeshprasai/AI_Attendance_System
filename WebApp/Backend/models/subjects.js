@@ -3,13 +3,10 @@ const mongoose = require("mongoose");
 const subjectSchema = new mongoose.Schema(
   {
     SubjectCode: {
-      type: Number,
+      type: String,
       required: true,
+      unique: true,
       min: 0,
-      validate: {
-        validator: Number.isInteger,
-        message: (props) => `${props.value} must be an integer value`,
-      },
     },
 
     SubjectName: {
