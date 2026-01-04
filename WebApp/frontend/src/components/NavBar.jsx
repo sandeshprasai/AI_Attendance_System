@@ -109,7 +109,7 @@ function NavBar({ links }) {
       />
 
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-cyan-600 to-teal-600 shadow-lg">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-linear-to-r from-cyan-600 to-teal-600 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -184,9 +184,9 @@ function NavBar({ links }) {
                   }`}
                 >
                   {/* User Info */}
-                  <div className="px-4 py-4 bg-gradient-to-r from-cyan-50 to-teal-50 border-b border-gray-100">
+                  <div className="px-4 py-4 bg-linear-to-r from-cyan-50 to-teal-50 border-b border-gray-100">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-md overflow-hidden">
+                      <div className="w-12 h-12 rounded-full bg-linear-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-md overflow-hidden">
                         {user?.photoURL && !imageError ? (
                           <img
                             src={user.photoURL}

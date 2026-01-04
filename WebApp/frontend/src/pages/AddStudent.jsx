@@ -1,6 +1,6 @@
 import { useState } from "react";
-
 import axios from "axios";
+
 import {
   validateForm,
   validateName,
@@ -19,16 +19,26 @@ import {
 
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
-
 import Toast from "../components/ui/Toast";
+
 import PersonalInfoSection from "../components/FormSections/PersonalInfoSection";
 import AcademicInfoSection from "../components/FormSections/AcademicInfoSection";
 import ProfilePhotoSection from "../components/FormSections/ProfilePhotoSection";
 import GuardianInfoSection from "../components/FormSections/GuardianInfoSection";
 
+import useDepartments from "../../hooks/useDepartments";
+
 export default function AddStudent() {
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const { departments: facultyOptions, loading: facultyLoading } =
+    useDepartments();
+
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [toast, setToast] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+
   const [formData, setFormData] = useState({
     FullName: "",
     RollNo: "",
@@ -46,25 +56,10 @@ export default function AddStudent() {
     ProfileImagePath: null,
   });
 
-  const [imagePreview, setImagePreview] = useState(null);
-  const [toast, setToast] = useState(null);
-  const API_URL = import.meta.env.VITE_API_URL;
-
-  const facultyOptions = [
-    "CIVIL",
-    "COMPUTER",
-    "BE IT",
-    "BBA",
-    "ARCHITECTURE",
-    "ELECTRONICS",
-    "BE SOFTWARE"
-  ];
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // Validate on input change
     let error = "";
     switch (name) {
       case "FullName":
@@ -93,7 +88,7 @@ export default function AddStudent() {
         break;
       case "GuardianPhone":
         error = validatePhone(value);
-        break;  
+        break;
       case "Class":
         error = validateClass(value);
         break;
@@ -109,43 +104,43 @@ export default function AddStudent() {
       default:
         break;
     }
+
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, ProfileImagePath: file }));
-      setErrors((prev) => ({
-        ...prev,
-        ProfileImagePath: validateProfileImage(file),
-      }));
+    if (!file) return;
 
-      const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result);
-      reader.readAsDataURL(file);
-    }
+    setFormData((prev) => ({ ...prev, ProfileImagePath: file }));
+    setErrors((prev) => ({
+      ...prev,
+      ProfileImagePath: validateProfileImage(file),
+    }));
+
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result);
+    reader.readAsDataURL(file);
   };
 
   const removeImage = () => {
     setFormData((prev) => ({ ...prev, ProfileImagePath: null }));
     setErrors((prev) => ({
       ...prev,
-      ProfileImagePath: "Profile image is required.",
+      ProfileImagePath: "Profile image is required",
     }));
     setImagePreview(null);
   };
 
   const handleSubmit = async () => {
-    if (loading) return; // block double submit
+    if (loading) return;
 
-    // Run validation
     const validationErrors = validateForm({
       FullName: { value: formData.FullName, validator: validateName },
       RollNo: { value: formData.RollNo, validator: validateRollNo },
       Faculty: {
         value: formData.Faculty,
-        validator: (val) => validateFaculty(val, facultyOptions),
+        validator: (v) => validateFaculty(v, facultyOptions),
       },
       GuardianName: { value: formData.GuardianName, validator: validateName },
       GuardianPhone: { value: formData.GuardianPhone, validator: validatePhone },
@@ -170,36 +165,28 @@ export default function AddStudent() {
     });
 
     setErrors(validationErrors);
-
-    // Stop submit if any errors
-    const hasErrors = Object.values(validationErrors).some((e) => e);
-    if (hasErrors) return;
+    if (Object.values(validationErrors).some(Boolean)) return;
 
     try {
       const token =
         localStorage.getItem("accessToken") ||
         sessionStorage.getItem("accessToken");
 
-      setLoading(true); // START LOADING
-      const data = new FormData();
-      for (const key in formData) {
-        if (key === "ProfileImagePath" && formData[key]) {
-          data.append(key, formData[key]);
-        } else {
-          data.append(key, formData[key]);
-        }
-      }
+      setLoading(true);
 
-      const res = await axios.post(`${API_URL}api/v1/users/students`, data, {
+      const data = new FormData();
+      Object.keys(formData).forEach((key) =>
+        data.append(key, formData[key])
+      );
+
+      await axios.post(`${API_URL}api/v1/users/students`, data, {
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
-          authorization: `Bearer ${token}`, // MUST be inside headers
         },
       });
 
       setToast({ message: "Student added successfully!", type: "success" });
-      console.log(formData);
-
       setFormData({
         FullName: "",
         RollNo: "",
@@ -219,13 +206,14 @@ export default function AddStudent() {
       setErrors({});
       setImagePreview(null);
     } catch (error) {
-      console.error(error);
-      console.error("SERVER ERROR:", error.response?.data); // ← ADD THIS
-      const message =
-        error.response?.data?.error || "Failed to add student. Server error.";
-      setToast({ message, type: "error" });
+      setToast({
+        message:
+          error.response?.data?.error ||
+          "Failed to add student. Server error.",
+        type: "error",
+      });
     } finally {
-      setLoading(false); // END LOADING
+      setLoading(false);
     }
   };
 
@@ -234,7 +222,10 @@ export default function AddStudent() {
       <NavBar />
 
       <div className="max-w-5xl mx-auto p-6 space-y-8 mb-16 pt-24">
-         <h1 className="text-3xl font-bold text-gray-800">Add New Student</h1>
+        <h1 className="text-3xl font-bold text-gray-800">
+          Add New Student
+        </h1>
+
         <ProfilePhotoSection
           imagePreview={imagePreview}
           handleImageUpload={handleImageUpload}
@@ -249,6 +240,7 @@ export default function AddStudent() {
           errors={errors}
           loading={loading}
         />
+
         <GuardianInfoSection
           formData={formData}
           handleInputChange={handleInputChange}
@@ -260,33 +252,23 @@ export default function AddStudent() {
           formData={formData}
           handleInputChange={handleInputChange}
           facultyOptions={facultyOptions}
+          facultyLoading={facultyLoading}
           errors={errors}
           loading={loading}
         />
 
         <button
-          disabled={loading}
-          className={`px-6 py-3 rounded-xl text-white flex items-center justify-center gap-2
-    ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-emerald-600"}`}
           onClick={handleSubmit}
+          disabled={loading}
+          className={`px-6 py-3 rounded-xl text-white ${
+            loading ? "bg-gray-400" : "bg-emerald-600"
+          }`}
         >
-          {loading && (
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          )}
           {loading ? "Saving..." : "Submit"}
         </button>
       </div>
 
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
-
-      {loading && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3">
-            <div className="w-6 h-6 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-gray-700 font-medium">Saving student data...</p>
-          </div>
-        </div>
-      )}
       <Footer />
     </div>
   );
