@@ -3,13 +3,8 @@ const mongoose = require("mongoose");
 const departmentSchema = new mongoose.Schema(
   {
     DepartmentCode: {
-      type: Number,
+      type: String,
       required: true,
-      min: 0,
-      validate: {
-        validator: Number.isInteger,
-        message: (props) => `${props.value} must be an integer value`,
-      },
     },
 
     DepartmentName: {
