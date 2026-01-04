@@ -3,13 +3,18 @@ import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 import axios from "axios";
 
-// Toast Component
+// Toast Component with auto-dismiss
 const Toast = ({ message, type, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, 3000); // Disappear after 3 seconds
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
   return (
-    <div className="fixed top-24 right-6 z-50">
+    <div className="fixed top-24 right-6 z-50 animate-bounce-in">
       <div
         className={`px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 ${
-          type === "success" ? "bg-cyan-600" : "bg-red-600"
+          type === "success" ? "bg-cyan-600" : type === "error" ? "bg-red-600" : "bg-amber-500"
         } text-white`}
       >
         <span>{message}</span>
@@ -34,15 +39,11 @@ export default function AddAcademicsPage() {
   const [subjects, setSubjects] = useState([
     { Department: "", SubjectCode: "", SubjectName: "" },
   ]);
-  const [classrooms, setClassrooms] = useState([{ Code: "", Capacity: "" }]);
+  const [classrooms, setClassrooms] = useState([{ Code: "", Capacity: "", Description: "" }]);
   const [toast, setToast] = useState(null);
   const [deptOptions, setDeptOptions] = useState([]);
   const [loadingDept, setLoadingDept] = useState(false);
 
-  // Fetch departments for Subjects dropdown only
-  // Inside AddAcademicsPage component
-
-  // Helper to get token
   // Helper to get token
   const getToken = () =>
     localStorage.getItem("accessToken") ||
@@ -171,7 +172,7 @@ export default function AddAcademicsPage() {
       // Remove submitted rows
       const remaining = classrooms.filter((c) => !c.Code || !c.Capacity);
       setClassrooms(
-        remaining.length > 0 ? remaining : [{ Code: "", Capacity: "" }]
+        remaining.length > 0 ? remaining : [{ Code: "", Capacity: "", Description: "" }]
       );
     } catch (err) {
       setToast({
@@ -208,20 +209,25 @@ export default function AddAcademicsPage() {
     fetchDepartments();
   }, []);
 
-  // Helper: Check if all fields in a row are filled
-  const isRowFilled = (row) =>
-    Object.values(row).every((val) => val.toString().trim() !== "");
+  // Helper: Check if all fields in a row are filled (Description optional for classrooms)
+  const isRowFilled = (row) => {
+    if (row.hasOwnProperty('Description')) {
+      // For classrooms: Code and Capacity are required, Description is optional
+      const { Description, ...requiredFields } = row;
+      return Object.values(requiredFields).every(val => val.toString().trim() !== "");
+    }
+    // For departments and subjects: all fields are required
+    return Object.values(row).every((val) => val.toString().trim() !== "");
+  };
 
   // ============ Handlers ============
   const handleDeptChange = (index, field, value) => {
-    if (field === "DepartmentCode" && value && !/^\d+$/.test(value)) return;
     const updated = [...departments];
     updated[index][field] = value;
     setDepartments(updated);
   };
 
   const handleSubjectChange = (index, field, value) => {
-    if (field === "SubjectCode" && value && !/^\d+$/.test(value)) return;
     const updated = [...subjects];
     updated[index][field] = value;
     setSubjects(updated);
@@ -244,10 +250,10 @@ export default function AddAcademicsPage() {
           { Department: "", SubjectCode: "", SubjectName: "" },
         ]);
       if (sectionName === "room")
-        setter([...currentList, { Code: "", Capacity: "" }]);
+        setter([...currentList, { Code: "", Capacity: "", Description: "" }]);
     } else {
       setToast({
-        message: `Please fill out all fields in the current ${sectionName} row first.`,
+        message: `Please fill out all required fields in the current ${sectionName} row first.`,
         type: "error",
       });
     }
@@ -259,7 +265,7 @@ export default function AddAcademicsPage() {
       <div className="max-w-5xl mx-auto p-6 space-y-10 mb-16 pt-24">
         <h1 className="text-3xl font-bold text-gray-800">Add Academics</h1>
 
-        {/* ============ Add Department (Manual Input) ============ */}
+        {/* ============ Add Department ============ */}
         <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <h2 className="text-xl font-bold text-emerald-700 mb-6">
             Add Department
@@ -273,7 +279,7 @@ export default function AddAcademicsPage() {
                 <input
                   type="text"
                   value={dept.DepartmentCode}
-                  placeholder="e.g. 01"
+                  placeholder="e.g. CS-01"
                   onChange={(e) =>
                     handleDeptChange(index, "DepartmentCode", e.target.value)
                   }
@@ -322,7 +328,7 @@ export default function AddAcademicsPage() {
           </button>
         </section>
 
-        {/* ============ Add Subjects (Use Backend Departments) ============ */}
+        {/* ============ Add Subjects ============ */}
         <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
           <h2 className="text-xl font-bold text-emerald-700 mb-6">
             Add Subjects
@@ -358,7 +364,7 @@ export default function AddAcademicsPage() {
                 <input
                   type="text"
                   value={sub.SubjectCode}
-                  placeholder="e.g. 101"
+                  placeholder="e.g. BEX 402"
                   onChange={(e) =>
                     handleSubjectChange(index, "SubjectCode", e.target.value)
                   }
@@ -435,7 +441,7 @@ export default function AddAcademicsPage() {
                 <input
                   type="text"
                   value={room.Code}
-                  placeholder="e.g. CR-101"
+                  placeholder="e.g. D001"
                   onChange={(e) =>
                     handleClassroomChange(index, "Code", e.target.value)
                   }
@@ -452,6 +458,20 @@ export default function AddAcademicsPage() {
                   placeholder="e.g. 50"
                   onChange={(e) =>
                     handleClassroomChange(index, "Capacity", e.target.value)
+                  }
+                  className="w-full px-4 py-2 rounded-lg border border-cyan-500/30 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100 outline-none transition-all"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-semibold text-gray-600 mb-1">
+                  Description (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={room.Description}
+                  placeholder="e.g. Third Floor, West Wing"
+                  onChange={(e) =>
+                    handleClassroomChange(index, "Description", e.target.value)
                   }
                   className="w-full px-4 py-2 rounded-lg border border-cyan-500/30 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100 outline-none transition-all"
                 />
