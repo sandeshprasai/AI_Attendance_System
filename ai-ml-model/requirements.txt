@@ -51,3 +51,6 @@ tensorflow-io-gcs-filesystem>=0.31.0
 # ===============================
 pydot>=1.4.2,<2
 graphviz>=0.20.1,<0.21
+
+ultralytics
+opencv-python-headless
