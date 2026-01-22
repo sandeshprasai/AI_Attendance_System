@@ -1,7 +1,6 @@
 const Joi = require("joi");
 
 const validateClass = (req, res, next) => {
-  // Normalize single → bulk
   if (req.body.Class) {
     req.body = {
       classes: [req.body],
@@ -23,10 +22,12 @@ const validateClass = (req, res, next) => {
             "any.required": "Capacity is required",
           }),
 
-          Description: Joi.string().max(100).allow("", null).messages({
+          Description: Joi.string().max(100).allow("").messages({
+            "string.base": "Description must be a string",
             "string.max": "Description must not exceed 100 characters",
+            "any.required": "Description is required",
           }),
-        })
+        }),
       )
       .min(1)
       .required()

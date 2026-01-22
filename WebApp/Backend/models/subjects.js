@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { validate } = require("./department");
 
 const subjectSchema = new mongoose.Schema(
   {
@@ -6,7 +7,6 @@ const subjectSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      min: 0,
     },
 
     SubjectName: {
@@ -15,6 +15,17 @@ const subjectSchema = new mongoose.Schema(
       unique: true,
       maxlength: 100,
       trim: true,
+    },
+    Semester: {
+      type: Number,
+      min: 1,
+      max: 8,
+      validate: {
+        validator: Number.isInteger,
+        message: (props) => {
+          `Class capacity must be an integer. Current value: ${props.value}`;
+        },
+      },
     },
 
     DepartmentID: {
