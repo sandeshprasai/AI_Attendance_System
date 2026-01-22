@@ -4,109 +4,113 @@ const logger = require("../../logger/logger");
 
 const addSubjects = async (req, res) => {
   try {
+    // Joi already validated this
     const subjects = req.body;
 
-    if (!Array.isArray(subjects) || subjects.length === 0) {
-      logger.warn(
-        `Empty subjects fields | IP: ${req.ip}`
-      );
-      return res.status(400).json({
-        success: false,
-        message: "Request body must be a non-empty array of subjects",
-      });
-    }
+    const departmentNames = subjects.map((s) => s.DepartmentName.trim());
 
+    const departments = await Department.find(
+      { DepartmentName: { $in: departmentNames } },
+      { _id: 1, DepartmentName: 1 },
+    ).lean();
+
+    const departmentMap = {};
+    departments.forEach((d) => {
+      departmentMap[d.DepartmentName] = d._id;
+    });
+
+    const docsToInsert = [];
     const results = [];
 
-    for (const subj of subjects) {
-      const { SubjectCode, SubjectName, DepartmentName } = subj;
+    /* ----------------------------------
+       1. Validate departments
+    -----------------------------------*/
+    subjects.forEach((subj) => {
+      const { SubjectCode, SubjectName, DepartmentName, Semester } = subj;
 
-      // Empty fields
-      if (!SubjectCode || !SubjectName || !DepartmentName) {
-        logger.warn(
-          `Empty subjects fields | Code: ${SubjectCode || "N/A"} | IP: ${req.ip}`
-        );
-        results.push({
-          SubjectCode,
-          SubjectName,
-          success: false,
-          message: "All fields are required",
-        });
-        continue;
-      }
+      const departmentId = departmentMap[DepartmentName.trim()];
 
-      // Duplicate Subject Code
-      let existingSubject = await Subjects.findOne({ SubjectCode });
-      if (existingSubject) {
-        logger.warn(
-          `Duplicate Subject Code | Code: ${SubjectCode} | Existing Subject: ${existingSubject.SubjectName} | IP: ${req.ip}`
-        );
-        results.push({
-          SubjectCode,
-          SubjectName,
-          success: false,
-          message: "Duplicate Subject Code",
-        });
-        continue;
-      }
-
-      // Duplicate Subject Name
-      existingSubject = await Subjects.findOne({ SubjectName });
-      if (existingSubject) {
-        logger.warn(
-          `Subject already exists | Name: ${SubjectName} | Code: ${existingSubject.SubjectCode} | IP: ${req.ip}`
-        );
-        results.push({
-          SubjectCode,
-          SubjectName,
-          success: false,
-          message: "Subject already exists",
-        });
-        continue;
-      }
-
-      // Invalid Department
-      const department = await Department.findOne({ DepartmentName });
-      if (!department) {
-        logger.warn(
-          `Invalid Department Name to add Subjects | Department: ${DepartmentName} | IP: ${req.ip}`
-        );
+      if (!departmentId) {
+        logger.warn(`Invalid Department | ${DepartmentName} | IP: ${req.ip}`);
         results.push({
           SubjectCode,
           SubjectName,
           success: false,
           message: "Invalid Department Name",
         });
-        continue;
+        return;
       }
 
-      // Create Subject
-      await Subjects.create({
+      docsToInsert.push({
         SubjectCode,
         SubjectName,
-        DepartmentID: department._id,
+        DepartmentID: departmentId,
+        Semester,
       });
+    });
 
-      logger.info(
-        `Subject Created Successfully | Code: ${SubjectCode} | Name: ${SubjectName} | Department: ${DepartmentName} | IP: ${req.ip}`
-      );
+    /* ----------------------------------
+       2. Insert valid subjects only
+    -----------------------------------*/
+    let insertedDocs = [];
 
-      results.push({
-        SubjectCode,
-        SubjectName,
-        success: true,
-        message: "Subject Created Successfully",
-      });
+    if (docsToInsert.length > 0) {
+      try {
+        insertedDocs = await Subjects.insertMany(docsToInsert, {
+          ordered: false,
+        });
+      } catch (err) {
+        // Handle duplicate key errors only
+        if (err.code !== 11000 && !err.writeErrors) {
+          throw err;
+        }
+        insertedDocs = err.insertedDocs || [];
+      }
     }
 
-    return res.status(207).json({
-      success: true,
+    const insertedCodes = new Set(insertedDocs.map((d) => d.SubjectCode));
+
+    /* ----------------------------------
+       3. Build final response
+    -----------------------------------*/
+    docsToInsert.forEach((doc) => {
+      if (insertedCodes.has(doc.SubjectCode)) {
+        logger.info(
+          `Subject Created | Code: ${doc.SubjectCode} | IP: ${req.ip}`,
+        );
+        results.push({
+          SubjectCode: doc.SubjectCode,
+          SubjectName: doc.SubjectName,
+          success: true,
+          message: "Subject Created Successfully",
+        });
+      } else {
+        logger.warn(
+          `Duplicate Subject | Code: ${doc.SubjectCode} | IP: ${req.ip}`,
+        );
+        results.push({
+          SubjectCode: doc.SubjectCode,
+          SubjectName: doc.SubjectName,
+          success: false,
+          message: "Duplicate Subject Code or Name",
+        });
+      }
+    });
+
+    /* ----------------------------------
+       4. Overall success flag
+    -----------------------------------*/
+    const overallSuccess = results.some((r) => r.success === true);
+
+    return res.status(200).json({
+      success: overallSuccess,
       results,
     });
   } catch (error) {
-    logger.error(
-      `Add Subjects failed | Error: ${error.message} | IP: ${req.ip}`
-    );
+    logger.error(`Add Subjects Failed | ${error.message} | IP: ${req.ip}`, {
+      stack: error.stack,
+    });
+
     return res.status(500).json({
       success: false,
       message: "Internal server error while adding subjects",
