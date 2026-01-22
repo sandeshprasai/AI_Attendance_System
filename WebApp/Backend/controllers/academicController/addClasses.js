@@ -4,9 +4,12 @@ const logger = require("../../logger/logger");
 const addMultipleClasses = async (req, res) => {
   const { classes } = req.body;
 
-  logger.info(`Bulk create class request from ${req.ip}`);
+  logger.info(`Add Classes process started | IP: ${req.ip}`);
 
+  // Empty classes array
   if (!Array.isArray(classes) || classes.length === 0) {
+    logger.warn(`Empty classes fields | IP: ${req.ip}`);
+
     return res.status(400).json({
       success: false,
       message: "Classes array is required",
@@ -15,19 +18,25 @@ const addMultipleClasses = async (req, res) => {
   }
 
   const payload = classes.map(item => ({
-    class: item.Class,
+    Classroom: item.Class,
     capacity: item.Capacity,
     description: item.Description,
   }));
 
   try {
     const createdClasses = await classSchema.insertMany(payload, {
-      ordered: false, // 🔑 KEY FIX
+      ordered: false,
     });
+
+    
+
+    logger.info(
+      `Classes Created Successfully | Count: ${createdClasses.length} | IP: ${req.ip}`
+    );
 
     return res.status(201).json({
       success: true,
-      message: "Classes created successfully",
+      message: "Classes Created Successfully",
       data: {
         createdCount: createdClasses.length,
         created: createdClasses,
@@ -35,7 +44,7 @@ const addMultipleClasses = async (req, res) => {
     });
 
   } catch (error) {
-    // 🔹 HANDLE DUPLICATE KEY ERROR
+    // Duplicate classes
     if (error.code === 11000) {
       const insertedDocs = error.insertedDocs || [];
 
@@ -43,10 +52,16 @@ const addMultipleClasses = async (req, res) => {
         err => err.err.op.class
       );
 
-      logger.warn(`Duplicate classes skipped`, {
-        duplicates: duplicateClasses,
-      });
+      logger.warn(
+        `Duplicate Classes skipped while adding classes | IP: ${req.ip}`,
+        {
+          duplicates: duplicateClasses,
+        }
+      );
 
+
+
+      
       return res.status(207).json({
         success: true,
         message: "Some classes already existed and were skipped",
@@ -59,9 +74,9 @@ const addMultipleClasses = async (req, res) => {
       });
     }
 
-    logger.error(`Failed to create classes from ${req.ip}`, {
-      error: error.message,
-    });
+    logger.error(
+      `Failed to add classes | IP: ${req.ip} | Error: ${error.message}`
+    );
 
     return res.status(500).json({
       success: false,

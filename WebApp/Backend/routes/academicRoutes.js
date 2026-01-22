@@ -20,9 +20,9 @@ const addClasses = require("../controllers/academicController/addClasses");
 
 // ------------------------------------------------Import Controllers Completed ------------------------------------------------
 
-// ------------------------------------------------All get requests ------------------------------------------------
+// ------------------------------------------------All get requests ------------------------------------------------------------
 
-// ------------------------------------------------All get requests Completed------------------------------------------------
+// ------------------------------------------------All get requests Completed---------------------------------------------------
 
 academicRoutes.get("/allDepartments", preventAccess, getAllDepartments);
 academicRoutes.get("/allSubjects/", preventAccess, getAllSubjects);

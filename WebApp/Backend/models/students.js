@@ -17,22 +17,9 @@ const students = new mongoose.Schema(
     },
 
     Faculty: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "faculty",
       required: true,
-      trim: true,
-      enum: {
-        values: [
-          "CIVIL",
-          "COMPUTER",
-          "BE IT",
-          "BBA",
-          "ARCHITECTURE",
-          "ELECTRONICS",
-          "BE SOFTWARE",
-          "BE INFORMATION",
-        ],
-        message: "{VALUE} is not a valid faculty",
-      },
     },
 
     YearOfEnrollment: {
@@ -46,6 +33,7 @@ const students = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      unique: true,
       lowercase: true,
       match: [
         /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
@@ -80,7 +68,7 @@ const students = new mongoose.Schema(
       required: false,
       match: [/^\d{10}$/, "Please enter a valid 10-digit phone number"],
     },
-    Class: {
+    Classroom: {
       type: String,
       required: true,
       trim: true,
@@ -117,10 +105,17 @@ const students = new mongoose.Schema(
       default: null,
       trim: true,
     },
+    Subjects: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "subjects",
+        required: true,
+      },
+    ],
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("students", students);
