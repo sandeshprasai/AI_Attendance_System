@@ -76,7 +76,10 @@ const sanitizeStudentInput = async (req, res, next) => {
         "string.pattern.base": "Guardian Phone number must be 10 digits",
         "string.empty": "Guardian Phone number is required",
       }),
-
+    Section: joi.string().required().messages({
+      "string.empty": "Section is requird",
+      "any.required": "Section is required",
+    }),
     Class: joi.string().required().messages({
       "string.empty": "Class is required",
     }),
@@ -90,6 +93,28 @@ const sanitizeStudentInput = async (req, res, next) => {
       "string.min": "Address must be at least 5 characters long",
     }),
 
+    Subjects: joi
+      .array()
+      .items(
+        joi
+          .string()
+          .trim()
+          .pattern(/^[A-Za-z\s]+$/)
+          .messages({
+            "string.pattern.base":
+              "Subject Name can contain only letter and spaces",
+            "string.empty": "Subjects name cannot be empty",
+          }),
+      )
+      .min(1)
+      .unique()
+      .required()
+      .messages({
+        "array.base": "Subjects must be an array",
+        "array.min": "At least one subjects is required",
+        "any.required": "Subjects field are required",
+      }),
+
     UniversityReg: joi.string().required().messages({
       "string.empty": "University Registration is required",
     }),
@@ -99,7 +124,7 @@ const sanitizeStudentInput = async (req, res, next) => {
   try {
     await Schema.validateAsync(req.body, {
       abortEarly: false,
-      allowUnknown: true,
+      allowUnknown: false,
     });
     next();
   } catch (error) {

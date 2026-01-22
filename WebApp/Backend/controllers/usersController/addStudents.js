@@ -1,16 +1,20 @@
 const students = require("./../../models/students");
 const users = require("./../../models/users");
+const FacultySchema = require("./../../models/department");
+const SubjectSchema = require("./../../models/subjects");
 const bcryptjs = require("bcryptjs");
 const logger = require("./../../logger/logger");
 const generateCredentials = require("./../../middlewares/generateCredentials");
 const sendCredentialsEmail = require("./../../middlewares/mailCredentials");
 const uploadToCloudinary = require("./../../middlewares/cloudinaryUpload");
+const { default: mongoose } = require("mongoose");
 
 const addStudents = async (req, res) => {
-  logger.info(`ADD_STUDENT request received: RollNo=${req.body?.RollNo}, IP=${req.ip}`);
+  logger.info(
+    `ADD_STUDENT request received: RollNo=${req.body?.RollNo}, IP=${req.ip}`,
+  );
 
   try {
-  
     const {
       RollNo,
       FullName,
@@ -24,13 +28,10 @@ const addStudents = async (req, res) => {
       Phone,
       YearOfEnrollment,
       Faculty,
+      Subjects,
+      Section,
     } = req.body;
 
-    if (!RollNo || !FullName || !Email) {
-      return res.status(400).json({ error: "Required fields missing" });
-    }
-
-    
     const existingStudent = await students.findOne({ RollNo });
     if (existingStudent) {
       logger.warn(`Student with RollNo ${RollNo} already exists`);
@@ -51,19 +52,42 @@ const addStudents = async (req, res) => {
       logger.warn("No image uploaded for student.");
     }
 
+    const facultyDoc = await FacultySchema.findOne({ DepartmentName: Faculty });
+    if (!facultyDoc) {
+      return res.status(400).json({ error: "Invalid faculty selected" });
+    }
+    console.log(facultyDoc._id);
+    console.log(Subjects);
+    const subjectDocs = await SubjectSchema.find({
+      SubjectName: { $in: Subjects },
+      DepartmentID: facultyDoc._id, // ensure subjects belong to this faculty
+    });
+
+    console.log(subjectDocs);
+
+    if (subjectDocs.length !== Subjects.length) {
+      return res.status(400).json({
+        error: "Invalid Subject(s) selected for the chosen faculty",
+      });
+    }
+
+    const subjectIds = subjectDocs.map((s) => s._id);
+
     const newStudent = await students.create({
       RollNo,
       FullName,
       Email,
       UniversityReg,
       FullAddress,
-      Class,
+      Classroom: Class,
       DateOfBirth,
       GuardianName,
       GuardianPhone,
       Phone,
       YearOfEnrollment,
-      Faculty,
+      Subjects: subjectIds,
+      Faculty: facultyDoc._id,
+      Section,
       ProfileImagePath: profileImageUrl,
       CloudinaryPublicId: cloudinaryId,
     });
@@ -72,7 +96,6 @@ const addStudents = async (req, res) => {
 
     let { username, password } = generateCredentials(FullName, RollNo);
 
-  
     while (await users.findOne({ username })) {
       username = `${username}_${Math.floor(Math.random() * 1000)}`;
     }
@@ -90,14 +113,12 @@ const addStudents = async (req, res) => {
 
     logger.info(`User account created: username=${username}`);
 
-  
     await sendCredentialsEmail(Email, username, password);
 
     return res.status(200).json({
       success: true,
       message: "Student registered and user account created",
     });
-
   } catch (err) {
     logger.error(`Error adding student: ${err.stack || err}`);
 

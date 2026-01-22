@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 const teachersSchema = new mongoose.Schema(
   {
     EmployeeId: {
-       type: String,
-  unique: true,   // ensures no duplicates in the database
-  required: true, // optional, ensures this field is always provided
+      type: String,
+      unique: true, // ensures no duplicates in the database
+      required: true, // optional, ensures this field is always provided
     },
 
     FullName: {
@@ -28,15 +28,20 @@ const teachersSchema = new mongoose.Schema(
       type: String,
     },
 
-   Faculty: {
-  type: String,
-  required: true,
-},
+    Faculty: {
+      type: String,
+      required: true,
+    },
 
-    Subject: {
-  type: [String], // array of strings
-  required: true,
-},
+    Subjects: {
+      type: [String],
+      required: true,
+      ref: "subjects",
+    },
+    Classroom: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "classes",
+    },
 
     JoinedYear: {
       type: String,
@@ -49,7 +54,7 @@ const teachersSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("Teachers", teachersSchema);

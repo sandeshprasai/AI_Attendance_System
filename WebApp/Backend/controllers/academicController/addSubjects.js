@@ -4,9 +4,12 @@ const logger = require("../../logger/logger");
 
 const addSubjects = async (req, res) => {
   try {
-    const subjects = req.body; // Expecting an array of subjects
+    const subjects = req.body;
 
     if (!Array.isArray(subjects) || subjects.length === 0) {
+      logger.warn(
+        `Empty subjects fields | IP: ${req.ip}`
+      );
       return res.status(400).json({
         success: false,
         message: "Request body must be a non-empty array of subjects",
@@ -18,8 +21,11 @@ const addSubjects = async (req, res) => {
     for (const subj of subjects) {
       const { SubjectCode, SubjectName, DepartmentName } = subj;
 
-      // Basic validation (extra safety in case middleware is bypassed)
+      // Empty fields
       if (!SubjectCode || !SubjectName || !DepartmentName) {
+        logger.warn(
+          `Empty subjects fields | Code: ${SubjectCode || "N/A"} | IP: ${req.ip}`
+        );
         results.push({
           SubjectCode,
           SubjectName,
@@ -29,43 +35,52 @@ const addSubjects = async (req, res) => {
         continue;
       }
 
-      // Check duplicate SubjectCode
+      // Duplicate Subject Code
       let existingSubject = await Subjects.findOne({ SubjectCode });
       if (existingSubject) {
+        logger.warn(
+          `Duplicate Subject Code | Code: ${SubjectCode} | Existing Subject: ${existingSubject.SubjectName} | IP: ${req.ip}`
+        );
         results.push({
           SubjectCode,
           SubjectName,
           success: false,
-          message: `Subject code ${SubjectCode} already exists for ${existingSubject.SubjectName}`,
+          message: "Duplicate Subject Code",
         });
         continue;
       }
 
-      // Check duplicate SubjectName
+      // Duplicate Subject Name
       existingSubject = await Subjects.findOne({ SubjectName });
       if (existingSubject) {
+        logger.warn(
+          `Subject already exists | Name: ${SubjectName} | Code: ${existingSubject.SubjectCode} | IP: ${req.ip}`
+        );
         results.push({
           SubjectCode,
           SubjectName,
           success: false,
-          message: `Subject name ${SubjectName} already exists with code ${existingSubject.SubjectCode}`,
+          message: "Subject already exists",
         });
         continue;
       }
 
-      // Find department
+      // Invalid Department
       const department = await Department.findOne({ DepartmentName });
       if (!department) {
+        logger.warn(
+          `Invalid Department Name to add Subjects | Department: ${DepartmentName} | IP: ${req.ip}`
+        );
         results.push({
           SubjectCode,
           SubjectName,
           success: false,
-          message: `Invalid department name: ${DepartmentName}`,
+          message: "Invalid Department Name",
         });
         continue;
       }
 
-      // Create subject
+      // Create Subject
       await Subjects.create({
         SubjectCode,
         SubjectName,
@@ -73,14 +88,14 @@ const addSubjects = async (req, res) => {
       });
 
       logger.info(
-        `Subject created successfully | ${SubjectName} | Code: ${SubjectCode} | Department: ${DepartmentName} | IP: ${req.ip}`
+        `Subject Created Successfully | Code: ${SubjectCode} | Name: ${SubjectName} | Department: ${DepartmentName} | IP: ${req.ip}`
       );
 
       results.push({
         SubjectCode,
         SubjectName,
         success: true,
-        message: "Subject added successfully",
+        message: "Subject Created Successfully",
       });
     }
 
