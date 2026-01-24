@@ -23,11 +23,13 @@ const academicClassSchema = new mongoose.Schema({
       },
     },
   },
-  subjects: {
-    type: String,
-    default: [],
-    required: true,
-  },
+  subjects: [
+    {
+      type: String,
+      required: true,
+      default: [],
+    },
+  ],
   section: {
     type: String,
     required: true,
