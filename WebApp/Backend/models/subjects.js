@@ -6,13 +6,11 @@ const subjectSchema = new mongoose.Schema(
     SubjectCode: {
       type: String,
       required: true,
-      unique: true,
     },
 
     SubjectName: {
       type: String,
       required: true,
-      unique: true,
       maxlength: 100,
       trim: true,
     },
@@ -38,5 +36,9 @@ const subjectSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+// ✅ Compound indexes for uniqueness per department
+subjectSchema.index({ DepartmentID: 1, SubjectCode: 1 }, { unique: true });
+subjectSchema.index({ DepartmentID: 1, SubjectName: 1 }, { unique: true });
+
 
 module.exports = mongoose.model("Subjects", subjectSchema);

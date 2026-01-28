@@ -26,7 +26,8 @@ import AcademicInfoSection from "../components/FormSections/AcademicInfoSection"
 import ProfilePhotoSection from "../components/FormSections/ProfilePhotoSection";
 import GuardianInfoSection from "../components/FormSections/GuardianInfoSection";
 
-import useDepartments from "../../hooks/useDepartments";
+import useDepartments from "../hooks/useDepartments";
+
 
 export default function AddStudent() {
   const API_URL = import.meta.env.VITE_API_URL;
