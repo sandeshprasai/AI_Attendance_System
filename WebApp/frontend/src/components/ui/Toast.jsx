@@ -1,24 +1,32 @@
 import { useEffect } from "react";
-import { CheckCircle, AlertTriangle, X } from "lucide-react";
 
-export default function Toast({ message, type, onClose }) {
+const Toast = ({ message, type = "success", onClose }) => {
   useEffect(() => {
     const timer = setTimeout(onClose, 3000);
     return () => clearTimeout(timer);
-  }, []);
-
-  const Icon = type === "success" ? CheckCircle : AlertTriangle;
-  const bg = type === "success" ? "bg-emerald-600" : "bg-red-500";
+  }, [onClose]);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-slideIn">
-      <div className={`${bg} text-white px-6 py-4 rounded-xl flex items-center gap-3`}>
-        <Icon className="w-5 h-5" />
-        <p>{message}</p>
-        <button onClick={onClose}>
-          <X className="w-4 h-4" />
+    <div className="fixed top-24 right-6 z-50 animate-slide-in">
+      <div
+        className={`px-6 py-4 rounded-xl shadow-lg flex items-center justify-between text-white ${
+          type === "success"
+            ? "bg-emerald-600"
+            : type === "error"
+            ? "bg-red-600"
+            : "bg-amber-500"
+        }`}
+      >
+        <span>{message}</span>
+        <button
+          onClick={onClose}
+          className="ml-4 font-bold text-xl leading-none hover:opacity-80"
+        >
+          ×
         </button>
       </div>
     </div>
   );
-}
+};
+
+export default Toast;

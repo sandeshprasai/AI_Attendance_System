@@ -6,7 +6,7 @@ import FacultyInfoSection from "../components/FormSections/FacultyInfoSection";
 import Toast from "../components/ui/Toast";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
-import useDepartments from "../../hooks/useDepartments";
+import useDepartments from "../hooks/useDepartments";
 import {
   validateName,
   validateEmail,
