@@ -90,7 +90,8 @@ dist/
 *.db
 *.h5
 *.keras
-
+*.npy
+*.zip
 
 # =========================
 # VSCode / IDE
