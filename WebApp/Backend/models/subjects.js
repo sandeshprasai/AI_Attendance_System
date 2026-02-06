@@ -16,8 +16,9 @@ const subjectSchema = new mongoose.Schema(
     },
     Semester: {
       type: Number,
+      required: true,
       min: 1,
-      max: 8,
+      max: 10,
       validate: {
         validator: Number.isInteger,
         message: (props) => {

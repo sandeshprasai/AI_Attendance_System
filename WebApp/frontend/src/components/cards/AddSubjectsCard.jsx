@@ -81,7 +81,7 @@ const AddSubjectsCard = ({
       DepartmentName: s.Department,
       SubjectCode: s.SubjectCode.trim(),
       SubjectName: s.SubjectName.trim(),
-      Semester: Number(s.Semester) || 1,
+      Semester: Number(s.Semester), // Remove "|| 1"
     }));
 
     setIsSubmitting(true);
@@ -232,7 +232,7 @@ const AddSubjectsCard = ({
             </div>
           )}
 
-          <div className="flex gap-4 items-end">
+          <div className="flex gap-4 items-start">
             {/* Department */}
             <div className="flex-1">
               <label className="block text-sm font-semibold text-gray-600 mb-1">Department</label>
@@ -249,9 +249,11 @@ const AddSubjectsCard = ({
                   <option key={opt} value={opt}>{opt}</option>
                 ))}
               </select>
-              {errors[index]?.Department && (
-                <p className="text-red-500 text-xs mt-1">{errors[index].Department}</p>
-              )}
+              <div className="h-5 mt-1">
+                {errors[index]?.Department && (
+                  <p className="text-red-500 text-xs">{errors[index].Department}</p>
+                )}
+              </div>
             </div>
 
             {/* Subject Code */}
@@ -267,9 +269,11 @@ const AddSubjectsCard = ({
                   errors[index]?.SubjectCode ? "border-red-500" : "border-emerald-300"
                 }`}
               />
-              {errors[index]?.SubjectCode && (
-                <p className="text-red-500 text-xs mt-1">{errors[index].SubjectCode}</p>
-              )}
+              <div className="h-5 mt-1">
+                {errors[index]?.SubjectCode && (
+                  <p className="text-red-500 text-xs">{errors[index].SubjectCode}</p>
+                )}
+              </div>
             </div>
 
             {/* Subject Name */}
@@ -285,35 +289,40 @@ const AddSubjectsCard = ({
                   errors[index]?.SubjectName ? "border-red-500" : "border-emerald-300"
                 }`}
               />
-              {errors[index]?.SubjectName && (
-                <p className="text-red-500 text-xs mt-1">{errors[index].SubjectName}</p>
-              )}
+              <div className="h-5 mt-1">
+                {errors[index]?.SubjectName && (
+                  <p className="text-red-500 text-xs">{errors[index].SubjectName}</p>
+                )}
+              </div>
             </div>
 
             {/* Semester */}
             <div className="flex-1">
-              <label className="block text-sm font-semibold text-gray-600 mb-1">Semester</label>
+               <label className="block text-sm font-semibold text-gray-600 mb-1">Semester *</label>
               <input
                 type="number"
                 min={1}
-                max={8}
-                placeholder="1 - 8"
+                max={10}
+                placeholder="1 - 10"
                 value={sub.Semester}
                 onChange={(e) =>
                   handleSubjectChange(index, "Semester", e.target.value === "" ? "" : e.target.value)
                 }
                 disabled={isSubmitting}
+                required
                 className={`w-full px-4 py-2 rounded-lg border ${
                   errors[index]?.Semester ? "border-red-500" : "border-emerald-300"
                 }`}
               />
-              {errors[index]?.Semester && (
-                <p className="text-red-500 text-xs mt-1">{errors[index].Semester}</p>
-              )}
+              <div className="h-5 mt-1">
+                {errors[index]?.Semester && (
+                  <p className="text-red-500 text-xs">{errors[index].Semester}</p>
+                )}
+              </div>
             </div>
 
             {/* Add / Remove */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 pt-6">
               <button
                 onClick={addRow}
                 disabled={isSubmitting}
