@@ -12,7 +12,6 @@ build/
 .eggs/
 *.log
 *.yaml
-*.json
 public/
 .ipynb_checkpoints/
 *.jpg
@@ -52,6 +51,9 @@ AI_And_ML_Model/datasets/test
 AI_And_ML_Model/datasets/val/
 logs/
 checkpoints/
+ai-ml-model/*.json
+ai-ml-model/**/*.json
+
 
 # Large model files
 *.h5
