@@ -18,11 +18,19 @@ const singleSubjectSchema = Joi.object({
     "any.required": "Department name is required",
     "string.empty": "Department name cannot be empty",
   }),
-  Semester: Joi.number().integer().min(1).max(8).optional().messages({
-    "number.base": "Semester must be a valid number ",
-    "number.min": "Semester should be between 1 to 8",
-    "number.max": "Semester should be between 1 to 8 ",
+  Semester: Joi.number()
+  .strict()        // 🔥 prevents "" or "3"
+  .integer()
+  .min(1)
+  .max(10)
+  .required()
+  .messages({
+    "number.base": "Semester must be a valid number",
+    "number.min": "Semester should be between 1 to 10",
+    "number.max": "Semester should be between 1 to 10",
+    "any.required": "Semester is required",
   }),
+
 }).unknown(false);
 
 // Define an array of subjects schema

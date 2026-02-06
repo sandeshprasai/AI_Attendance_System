@@ -27,15 +27,18 @@ export const validateSubjects = (subjects = []) => {
       rowErrors.Department = "Department name must not exceed 100 characters";
     }
 
-    // Semester (optional but strict)
-    if (sub.Semester !== "" && sub.Semester !== undefined && sub.Semester !== null) {
-      const sem = Number(sub.Semester);
-      if (!Number.isInteger(sem)) {
-        rowErrors.Semester = "Semester must be a valid integer";
-      } else if (sem < 1 || sem > 8) {
-        rowErrors.Semester = "Semester should be between 1 and 8";
-      }
-    }
+     // Semester (required and strict)
+   const semester = sub.Semester;
+   if (semester === "" || semester === undefined || semester === null) {
+     rowErrors.Semester = "Semester is required";
+   } else {
+     const sem = Number(semester);
+     if (!Number.isInteger(sem)) {
+       rowErrors.Semester = "Semester must be a valid integer";
+     } else if (sem < 1 || sem > 10) {
+       rowErrors.Semester = "Semester should be between 1 and 10";
+     }
+   }
 
     if (Object.keys(rowErrors).length > 0) {
       errors[index] = rowErrors;
