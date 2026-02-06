@@ -11,7 +11,8 @@ dist/
 build/
 .eggs/
 *.log
-
+*.yaml
+*.json
 public/
 .ipynb_checkpoints/
 *.jpg
