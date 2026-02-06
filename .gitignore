@@ -102,6 +102,7 @@ dist/
 *.swo
 package-lock.json
 .virtual_documents/
+*.onnx
 
 
 
