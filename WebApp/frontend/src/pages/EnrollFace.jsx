@@ -17,7 +17,7 @@ export default function EnrollFace() {
     const canvasRef = useRef(null);
     const [cameraStream, setCameraStream] = useState(null);
 
-    // NEW: Camera device management
+    // Camera device management
     const [availableCameras, setAvailableCameras] = useState([]);
     const [selectedCameraId, setSelectedCameraId] = useState("");
 
@@ -26,35 +26,47 @@ export default function EnrollFace() {
         name: "",
     });
 
-    // NEW: Enumerate available cameras on component mount
-    useEffect(() => {
-        const getCameras = async () => {
-            try {
-                // Request permission first
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                stream.getTracks().forEach(track => track.stop());
-
-                // Then enumerate devices
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                
-                console.log("Available cameras:", videoDevices);
-                setAvailableCameras(videoDevices);
-                
-                // Set default camera
-                if (videoDevices.length > 0 && !selectedCameraId) {
-                    setSelectedCameraId(videoDevices[0].deviceId);
-                }
-            } catch (error) {
-                console.error("Error enumerating cameras:", error);
-                setToast({
-                    message: "Could not access camera devices",
-                    type: "error",
-                });
+    // Enumerate available cameras
+    const enumerateCameras = async () => {
+        try {
+            console.log("Starting camera enumeration...");
+            
+            // Get all devices
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            
+            console.log("Found video devices:", videoDevices);
+            console.log("Number of cameras:", videoDevices.length);
+            
+            setAvailableCameras(videoDevices);
+            
+            // Set default camera if none selected
+            if (videoDevices.length > 0 && !selectedCameraId) {
+                setSelectedCameraId(videoDevices[0].deviceId);
+                console.log("Default camera set to:", videoDevices[0].deviceId);
             }
+
+            return videoDevices;
+        } catch (error) {
+            console.error("Error enumerating cameras:", error);
+            return [];
+        }
+    };
+
+    // Initial camera enumeration on mount
+    useEffect(() => {
+        const initCameras = async () => {
+            await enumerateCameras();
         };
 
-        getCameras();
+        initCameras();
+
+        // Listen for device changes
+        navigator.mediaDevices.addEventListener('devicechange', enumerateCameras);
+
+        return () => {
+            navigator.mediaDevices.removeEventListener('devicechange', enumerateCameras);
+        };
     }, []);
 
     // Fix: Attach stream to video element when it's rendered
@@ -70,7 +82,8 @@ export default function EnrollFace() {
     useEffect(() => {
         console.log("isCameraActive changed to:", isCameraActive);
         console.log("videoRef.current status:", videoRef.current ? "Present" : "Null");
-    }, [isCameraActive]);
+        console.log("Available cameras count:", availableCameras.length);
+    }, [isCameraActive, availableCameras]);
 
     // YOLO Bounding Box Detection Loop
     useEffect(() => {
@@ -164,9 +177,10 @@ export default function EnrollFace() {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // NEW: Handle camera selection change
+    // Handle camera selection change
     const handleCameraChange = async (e) => {
         const newCameraId = e.target.value;
+        console.log("Camera changed to:", newCameraId);
         setSelectedCameraId(newCameraId);
 
         // If camera is currently active, restart with new camera
@@ -175,26 +189,34 @@ export default function EnrollFace() {
             // Small delay to ensure cleanup
             setTimeout(() => {
                 startCamera(newCameraId);
-            }, 100);
+            }, 200);
         }
     };
 
-    // MODIFIED: Start camera with optional deviceId parameter
+    // Start camera with optional deviceId parameter
     const startCamera = async (deviceId = selectedCameraId) => {
         try {
             console.log("Requesting camera access for device:", deviceId);
             
             const constraints = {
-                video: {
-                    deviceId: deviceId ? { exact: deviceId } : undefined,
-                    width: 640,
-                    height: 480
-                }
+                video: deviceId 
+                    ? { 
+                        deviceId: { exact: deviceId },
+                        width: 640,
+                        height: 480
+                      }
+                    : {
+                        width: 640,
+                        height: 480
+                      }
             };
 
             const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
             console.log("Camera access granted, stream acquired");
+
+            // After getting permission, re-enumerate to get proper labels
+            await enumerateCameras();
 
             // First, make the video element render
             setIsCameraActive(true);
@@ -364,17 +386,17 @@ export default function EnrollFace() {
                         Capture Face Image
                     </h2>
 
-                    {/* NEW: Camera Selection Dropdown */}
-                    {availableCameras.length > 1 && !isCameraActive && !imagePreview && (
+                    {/* Camera Selection Dropdown - ALWAYS SHOW if cameras are available */}
+                    {availableCameras.length > 0 && !imagePreview && (
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Select Camera
+                                Select Camera {availableCameras.length > 1 && `(${availableCameras.length} available)`}
                             </label>
                             <select
                                 value={selectedCameraId}
                                 onChange={handleCameraChange}
-                                disabled={loading}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
+                                disabled={loading || isCameraActive}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
                             >
                                 {availableCameras.map((camera, index) => (
                                     <option key={camera.deviceId} value={camera.deviceId}>
@@ -382,27 +404,11 @@ export default function EnrollFace() {
                                     </option>
                                 ))}
                             </select>
-                        </div>
-                    )}
-
-                    {/* NEW: Camera Switch Button (when camera is active) */}
-                    {availableCameras.length > 1 && isCameraActive && (
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Switch Camera
-                            </label>
-                            <select
-                                value={selectedCameraId}
-                                onChange={handleCameraChange}
-                                disabled={loading}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
-                            >
-                                {availableCameras.map((camera, index) => (
-                                    <option key={camera.deviceId} value={camera.deviceId}>
-                                        {camera.label || `Camera ${index + 1}`}
-                                    </option>
-                                ))}
-                            </select>
+                            {isCameraActive && availableCameras.length > 1 && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Stop the camera to switch devices
+                                </p>
+                            )}
                         </div>
                     )}
 
@@ -450,7 +456,7 @@ export default function EnrollFace() {
                             {!isCameraActive && !imagePreview && (
                                 <button
                                     onClick={() => startCamera()}
-                                    disabled={loading}
+                                    disabled={loading || availableCameras.length === 0}
                                     className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-gray-400"
                                 >
                                     📷 Start Camera
