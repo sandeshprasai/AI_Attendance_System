@@ -13,7 +13,8 @@ import ContactUs from "./pages/ContactUs";
 import CreateClassroom from "./components/CreateClassroom";
 import AddStudent from "./pages/AddStudent";
 import AddTeacher from "./pages/AddTeacher";
-import AddAcademics from "./pages/AddAcademics"; // 🆕 Added import
+import AddAcademics from "./pages/AddAcademics";
+import EnrollFace from "./pages/EnrollFace"; // 🆕 Face enrollment page
 
 // route protection
 import RoleProtectedRoute from "./routes/RoleProtectedRoute";
@@ -60,6 +61,16 @@ export default function App() {
           element={
             <RoleProtectedRoute allowedRoles={["admin"]}>
               <AddAcademics />
+            </RoleProtectedRoute>
+          }
+        />
+
+        {/* 🆕 Face Enrollment Route */}
+        <Route
+          path="/enroll-face"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <EnrollFace />
             </RoleProtectedRoute>
           }
         />
