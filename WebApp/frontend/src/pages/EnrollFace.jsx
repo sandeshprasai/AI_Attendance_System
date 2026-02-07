@@ -24,8 +24,14 @@ export default function EnrollFace() {
     const MAX_IMAGES = 10;
 
     const [formData, setFormData] = useState({
-        roll_no: "", // Changed from student_id to roll_no
+        roll_no: "",
     });
+
+    // Student verification state
+    const [studentVerified, setStudentVerified] = useState(false);
+    const [studentDetails, setStudentDetails] = useState(null);
+    const [findingStudent, setFindingStudent] = useState(false);
+    const [enrollmentWarning, setEnrollmentWarning] = useState(false);
 
     // Enumerate available cameras
     const enumerateCameras = async () => {
@@ -161,6 +167,68 @@ export default function EnrollFace() {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+        
+        // Reset verification when roll number changes
+        if (name === "roll_no") {
+            setStudentVerified(false);
+            setStudentDetails(null);
+            setEnrollmentWarning(false);
+        }
+    };
+
+    // Find Student Function
+    const handleFindStudent = async () => {
+        if (!formData.roll_no.trim()) {
+            setToast({ message: "Please enter a Roll Number", type: "error" });
+            return;
+        }
+
+        try {
+            setFindingStudent(true);
+            setEnrollmentWarning(false); // Reset warning
+
+            const response = await axios.post(`${FLASK_API_URL}/find-student`, {
+                roll_no: formData.roll_no
+            });
+
+            if (response.data.status === "success") {
+                const student = response.data.data[0];
+                setStudentDetails(student);
+                setStudentVerified(true);
+                
+                // Check if already enrolled
+                if (student.is_enrolled) {
+                    setEnrollmentWarning(true);
+                    setToast({
+                        message: `${student.full_name} is already enrolled. You can re-enroll to update face data.`,
+                        type: "error",
+                    });
+                } else {
+                    setToast({
+                        message: `Student found: ${student.full_name}`,
+                        type: "success",
+                    });
+                }
+            }
+
+        } catch (error) {
+            console.error("Find student error:", error);
+            
+            const errorMessage = error.response?.data?.message 
+                || "Student not found. Please check the Roll Number.";
+            
+            setToast({
+                message: errorMessage,
+                type: "error",
+            });
+            
+            setStudentVerified(false);
+            setStudentDetails(null);
+            setEnrollmentWarning(false);
+
+        } finally {
+            setFindingStudent(false);
+        }
     };
 
     // Handle camera selection change
@@ -297,9 +365,9 @@ export default function EnrollFace() {
     const handleSubmit = async () => {
         if (loading) return;
 
-        // Validation
-        if (!formData.roll_no.trim()) {
-            setToast({ message: "Roll Number is required", type: "error" });
+        // Check if student is verified first
+        if (!studentVerified) {
+            setToast({ message: "Please find and verify student first", type: "error" });
             return;
         }
 
@@ -311,11 +379,9 @@ export default function EnrollFace() {
         try {
             setLoading(true);
 
-            // Create FormData with all images
             const data = new FormData();
-            data.append("roll_no", formData.roll_no); // Changed from student_id to roll_no
+            data.append("roll_no", formData.roll_no);
 
-            // Append all images with the same key "images"
             capturedImages.forEach((image) => {
                 data.append("images", image.file);
             });
@@ -328,17 +394,26 @@ export default function EnrollFace() {
                 },
             });
 
-            // Handle response based on new format
             if (response.data.status === "success") {
                 const responseData = response.data.data[0];
                 
+                const successMessage = enrollmentWarning 
+                    ? `Face data updated successfully for ${responseData.student_name} (${responseData.images_processed} processed, ${responseData.images_failed} failed)`
+                    : `${response.data.message} for ${responseData.student_name} (${responseData.images_processed} processed, ${responseData.images_failed} failed)`;
+                
                 setToast({
-                    message: `${response.data.message} for ${responseData.student_name} (${responseData.images_processed} processed, ${responseData.images_failed} failed)`,
+                    message: successMessage,
                     type: "success",
                 });
 
+                // Stop camera if it's running
+                stopCamera();
+
                 // Reset form
                 setFormData({ roll_no: "" });
+                setStudentVerified(false);
+                setStudentDetails(null);
+                setEnrollmentWarning(false);
                 clearAllImages();
             } else {
                 setToast({
@@ -377,30 +452,138 @@ export default function EnrollFace() {
                         Student Information
                     </h2>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Roll Number <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="number"
-                            name="roll_no"
-                            value={formData.roll_no}
-                            onChange={handleInputChange}
-                            disabled={loading}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                            placeholder="e.g., 101"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                            Enter the student's roll number registered in the system
-                        </p>
+                    <div className="space-y-4">
+                        {/* Roll Number Input with Find Button */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Roll Number <span className="text-red-500">*</span>
+                            </label>
+                            <div className="flex gap-3">
+                                <input
+                                    type="text"
+                                    name="roll_no"
+                                    value={formData.roll_no}
+                                    onChange={handleInputChange}
+                                    disabled={loading || findingStudent || studentVerified}
+                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent disabled:bg-gray-100"
+                                    placeholder="e.g., 101"
+                                />
+                                <button
+                                    onClick={handleFindStudent}
+                                    disabled={loading || findingStudent || studentVerified || !formData.roll_no.trim()}
+                                    className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                                        studentVerified
+                                            ? "bg-green-100 text-green-700 cursor-not-allowed"
+                                            : "bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                    }`}
+                                >
+                                    {findingStudent ? "Finding..." : studentVerified ? "✓ Verified" : "🔍 Find"}
+                                </button>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                                Enter the roll number and click Find to verify student
+                            </p>
+                        </div>
+
+                        {/* Student Details Display - ENHANCED */}
+                        {studentVerified && studentDetails && (
+                            <div className={`border-2 rounded-lg p-4 space-y-3 ${
+                                enrollmentWarning 
+                                    ? 'bg-yellow-50 border-yellow-400' 
+                                    : 'bg-emerald-50 border-emerald-300'
+                            }`}>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <h3 className={`font-semibold text-lg ${
+                                            enrollmentWarning ? 'text-yellow-800' : 'text-emerald-800'
+                                        }`}>
+                                            Student Verified ✓
+                                        </h3>
+                                        {enrollmentWarning && (
+                                            <span className="bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse">
+                                                ALREADY ENROLLED
+                                            </span>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            setStudentVerified(false);
+                                            setStudentDetails(null);
+                                            setFormData({ roll_no: "" });
+                                            setEnrollmentWarning(false);
+                                            clearAllImages();
+                                            stopCamera();
+                                        }}
+                                        disabled={loading}
+                                        className={`text-sm underline font-medium ${
+                                            enrollmentWarning 
+                                                ? 'text-yellow-700 hover:text-yellow-900' 
+                                                : 'text-emerald-700 hover:text-emerald-900'
+                                        }`}
+                                    >
+                                        Change Student
+                                    </button>
+                                </div>
+                                
+                                {enrollmentWarning && (
+                                    <div className="bg-yellow-200 border-l-4 border-yellow-600 rounded p-3">
+                                        <div className="flex items-start gap-2">
+                                            <span className="text-yellow-700 text-xl">⚠️</span>
+                                            <div>
+                                                <p className="text-sm text-yellow-900 font-semibold">
+                                                    Warning: Face Data Already Exists
+                                                </p>
+                                                <p className="text-xs text-yellow-800 mt-1">
+                                                    This student has already been enrolled in the system. 
+                                                    Proceeding will <strong>overwrite</strong> the existing face embeddings.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                <div className="bg-white rounded-lg p-3 border border-gray-200">
+                                    <div className="grid grid-cols-2 gap-3 text-sm">
+                                        <div>
+                                            <span className="font-semibold text-gray-600">Name:</span>
+                                            <p className="text-gray-900 font-medium">{studentDetails.full_name}</p>
+                                        </div>
+                                        <div>
+                                            <span className="font-semibold text-gray-600">Roll No:</span>
+                                            <p className="text-gray-900 font-medium">{studentDetails.roll_no}</p>
+                                        </div>
+                                        {studentDetails.email && studentDetails.email !== "N/A" && (
+                                            <div className="col-span-2">
+                                                <span className="font-semibold text-gray-600">Email:</span>
+                                                <p className="text-gray-900">{studentDetails.email}</p>
+                                            </div>
+                                        )}
+                                        {studentDetails.department && studentDetails.department !== "N/A" && (
+                                            <div className="col-span-2">
+                                                <span className="font-semibold text-gray-600">Department:</span>
+                                                <p className="text-gray-900">{studentDetails.department}</p>
+                                            </div>
+                                        )}
+                                        <div className="col-span-2 pt-2 border-t border-gray-200">
+                                            <span className="font-semibold text-gray-600">Enrollment Status:</span>
+                                            <p className={`font-bold ${enrollmentWarning ? 'text-yellow-700' : 'text-green-700'}`}>
+                                                {enrollmentWarning ? '⚠️ Already Enrolled - Re-enrollment Available' : '✓ Not Enrolled - Ready to Enroll'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 {/* Camera Section */}
-                <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
+                <div className={`bg-white rounded-xl shadow-md p-6 space-y-4 ${!studentVerified ? 'opacity-50 pointer-events-none' : ''}`}>
                     <div className="flex justify-between items-center">
                         <h2 className="text-xl font-semibold text-gray-700">
                             Capture Face Images
+                            {!studentVerified && <span className="text-sm text-gray-500 ml-2">(Verify student first)</span>}
+                            {enrollmentWarning && <span className="text-sm text-yellow-600 ml-2">(Re-enrollment mode)</span>}
                         </h2>
                         <span className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
                             {capturedImages.length}/{MAX_IMAGES} images
@@ -416,7 +599,7 @@ export default function EnrollFace() {
                             <select
                                 value={selectedCameraId}
                                 onChange={handleCameraChange}
-                                disabled={loading || isCameraActive}
+                                disabled={loading || isCameraActive || !studentVerified}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
                             >
                                 {availableCameras.map((camera, index) => (
@@ -460,7 +643,7 @@ export default function EnrollFace() {
                             {!isCameraActive && (
                                 <button
                                     onClick={() => startCamera()}
-                                    disabled={loading || availableCameras.length === 0 || capturedImages.length >= MAX_IMAGES}
+                                    disabled={loading || availableCameras.length === 0 || capturedImages.length >= MAX_IMAGES || !studentVerified}
                                     className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-gray-400"
                                 >
                                     📷 Start Camera
@@ -488,7 +671,7 @@ export default function EnrollFace() {
                         </div>
 
                         {/* File Upload Option */}
-                        {!isCameraActive && capturedImages.length < MAX_IMAGES && (
+                        {!isCameraActive && capturedImages.length < MAX_IMAGES && studentVerified && (
                             <div className="text-center">
                                 <p className="text-gray-500 mb-2">Or upload images</p>
                                 <label className="cursor-pointer px-6 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 inline-block">
@@ -505,9 +688,6 @@ export default function EnrollFace() {
                             </div>
                         )}
                     </div>
-
-                    {/* Hidden canvas for image capture */}
-                    <canvas ref={canvasRef} className="hidden" />
                 </div>
 
                 {/* Captured Images Gallery */}
@@ -553,14 +733,21 @@ export default function EnrollFace() {
                 {/* Submit Button */}
                 <button
                     onClick={handleSubmit}
-                    disabled={loading || capturedImages.length === 0}
+                    disabled={loading || capturedImages.length === 0 || !studentVerified}
                     className={`w-full px-6 py-3 rounded-xl text-white font-semibold ${
-                        loading || capturedImages.length === 0
+                        loading || capturedImages.length === 0 || !studentVerified
                             ? "bg-gray-400"
+                            : enrollmentWarning
+                            ? "bg-yellow-600 hover:bg-yellow-700"
                             : "bg-emerald-600 hover:bg-emerald-700"
                     }`}
                 >
-                    {loading ? "Enrolling..." : `✓ Enroll Student (${capturedImages.length} image${capturedImages.length !== 1 ? 's' : ''})`}
+                    {loading 
+                        ? "Processing..." 
+                        : enrollmentWarning 
+                        ? `⚠️ Re-enroll Student (${capturedImages.length} image${capturedImages.length !== 1 ? 's' : ''})` 
+                        : `✓ Enroll Student (${capturedImages.length} image${capturedImages.length !== 1 ? 's' : ''})`
+                    }
                 </button>
             </div>
 

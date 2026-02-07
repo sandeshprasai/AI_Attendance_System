@@ -120,6 +120,7 @@ const addStudents = async (req, res) => {
       message: "Student registered and user account created",
     });
   } catch (err) {
+    console.log(err)
     logger.error(`Error adding student: ${err.stack || err}`);
 
     return res.status(500).json({

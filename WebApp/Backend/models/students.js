@@ -109,7 +109,7 @@ const students = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "subjects",
-        required: true,
+        // required: true,
       },
     ],
   },

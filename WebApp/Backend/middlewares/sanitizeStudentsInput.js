@@ -124,7 +124,7 @@ const sanitizeStudentInput = async (req, res, next) => {
   try {
     await Schema.validateAsync(req.body, {
       abortEarly: false,
-      allowUnknown: false,
+      allowUnknown: true,
     });
     next();
   } catch (error) {

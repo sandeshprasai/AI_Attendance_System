@@ -68,3 +68,32 @@ def load_all_enroll_embeddings():
     except Exception as e:
         print(f"Error loading embeddings: {str(e)}")
         return []
+
+def check_student_enrollment(student_id):
+    """
+    Check if a student is already enrolled (has an embedding).
+    
+    Args:
+        student_id: Student's ID (string or ObjectId)
+    
+    Returns:
+        bool: True if enrolled, False otherwise
+    """
+    try:
+        # Convert string to ObjectId if needed
+        if isinstance(student_id, str):
+            student_id = ObjectId(student_id)
+        
+        # Check if embedding exists for this student
+        # Use the correct field name: "StudentId" (capital S)
+        existing = embeddings_collection.find_one({"StudentId": student_id})
+        
+        print(f"Checking enrollment for StudentId: {student_id}")
+        print(f"Found existing embedding: {existing is not None}")
+        
+        return existing is not None
+        
+    except Exception as e:
+        print(f"Error checking enrollment: {str(e)}")
+        import traceback
+        traceback.print_exc()
