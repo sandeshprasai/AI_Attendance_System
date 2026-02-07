@@ -24,8 +24,7 @@ export default function EnrollFace() {
     const MAX_IMAGES = 10;
 
     const [formData, setFormData] = useState({
-        student_id: "",
-        name: "",
+        roll_no: "", // Changed from student_id to roll_no
     });
 
     // Enumerate available cameras
@@ -294,18 +293,13 @@ export default function EnrollFace() {
         setCapturedImages([]);
     };
 
-    // UPDATED: Submit enrollment - Send all images in one request
+    // Submit enrollment - Send all images in one request
     const handleSubmit = async () => {
         if (loading) return;
 
         // Validation
-        if (!formData.student_id.trim()) {
-            setToast({ message: "Student ID is required", type: "error" });
-            return;
-        }
-
-        if (!formData.name.trim()) {
-            setToast({ message: "Student name is required", type: "error" });
+        if (!formData.roll_no.trim()) {
+            setToast({ message: "Roll Number is required", type: "error" });
             return;
         }
 
@@ -319,15 +313,14 @@ export default function EnrollFace() {
 
             // Create FormData with all images
             const data = new FormData();
-            data.append("student_id", formData.student_id);
-            data.append("name", formData.name);
+            data.append("roll_no", formData.roll_no); // Changed from student_id to roll_no
 
             // Append all images with the same key "images"
             capturedImages.forEach((image) => {
                 data.append("images", image.file);
             });
 
-            console.log(`Sending ${capturedImages.length} images to server...`);
+            console.log(`Sending ${capturedImages.length} images for Roll No: ${formData.roll_no}...`);
 
             const response = await axios.post(`${FLASK_API_URL}/enroll`, data, {
                 headers: {
@@ -340,12 +333,12 @@ export default function EnrollFace() {
                 const responseData = response.data.data[0];
                 
                 setToast({
-                    message: `${response.data.message} (${responseData.images_processed} processed, ${responseData.images_failed} failed)`,
+                    message: `${response.data.message} for ${responseData.student_name} (${responseData.images_processed} processed, ${responseData.images_failed} failed)`,
                     type: "success",
                 });
 
                 // Reset form
-                setFormData({ student_id: "", name: "" });
+                setFormData({ roll_no: "" });
                 clearAllImages();
             } else {
                 setToast({
@@ -384,36 +377,22 @@ export default function EnrollFace() {
                         Student Information
                     </h2>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Student ID <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="student_id"
-                                value={formData.student_id}
-                                onChange={handleInputChange}
-                                disabled={loading}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                placeholder="e.g., STU001"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Full Name <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleInputChange}
-                                disabled={loading}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                placeholder="e.g., John Doe"
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Roll Number <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            name="roll_no"
+                            value={formData.roll_no}
+                            onChange={handleInputChange}
+                            disabled={loading}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                            placeholder="e.g., 101"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                            Enter the student's roll number registered in the system
+                        </p>
                     </div>
                 </div>
 

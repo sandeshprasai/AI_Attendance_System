@@ -1,6 +1,6 @@
 import numpy as np
-from detector import FaceDetector
-from embedder import FaceEmbedder
+from models.detector import FaceDetector
+from models.embedder import FaceEmbedder
 
 class RecognitionPipeline:
     def __init__(self, detector_path, embedder_path):

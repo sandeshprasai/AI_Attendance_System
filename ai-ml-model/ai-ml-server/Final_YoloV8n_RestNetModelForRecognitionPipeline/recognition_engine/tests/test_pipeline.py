@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import time
 import onnxruntime as ort
-from pipeline import RecognitionPipeline
+from core.pipeline import RecognitionPipeline
 
 def run_camera_test():
     # Verification: Ensure CUDA is visible to ONNX
