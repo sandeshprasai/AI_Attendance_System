@@ -5,12 +5,10 @@ import Footer from "../components/Footer";
 import Toast from "../components/ui/Toast";
 
 export default function EnrollFace() {
-    const FLASK_API_URL = "http://localhost:5001"; // Flask AI service URL
+    const FLASK_API_URL = "http://localhost:5001";
 
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null);
-    const [capturedImage, setCapturedImage] = useState(null);
     const [isCameraActive, setIsCameraActive] = useState(false);
 
     const videoRef = useRef(null);
@@ -20,6 +18,10 @@ export default function EnrollFace() {
     // Camera device management
     const [availableCameras, setAvailableCameras] = useState([]);
     const [selectedCameraId, setSelectedCameraId] = useState("");
+
+    // Multiple images support (up to 10)
+    const [capturedImages, setCapturedImages] = useState([]);
+    const MAX_IMAGES = 10;
 
     const [formData, setFormData] = useState({
         student_id: "",
@@ -31,7 +33,6 @@ export default function EnrollFace() {
         try {
             console.log("Starting camera enumeration...");
             
-            // Get all devices
             const devices = await navigator.mediaDevices.enumerateDevices();
             const videoDevices = devices.filter(device => device.kind === 'videoinput');
             
@@ -40,7 +41,6 @@ export default function EnrollFace() {
             
             setAvailableCameras(videoDevices);
             
-            // Set default camera if none selected
             if (videoDevices.length > 0 && !selectedCameraId) {
                 setSelectedCameraId(videoDevices[0].deviceId);
                 console.log("Default camera set to:", videoDevices[0].deviceId);
@@ -61,7 +61,6 @@ export default function EnrollFace() {
 
         initCameras();
 
-        // Listen for device changes
         navigator.mediaDevices.addEventListener('devicechange', enumerateCameras);
 
         return () => {
@@ -69,7 +68,7 @@ export default function EnrollFace() {
         };
     }, []);
 
-    // Fix: Attach stream to video element when it's rendered
+    // Attach stream to video element
     useEffect(() => {
         if (isCameraActive && cameraStream && videoRef.current) {
             console.log("Attaching stream to video element...");
@@ -77,13 +76,6 @@ export default function EnrollFace() {
             videoRef.current.play().catch(err => console.error("Error playing video:", err));
         }
     }, [isCameraActive, cameraStream]);
-
-    // Debug: Log when camera state changes
-    useEffect(() => {
-        console.log("isCameraActive changed to:", isCameraActive);
-        console.log("videoRef.current status:", videoRef.current ? "Present" : "Null");
-        console.log("Available cameras count:", availableCameras.length);
-    }, [isCameraActive, availableCameras]);
 
     // YOLO Bounding Box Detection Loop
     useEffect(() => {
@@ -96,19 +88,16 @@ export default function EnrollFace() {
             const canvas = canvasRef.current;
             const ctx = canvas.getContext("2d");
 
-            // Set canvas size to match video
             canvas.width = 640;
             canvas.height = 480;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Capture current frame
             const tempCanvas = document.createElement("canvas");
             tempCanvas.width = 640;
             tempCanvas.height = 480;
             const tempCtx = tempCanvas.getContext("2d");
             tempCtx.drawImage(video, 0, 0, 640, 480);
 
-            // Convert to blob
             const blob = await new Promise(resolve =>
                 tempCanvas.toBlob(resolve, "image/jpeg")
             );
@@ -127,12 +116,10 @@ export default function EnrollFace() {
 
                 const [x1, y1, x2, y2] = bbox;
 
-                // Draw bounding box on overlay canvas
                 ctx.strokeStyle = "#00FF00";
                 ctx.lineWidth = 3;
                 ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
 
-                // Optional: Add corner markers for better visibility
                 const cornerSize = 20;
                 ctx.lineWidth = 4;
                 
@@ -167,7 +154,7 @@ export default function EnrollFace() {
             } catch (error) {
                 console.error("YOLO detection error:", error);
             }
-        }, 350); // ~3 FPS (safe for Flask + ONNX)
+        }, 350);
 
         return () => clearInterval(interval);
     }, [isCameraActive, FLASK_API_URL]);
@@ -183,17 +170,15 @@ export default function EnrollFace() {
         console.log("Camera changed to:", newCameraId);
         setSelectedCameraId(newCameraId);
 
-        // If camera is currently active, restart with new camera
         if (isCameraActive) {
             stopCamera();
-            // Small delay to ensure cleanup
             setTimeout(() => {
                 startCamera(newCameraId);
             }, 200);
         }
     };
 
-    // Start camera with optional deviceId parameter
+    // Start camera
     const startCamera = async (deviceId = selectedCameraId) => {
         try {
             console.log("Requesting camera access for device:", deviceId);
@@ -215,12 +200,9 @@ export default function EnrollFace() {
 
             console.log("Camera access granted, stream acquired");
 
-            // After getting permission, re-enumerate to get proper labels
             await enumerateCameras();
 
-            // First, make the video element render
             setIsCameraActive(true);
-            // Then, store the stream (the useEffect will handle attachment)
             setCameraStream(stream);
 
         } catch (error) {
@@ -241,11 +223,19 @@ export default function EnrollFace() {
         }
     };
 
-    // Capture image from camera
+    // Capture image (add to array, don't stop camera)
     const captureImage = () => {
-        if (!videoRef.current || !canvasRef.current) return;
+        if (!videoRef.current) return;
 
-        const canvas = canvasRef.current;
+        if (capturedImages.length >= MAX_IMAGES) {
+            setToast({
+                message: `Maximum ${MAX_IMAGES} images already captured`,
+                type: "error"
+            });
+            return;
+        }
+
+        const canvas = document.createElement("canvas");
         const video = videoRef.current;
 
         canvas.width = video.videoWidth;
@@ -255,29 +245,56 @@ export default function EnrollFace() {
         ctx.drawImage(video, 0, 0);
 
         canvas.toBlob((blob) => {
-            const file = new File([blob], "captured.jpg", { type: "image/jpeg" });
-            setCapturedImage(file);
-            setImagePreview(URL.createObjectURL(blob));
-            stopCamera();
+            const file = new File([blob], `capture_${Date.now()}.jpg`, { type: "image/jpeg" });
+            const preview = URL.createObjectURL(blob);
+            
+            setCapturedImages(prev => [...prev, { file, preview }]);
+            
+            setToast({
+                message: `Image ${capturedImages.length + 1}/${MAX_IMAGES} captured!`,
+                type: "success"
+            });
         }, "image/jpeg");
     };
 
-    // Handle file upload
+    // Handle file upload (add to array)
     const handleImageUpload = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+        const files = Array.from(e.target.files);
+        
+        const remainingSlots = MAX_IMAGES - capturedImages.length;
+        if (files.length > remainingSlots) {
+            setToast({
+                message: `Can only add ${remainingSlots} more image(s)`,
+                type: "error"
+            });
+            return;
+        }
 
-        setCapturedImage(file);
-        setImagePreview(URL.createObjectURL(file));
+        const newImages = files.map(file => ({
+            file,
+            preview: URL.createObjectURL(file)
+        }));
+
+        setCapturedImages(prev => [...prev, ...newImages]);
     };
 
-    // Remove image
-    const removeImage = () => {
-        setCapturedImage(null);
-        setImagePreview(null);
+    // Remove specific image
+    const removeImage = (index) => {
+        setCapturedImages(prev => {
+            const updated = [...prev];
+            URL.revokeObjectURL(updated[index].preview);
+            updated.splice(index, 1);
+            return updated;
+        });
     };
 
-    // Submit enrollment
+    // Clear all images
+    const clearAllImages = () => {
+        capturedImages.forEach(img => URL.revokeObjectURL(img.preview));
+        setCapturedImages([]);
+    };
+
+    // UPDATED: Submit enrollment - Send all images in one request
     const handleSubmit = async () => {
         if (loading) return;
 
@@ -292,18 +309,25 @@ export default function EnrollFace() {
             return;
         }
 
-        if (!capturedImage) {
-            setToast({ message: "Please capture or upload an image", type: "error" });
+        if (capturedImages.length === 0) {
+            setToast({ message: "Please capture or upload at least one image", type: "error" });
             return;
         }
 
         try {
             setLoading(true);
 
+            // Create FormData with all images
             const data = new FormData();
             data.append("student_id", formData.student_id);
             data.append("name", formData.name);
-            data.append("image", capturedImage);
+
+            // Append all images with the same key "images"
+            capturedImages.forEach((image) => {
+                data.append("images", image.file);
+            });
+
+            console.log(`Sending ${capturedImages.length} images to server...`);
 
             const response = await axios.post(`${FLASK_API_URL}/enroll`, data, {
                 headers: {
@@ -311,20 +335,33 @@ export default function EnrollFace() {
                 },
             });
 
-            setToast({
-                message: response.data.message || "Student enrolled successfully!",
-                type: "success",
-            });
+            // Handle response based on new format
+            if (response.data.status === "success") {
+                const responseData = response.data.data[0];
+                
+                setToast({
+                    message: `${response.data.message} (${responseData.images_processed} processed, ${responseData.images_failed} failed)`,
+                    type: "success",
+                });
 
-            // Reset form
-            setFormData({ student_id: "", name: "" });
-            setCapturedImage(null);
-            setImagePreview(null);
+                // Reset form
+                setFormData({ student_id: "", name: "" });
+                clearAllImages();
+            } else {
+                setToast({
+                    message: response.data.message || "Enrollment failed",
+                    type: "error",
+                });
+            }
+
         } catch (error) {
+            console.error("Enrollment error:", error);
+            
+            const errorMessage = error.response?.data?.message 
+                || "Failed to enroll student. Please try again.";
+            
             setToast({
-                message:
-                    error.response?.data?.error ||
-                    "Failed to enroll student. Please try again.",
+                message: errorMessage,
                 type: "error",
             });
         } finally {
@@ -382,12 +419,17 @@ export default function EnrollFace() {
 
                 {/* Camera Section */}
                 <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-700">
-                        Capture Face Image
-                    </h2>
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-xl font-semibold text-gray-700">
+                            Capture Face Images
+                        </h2>
+                        <span className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                            {capturedImages.length}/{MAX_IMAGES} images
+                        </span>
+                    </div>
 
-                    {/* Camera Selection Dropdown - ALWAYS SHOW if cameras are available */}
-                    {availableCameras.length > 0 && !imagePreview && (
+                    {/* Camera Selection Dropdown */}
+                    {availableCameras.length > 0 && (
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Select Camera {availableCameras.length > 1 && `(${availableCameras.length} available)`}
@@ -434,29 +476,12 @@ export default function EnrollFace() {
                             </div>
                         )}
 
-                        {/* Image Preview */}
-                        {imagePreview && !isCameraActive && (
-                            <div className="relative">
-                                <img
-                                    src={imagePreview}
-                                    alt="Preview"
-                                    className="rounded-lg border-4 border-emerald-500 max-w-md"
-                                />
-                                <button
-                                    onClick={removeImage}
-                                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600"
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                        )}
-
                         {/* Camera Controls */}
                         <div className="flex gap-4">
-                            {!isCameraActive && !imagePreview && (
+                            {!isCameraActive && (
                                 <button
                                     onClick={() => startCamera()}
-                                    disabled={loading || availableCameras.length === 0}
+                                    disabled={loading || availableCameras.length === 0 || capturedImages.length >= MAX_IMAGES}
                                     className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-gray-400"
                                 >
                                     📷 Start Camera
@@ -467,10 +492,10 @@ export default function EnrollFace() {
                                 <>
                                     <button
                                         onClick={captureImage}
-                                        disabled={loading}
+                                        disabled={loading || capturedImages.length >= MAX_IMAGES}
                                         className="px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:bg-gray-400"
                                     >
-                                        📸 Capture
+                                        📸 Capture ({capturedImages.length}/{MAX_IMAGES})
                                     </button>
                                     <button
                                         onClick={stopCamera}
@@ -484,14 +509,15 @@ export default function EnrollFace() {
                         </div>
 
                         {/* File Upload Option */}
-                        {!isCameraActive && !imagePreview && (
+                        {!isCameraActive && capturedImages.length < MAX_IMAGES && (
                             <div className="text-center">
-                                <p className="text-gray-500 mb-2">Or upload an image</p>
+                                <p className="text-gray-500 mb-2">Or upload images</p>
                                 <label className="cursor-pointer px-6 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 inline-block">
-                                    📁 Upload Image
+                                    📁 Upload Images
                                     <input
                                         type="file"
                                         accept="image/*"
+                                        multiple
                                         onChange={handleImageUpload}
                                         disabled={loading}
                                         className="hidden"
@@ -505,14 +531,57 @@ export default function EnrollFace() {
                     <canvas ref={canvasRef} className="hidden" />
                 </div>
 
+                {/* Captured Images Gallery */}
+                {capturedImages.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-md p-6 space-y-4">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-xl font-semibold text-gray-700">
+                                Captured Images ({capturedImages.length})
+                            </h2>
+                            <button
+                                onClick={clearAllImages}
+                                disabled={loading}
+                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:bg-gray-400 text-sm"
+                            >
+                                🗑️ Clear All
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                            {capturedImages.map((image, index) => (
+                                <div key={index} className="relative group">
+                                    <img
+                                        src={image.preview}
+                                        alt={`Capture ${index + 1}`}
+                                        className="w-full h-32 object-cover rounded-lg border-2 border-gray-300"
+                                    />
+                                    <div className="absolute top-1 left-1 bg-emerald-600 text-white text-xs px-2 py-1 rounded">
+                                        #{index + 1}
+                                    </div>
+                                    <button
+                                        onClick={() => removeImage(index)}
+                                        disabled={loading}
+                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Submit Button */}
                 <button
                     onClick={handleSubmit}
-                    disabled={loading}
-                    className={`w-full px-6 py-3 rounded-xl text-white font-semibold ${loading ? "bg-gray-400" : "bg-emerald-600 hover:bg-emerald-700"
-                        }`}
+                    disabled={loading || capturedImages.length === 0}
+                    className={`w-full px-6 py-3 rounded-xl text-white font-semibold ${
+                        loading || capturedImages.length === 0
+                            ? "bg-gray-400"
+                            : "bg-emerald-600 hover:bg-emerald-700"
+                    }`}
                 >
-                    {loading ? "Enrolling..." : "✓ Enroll Student"}
+                    {loading ? "Enrolling..." : `✓ Enroll Student (${capturedImages.length} image${capturedImages.length !== 1 ? 's' : ''})`}
                 </button>
             </div>
 
