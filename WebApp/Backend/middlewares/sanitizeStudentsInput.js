@@ -93,27 +93,7 @@ const sanitizeStudentInput = async (req, res, next) => {
       "string.min": "Address must be at least 5 characters long",
     }),
 
-    Subjects: joi
-      .array()
-      .items(
-        joi
-          .string()
-          .trim()
-          .pattern(/^[A-Za-z\s]+$/)
-          .messages({
-            "string.pattern.base":
-              "Subject Name can contain only letter and spaces",
-            "string.empty": "Subjects name cannot be empty",
-          }),
-      )
-      .min(1)
-      .unique()
-      .required()
-      .messages({
-        "array.base": "Subjects must be an array",
-        "array.min": "At least one subjects is required",
-        "any.required": "Subjects field are required",
-      }),
+    // Subjects field removed - will be auto-assigned based on Faculty
 
     UniversityReg: joi.string().required().messages({
       "string.empty": "University Registration is required",

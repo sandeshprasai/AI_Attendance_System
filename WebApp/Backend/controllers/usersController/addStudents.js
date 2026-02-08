@@ -28,15 +28,16 @@ const addStudents = async (req, res) => {
       Phone,
       YearOfEnrollment,
       Faculty,
-      Subjects,
       Section,
     } = req.body;
 
+    // Check if student already exists
     const existingStudent = await students.findOne({ RollNo });
     if (existingStudent) {
       logger.warn(`Student with RollNo ${RollNo} already exists`);
       return res.status(400).json({ error: "Student already registered" });
     }
+
     logger.info("Uploading student image to Cloudinary...");
 
     let profileImageUrl = null;
@@ -52,27 +53,34 @@ const addStudents = async (req, res) => {
       logger.warn("No image uploaded for student.");
     }
 
+    // Find faculty/department
     const facultyDoc = await FacultySchema.findOne({ DepartmentName: Faculty });
     if (!facultyDoc) {
+      logger.error(`Invalid faculty selected: ${Faculty}`);
       return res.status(400).json({ error: "Invalid faculty selected" });
     }
-    console.log(facultyDoc._id);
-    console.log(Subjects);
+
+    logger.info(`Faculty found: ${Faculty} (ID: ${facultyDoc._id})`);
+
+    // AUTO-ASSIGN ALL SUBJECTS: Fetch all subjects for this faculty/department
     const subjectDocs = await SubjectSchema.find({
-      SubjectName: { $in: Subjects },
-      DepartmentID: facultyDoc._id, // ensure subjects belong to this faculty
+      DepartmentID: facultyDoc._id,
     });
 
-    console.log(subjectDocs);
-
-    if (subjectDocs.length !== Subjects.length) {
+    if (!subjectDocs || subjectDocs.length === 0) {
+      logger.error(`No subjects found for faculty: ${Faculty}`);
       return res.status(400).json({
-        error: "Invalid Subject(s) selected for the chosen faculty",
+        error: "No subjects available for the selected faculty. Please add subjects to this department first.",
       });
     }
 
+    // Extract all subject IDs
     const subjectIds = subjectDocs.map((s) => s._id);
+    logger.info(
+      `Auto-assigned ${subjectIds.length} subjects to student from faculty ${Faculty}`,
+    );
 
+    // Create student record with all subjects from the faculty
     const newStudent = await students.create({
       RollNo,
       FullName,
@@ -85,7 +93,7 @@ const addStudents = async (req, res) => {
       GuardianPhone,
       Phone,
       YearOfEnrollment,
-      Subjects: subjectIds,
+      Subjects: subjectIds, // All subjects from the faculty
       Faculty: facultyDoc._id,
       Section,
       ProfileImagePath: profileImageUrl,
@@ -94,14 +102,17 @@ const addStudents = async (req, res) => {
 
     logger.info(`Student record created: RollNo=${RollNo}, Name=${FullName}`);
 
+    // Generate credentials
     let { username, password } = generateCredentials(FullName, RollNo);
 
+    // Ensure unique username
     while (await users.findOne({ username })) {
       username = `${username}_${Math.floor(Math.random() * 1000)}`;
     }
 
     const hashedPassword = await bcryptjs.hash(password, 10);
 
+    // Create user account
     await users.create({
       username,
       password: hashedPassword,
@@ -113,14 +124,16 @@ const addStudents = async (req, res) => {
 
     logger.info(`User account created: username=${username}`);
 
+    // Send credentials via email
     await sendCredentialsEmail(Email, username, password);
 
     return res.status(200).json({
       success: true,
       message: "Student registered and user account created",
+      subjectsAssigned: subjectIds.length,
     });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     logger.error(`Error adding student: ${err.stack || err}`);
 
     return res.status(500).json({
