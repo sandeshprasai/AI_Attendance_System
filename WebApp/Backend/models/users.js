@@ -22,15 +22,22 @@ const users = new mongoose.Schema(
       required: true,
       enum: ["admin", "teacher", "student"],
     },
+    otp: {
+      type: String,
+      minLength: 6,
+    },
+    otpExpiry: {
+      type: Date,
+    },
     ProfileImagePath: {
-      type: String, 
-      required:true,
+      type: String,
+      required: true,
       trim: true,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("users", users);
