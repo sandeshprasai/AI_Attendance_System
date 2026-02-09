@@ -18,7 +18,7 @@ const students = new mongoose.Schema(
 
     Faculty: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "faculty",
+      ref: "Departments",
       required: true,
     },
 

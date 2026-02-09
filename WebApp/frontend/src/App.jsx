@@ -17,6 +17,10 @@ import AddTeacher from "./pages/AddTeacher";
 import AddAcademics from "./pages/AddAcademics";
 import EnrollFace from "./pages/EnrollFace"; // 🆕 Face enrollment page
 
+// Academic Class pages
+import CreateAcademicClass from "./pages/CreateAcademicClass";
+import AcademicClassList from "./pages/AcademicClassList";
+
 // route protection
 import RoleProtectedRoute from "./routes/RoleProtectedRoute";
 
@@ -91,6 +95,25 @@ export default function App() {
           element={
             <RoleProtectedRoute allowedRoles={["admin"]}>
               <UsersPage />
+            </RoleProtectedRoute>
+          }
+        />
+
+        {/* 🆕 Academic Class Routes */}
+        <Route
+          path="/admin/create-academic-class"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <CreateAcademicClass />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/academic-classes"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AcademicClassList />
             </RoleProtectedRoute>
           }
         />
