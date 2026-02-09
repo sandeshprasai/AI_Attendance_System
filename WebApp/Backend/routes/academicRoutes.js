@@ -17,6 +17,8 @@ const addSubjects = require("../controllers/academicController/addSubjects");
 const getAllDepartments = require("../controllers/academicController/getAllDepartment");
 const getAllSubjects = require("../controllers/academicController/getSubjects");
 const addClasses = require("../controllers/academicController/addClasses");
+const getTotalClass = require("../controllers/academicController/getTotalClasses");
+const accademicClass = require("../models/accademicClass");
 
 // ------------------------------------------------Import Controllers Completed ------------------------------------------------
 
@@ -26,16 +28,13 @@ const addClasses = require("../controllers/academicController/addClasses");
 
 academicRoutes.get("/allDepartments", preventAccess, getAllDepartments);
 academicRoutes.get("/allSubjects/", preventAccess, getAllSubjects);
+academicRoutes.get("/total-class", preventAccess, getTotalClass);
 
 // ------------------------------------------------All Post requests ------------------------------------------------
 
-academicRoutes.post(
-  "/departments",
-  validateDepartment,
-  addDepartments
-);
+academicRoutes.post("/departments", validateDepartment, addDepartments);
 academicRoutes.post("/subjects", preventAccess, validateSubject, addSubjects);
-academicRoutes.post("/classes", validateClass,addClasses);
+academicRoutes.post("/classes", validateClass, addClasses);
 
 // ------------------------------------------------All Post request  completed ------------------------------------------------
 

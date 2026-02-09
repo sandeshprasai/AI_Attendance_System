@@ -6,7 +6,7 @@ const getUserStats = async (req, res) => {
   const userId = req.user ? req.user.id : "guest"; // If JWT middleware sets req.user
 
   logger.info(
-    `GET_USER_STATS request received - userId: ${userId}, IP: ${clientIp}`
+    `GET_USER_STATS request received - userId: ${userId}, IP: ${clientIp}`,
   );
 
   try {
@@ -30,11 +30,11 @@ const getUserStats = async (req, res) => {
     counts.forEach((c) => {
       stats[c._id] = c.total;
     });
-
+    console.log(stats);
     logger.info(
       `User stats computed successfully - userId: ${userId}, stats: ${JSON.stringify(
-        stats
-      )}`
+        stats,
+      )}`,
     );
 
     res.status(200).json({
@@ -45,7 +45,7 @@ const getUserStats = async (req, res) => {
     logger.error(
       `GET_USER_STATS error - userId: ${userId}, IP: ${clientIp}, message: ${
         err.stack || err
-      }`
+      }`,
     );
     res.status(500).json({ success: false, message: "Server error" });
   }
