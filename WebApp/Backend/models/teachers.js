@@ -34,9 +34,9 @@ const teachersSchema = new mongoose.Schema(
     },
 
     Subjects: {
-      type: [String],
+      type: [mongoose.Schema.Types.ObjectId],
       required: true,
-      ref: "subjects",
+      ref: "Subjects",
     },
     Classroom: {
       type: [mongoose.Schema.Types.ObjectId],

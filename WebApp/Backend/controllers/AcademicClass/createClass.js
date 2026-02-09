@@ -126,6 +126,13 @@ const createAcademicClass = async (req, res) => {
 
     await academicClass.save();
 
+    // Update teacher's Classroom field
+    await Teacher.findByIdAndUpdate(
+      TeacherId,
+      { $addToSet: { Classroom: academicClass._id } },
+      { new: true }
+    );
+
     // Populate the created class
     await academicClass.populate([
       { path: "PhysicalClassroom", select: "Classroom capacity" },

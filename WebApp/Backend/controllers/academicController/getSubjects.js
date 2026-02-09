@@ -45,7 +45,7 @@ const getAllSubjects = async (req, res) => {
 
     const subjects = await Subjects.find(
       subjectFilter,
-      { _id: 0, SubjectCode: 1, SubjectName: 1, Semester: 1 }
+      { _id: 1, SubjectCode: 1, SubjectName: 1, Semester: 1 }
     ).lean();
 
     if (!subjects.length) {

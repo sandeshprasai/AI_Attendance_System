@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const teachers = require("../../models/teachers");
 const users = require("../../models/users");
 const logger = require("../../logger/logger");
@@ -7,6 +8,9 @@ const sendCredentialsEmail = require("../../middlewares/mailCredentials");
 const uploadBufferToCloudinary = require("../../middlewares/cloudinaryUpload");
 
 const addTeachers = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const {
       EmployeeId,
@@ -24,63 +28,94 @@ const addTeachers = async (req, res) => {
       `ADD_TEACHER → ${EmployeeId}, ${FullName}, ${Email}, ${Faculty}, ${Subject}`,
     );
 
-    // 🔍 Check existing teacher by EmployeeId
-    const existingTeacher = await teachers.findOne({ EmployeeId });
+    /* ----------------------------------------------------
+       1️⃣ PRE-CHECK DUPLICATES (teachers + users)
+    ---------------------------------------------------- */
+
+    const existingTeacher = await teachers.findOne(
+      { $or: [{ EmployeeId }, { Phone }, { Email }] },
+      null,
+      { session },
+    );
+
     if (existingTeacher) {
-      logger.warn(`Teacher with EmployeeId ${EmployeeId} already exists`);
-      return res.status(400).json({
+      await session.abortTransaction();
+      session.endSession();
+
+      return res.status(409).json({
         success: false,
-        message: "The teacher with the provided Employee ID already exists",
+        message:
+          "Teacher with same Employee ID / Phone / Email already exists",
       });
     }
 
-    // 📷 Profile image (REQUIRED by schema)
+    const existingUser = await users.findOne(
+      { email: Email },
+      null,
+      { session },
+    );
+
+    if (existingUser) {
+      await session.abortTransaction();
+      session.endSession();
+
+      return res.status(409).json({
+        success: false,
+        message: "User with this email already exists",
+      });
+    }
+
+    /* ----------------------------------------------------
+       2️⃣ PROFILE IMAGE (required)
+    ---------------------------------------------------- */
+
     let ProfileImagePath = null;
 
-    try {
-      if (req.file && req.file.buffer) {
-        // If file uploaded, upload to Cloudinary
-        const cloudResult = await uploadBufferToCloudinary(
-          req.file,
-          "teachers",
-        );
-        ProfileImagePath = cloudResult.secure_url;
-        logger.info(`Profile image uploaded → ${ProfileImagePath}`);
-      } else if (req.body.ProfileImagePath) {
-        // If image URL provided in JSON, use it directly
-        ProfileImagePath = req.body.ProfileImagePath;
-        logger.info(`Profile image provided via JSON → ${ProfileImagePath}`);
-      }
+    if (req.file?.buffer) {
+      const cloudResult = await uploadBufferToCloudinary(req.file, "teachers");
+      ProfileImagePath = cloudResult.secure_url;
+      logger.info(`Profile image uploaded → ${ProfileImagePath}`);
+    } else if (req.body.ProfileImagePath) {
+      ProfileImagePath = req.body.ProfileImagePath;
+      logger.info(`Profile image provided via JSON → ${ProfileImagePath}`);
+    }
 
-      if (!ProfileImagePath) {
-        return res.status(400).json({
-          success: false,
-          message: "Profile image is required",
-        });
-      }
-    } catch (err) {
-      logger.error("Profile image handling failed:", err);
-      return res.status(500).json({
+    if (!ProfileImagePath) {
+      await session.abortTransaction();
+      session.endSession();
+
+      return res.status(400).json({
         success: false,
-        message: "Failed to process profile image",
+        message: "Profile image is required",
       });
     }
 
-    // 🧑‍🏫 Create teacher
-    const newTeacher = await teachers.create({
-      EmployeeId,
-      FullName,
-      DateOfBirth,
-      FullAddress,
-      Phone,
-      Email,
-      Faculty,
-      Subject,
-      JoinedYear,
-      ProfileImagePath,
-    });
+    /* ----------------------------------------------------
+       3️⃣ CREATE TEACHER (TRANSACTION)
+    ---------------------------------------------------- */
 
-    // 🔐 Create user credentials
+    const [newTeacher] = await teachers.create(
+      [
+        {
+          EmployeeId,
+          FullName,
+          DateOfBirth,
+          FullAddress,
+          Phone,
+          Email,
+          Faculty,
+          Subjects: Subject,
+          JoinedYear,
+          ProfileImagePath,
+        },
+      ],
+      { session },
+    );
+
+    /* ----------------------------------------------------
+       4️⃣ CREATE USER (TRANSACTION)
+    ---------------------------------------------------- */
+
     let { username, password } = generateTeacherCredentials(
       FullName,
       newTeacher._id,
@@ -92,31 +127,70 @@ const addTeachers = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await users.create({
-      username,
-      password: hashedPassword,
-      email: Email,
-      name: FullName,
-      role: "teacher",
-      ProfileImagePath,
-    });
+    await users.create(
+      [
+        {
+          username,
+          password: hashedPassword,
+          email: Email,
+          name: FullName,
+          role: "teacher",
+          ProfileImagePath,
+        },
+      ],
+      { session },
+    );
 
-    logger.info(`User created → username=${username}`);
+    /* ----------------------------------------------------
+       5️⃣ COMMIT TRANSACTION
+    ---------------------------------------------------- */
 
-    // 📧 Send credentials email
-    const emailSent = await sendCredentialsEmail(Email, username, password);
-    if (emailSent) {
-      logger.info(`Credentials email sent → ${Email}`);
-    } else {
-      logger.warn(`Failed to send credentials email → ${Email}`);
-    }
+    await session.commitTransaction();
+    session.endSession();
+
+    logger.info(`Teacher + User created → username=${username}`);
+
+    /* ----------------------------------------------------
+       6️⃣ SEND EMAIL (AFTER COMMIT)
+    ---------------------------------------------------- */
+
+    sendCredentialsEmail(Email, username, password)
+      .then(() =>
+        logger.info(`Credentials email sent → ${Email}`),
+      )
+      .catch((err) =>
+        logger.warn("Failed to send credentials email:", err),
+      );
 
     return res.status(201).json({
       success: true,
       message: "Teacher added successfully",
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
     logger.error("Error while adding teacher:", error);
+
+    /* ----------------------------------------------------
+       DUPLICATE KEY SAFETY NET
+    ---------------------------------------------------- */
+
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyValue)[0];
+
+      const fieldMap = {
+        email: "Email",
+        Phone: "Phone number",
+        EmployeeId: "Employee ID",
+      };
+
+      return res.status(409).json({
+        success: false,
+        message: `${fieldMap[field] || field} already exists`,
+      });
+    }
+
     return res.status(500).json({
       success: false,
       message: "Internal server error",
