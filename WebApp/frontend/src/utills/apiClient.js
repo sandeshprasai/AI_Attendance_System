@@ -42,7 +42,12 @@ apiClient.interceptors.response.use(
           { refreshToken }
         );
 
-        localStorage.setItem("accessToken", data.accessToken);
+        // Save to the same storage where refresh token exists
+        if (localStorage.getItem("refreshToken")) {
+          localStorage.setItem("accessToken", data.accessToken);
+        } else {
+          sessionStorage.setItem("accessToken", data.accessToken);
+        }
 
         originalRequest.headers.Authorization =
           `Bearer ${data.accessToken}`;
