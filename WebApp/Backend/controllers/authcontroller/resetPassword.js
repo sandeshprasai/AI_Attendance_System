@@ -1,8 +1,10 @@
 const bcrypt = require("bcryptjs");
 const users = require("../../models/users");
 const generateOtp = require("../../middlewares/generateOpt");
+const sendOtpMail = require("../../middlewares/mailOtp");
 const logger = require("../../logger/logger");
 const { Mongoose, default: mongoose } = require("mongoose");
+const { date } = require("joi");
 
 const resetPassword = async (req, res) => {
   const username = req.body?.username?.trim();
@@ -15,7 +17,7 @@ const resetPassword = async (req, res) => {
   try {
     const isValidUser = await users.findOne(
       { username: username },
-      { username: 1 },
+      { username: 1, email: 1 },
     );
 
     if (!isValidUser) {
@@ -41,6 +43,19 @@ const resetPassword = async (req, res) => {
         otpExpiry: otpExpiry,
       },
     );
+
+    const otpSent = await sendOtpMail(isValidUser.email, plainOtp);
+
+    if (!otpSent) {
+      logger.warn(`OTP email failed | User: ${username}`);
+      return res
+        .status(500)
+        .json({
+          message:
+            "`Internal Server error while sending OTP. Please try again later `",
+          data: [],
+        });
+    }
 
     return res.status(200).json({
       message: "If the account exists, an OTP has been sent",

@@ -70,7 +70,8 @@ const addStudents = async (req, res) => {
     if (!subjectDocs || subjectDocs.length === 0) {
       logger.error(`No subjects found for faculty: ${Faculty}`);
       return res.status(400).json({
-        error: "No subjects available for the selected faculty. Please add subjects to this department first.",
+        error:
+          "No subjects available for the selected faculty. Please add subjects to this department first.",
       });
     }
 
@@ -116,6 +117,7 @@ const addStudents = async (req, res) => {
     await users.create({
       username,
       password: hashedPassword,
+      email: Email,
       name: FullName,
       role: "student",
       ProfileImagePath: profileImageUrl,

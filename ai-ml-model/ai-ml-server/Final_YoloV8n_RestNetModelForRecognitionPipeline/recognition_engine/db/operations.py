@@ -96,4 +96,4 @@ def check_student_enrollment(student_id):
     except Exception as e:
         print(f"Error checking enrollment: {str(e)}")
         import traceback
-        traceback.print_exc()
+        traceback.print_exc()   

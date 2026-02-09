@@ -21,7 +21,7 @@ const addTeachers = async (req, res) => {
     } = req.body;
 
     logger.info(
-      `ADD_TEACHER → ${EmployeeId}, ${FullName}, ${Email}, ${Faculty}, ${Subject}`
+      `ADD_TEACHER → ${EmployeeId}, ${FullName}, ${Email}, ${Faculty}, ${Subject}`,
     );
 
     // 🔍 Check existing teacher by EmployeeId
@@ -34,34 +34,37 @@ const addTeachers = async (req, res) => {
       });
     }
 
-   // 📷 Profile image (REQUIRED by schema)
-let ProfileImagePath = null;
+    // 📷 Profile image (REQUIRED by schema)
+    let ProfileImagePath = null;
 
-try {
-  if (req.file && req.file.buffer) {
-    // If file uploaded, upload to Cloudinary
-    const cloudResult = await uploadBufferToCloudinary(req.file, "teachers");
-    ProfileImagePath = cloudResult.secure_url;
-    logger.info(`Profile image uploaded → ${ProfileImagePath}`);
-  } else if (req.body.ProfileImagePath) {
-    // If image URL provided in JSON, use it directly
-    ProfileImagePath = req.body.ProfileImagePath;
-    logger.info(`Profile image provided via JSON → ${ProfileImagePath}`);
-  }
+    try {
+      if (req.file && req.file.buffer) {
+        // If file uploaded, upload to Cloudinary
+        const cloudResult = await uploadBufferToCloudinary(
+          req.file,
+          "teachers",
+        );
+        ProfileImagePath = cloudResult.secure_url;
+        logger.info(`Profile image uploaded → ${ProfileImagePath}`);
+      } else if (req.body.ProfileImagePath) {
+        // If image URL provided in JSON, use it directly
+        ProfileImagePath = req.body.ProfileImagePath;
+        logger.info(`Profile image provided via JSON → ${ProfileImagePath}`);
+      }
 
-  if (!ProfileImagePath) {
-    return res.status(400).json({
-      success: false,
-      message: "Profile image is required",
-    });
-  }
-} catch (err) {
-  logger.error("Profile image handling failed:", err);
-  return res.status(500).json({
-    success: false,
-    message: "Failed to process profile image",
-  });
-}
+      if (!ProfileImagePath) {
+        return res.status(400).json({
+          success: false,
+          message: "Profile image is required",
+        });
+      }
+    } catch (err) {
+      logger.error("Profile image handling failed:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to process profile image",
+      });
+    }
 
     // 🧑‍🏫 Create teacher
     const newTeacher = await teachers.create({
@@ -80,7 +83,7 @@ try {
     // 🔐 Create user credentials
     let { username, password } = generateTeacherCredentials(
       FullName,
-      newTeacher._id
+      newTeacher._id,
     );
 
     while (await users.findOne({ username })) {
@@ -92,6 +95,7 @@ try {
     await users.create({
       username,
       password: hashedPassword,
+      email: Email,
       name: FullName,
       role: "teacher",
       ProfileImagePath,
