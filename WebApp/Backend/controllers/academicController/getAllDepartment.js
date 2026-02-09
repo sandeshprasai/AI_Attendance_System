@@ -7,7 +7,7 @@ const getAllDepartment = async (req, res) => {
   try {
     const departments = await Departments.find(
       {},
-      { _id: 0, DepartmentName: 1, DepartmentCode: 1 }
+      { _id: 1, DepartmentName: 1, DepartmentCode: 1 }
     ).lean();
     console.log(departments)
     if (!Array.isArray(departments) || departments.length == 0) {
