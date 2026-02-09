@@ -39,9 +39,12 @@ export default function EnrollFace() {
 
     // Define handleFindStudent with useCallback to avoid dependency issues
     const handleFindStudent = useCallback(async (rollNoParam = null) => {
-        const rollNoToUse = rollNoParam || formData.roll_no;
+        // Safely convert to string and trim
+        const rollNoToUse = String(rollNoParam || formData.roll_no || '').trim();
         
-        if (!rollNoToUse || !rollNoToUse.trim()) {
+        console.log('Finding student with roll number:', rollNoToUse); // Debug log
+        
+        if (!rollNoToUse) {
             setToast({ message: "Please enter a Roll Number", type: "error" });
             return;
         }
@@ -439,6 +442,7 @@ export default function EnrollFace() {
                 setStudentDetails(null);
                 setEnrollmentWarning(false);
                 clearAllImages();
+
             } else {
                 setToast({
                     message: response.data.message || "Enrollment failed",
@@ -449,8 +453,22 @@ export default function EnrollFace() {
         } catch (error) {
             console.error("Enrollment error:", error);
             
-            const errorMessage = error.response?.data?.message 
-                || "Failed to enroll student. Please try again.";
+            let errorMessage;
+            
+            // Check if it's a network error (Flask server not running)
+            if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+                errorMessage = "⚠️ Face Recognition Server is not running. Please start the Flask server (port 5001) to enroll students.";
+            } 
+            // Check if it's a conflict error (student already enrolled)
+            else if (error.response?.status === 409) {
+                errorMessage = error.response?.data?.message 
+                    || "Student is already enrolled. Please use re-enrollment option.";
+            }
+            // Other errors
+            else {
+                errorMessage = error.response?.data?.message 
+                    || "Failed to enroll student. Please try again.";
+            }
             
             setToast({
                 message: errorMessage,
@@ -502,7 +520,7 @@ export default function EnrollFace() {
                                     placeholder="e.g., 101"
                                 />
                                 <button
-                                    onClick={handleFindStudent}
+                                    onClick={() => handleFindStudent()}
                                     disabled={loading || findingStudent || studentVerified || !formData.roll_no.trim()}
                                     className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                                         studentVerified
