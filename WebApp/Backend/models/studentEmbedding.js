@@ -52,8 +52,6 @@ const studentEmbeddingSchema = new mongoose.Schema(
   }
 );
 
-// Index for faster lookups
-studentEmbeddingSchema.index({ RollNo: 1 });
-studentEmbeddingSchema.index({ StudentId: 1 });
+// Indexes are already created via unique: true in schema definition
 
 module.exports = mongoose.model("studentEmbedding", studentEmbeddingSchema);
