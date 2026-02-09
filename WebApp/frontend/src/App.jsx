@@ -8,6 +8,7 @@ import StudentDashboard from "./pages/StudentDashboard";
 import Unauthorized from "./pages/Unauthorized";
 import UsersPage from "./pages/UsersPage";
 import ContactUs from "./pages/ContactUs";
+import ForgetPassword from "./pages/ForgetPassword";
 
 // components
 import CreateClassroom from "./components/CreateClassroom";
@@ -26,6 +27,9 @@ export default function App() {
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/contact" element={<ContactUs />} />
+
+        {/* Forgot Password */}
+        <Route path="/forget-password" element={<ForgetPassword />} />
 
         {/* ADMIN ONLY */}
         <Route
@@ -55,7 +59,6 @@ export default function App() {
           }
         />
 
-        {/* 🆕 Add Academics Route */}
         <Route
           path="/add-academics"
           element={
@@ -65,7 +68,6 @@ export default function App() {
           }
         />
 
-        {/* 🆕 Face Enrollment Route */}
         <Route
           path="/enroll-face"
           element={

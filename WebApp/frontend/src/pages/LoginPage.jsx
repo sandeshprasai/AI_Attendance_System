@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Eye, EyeOff, User, Lock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { AuthProvider, useAuth } from "../context/AuthContext"; // import hook
 
 export default function LoginPage() {
@@ -65,11 +65,11 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
 
-     const response = await fetch(`${API_URL}api/v1/auth/login`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ username, password, rememberMe }),
-});
+      const response = await fetch(`${API_URL}api/v1/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, rememberMe }),
+      });
 
       const data = await response.json();
       setIsLoading(false);
@@ -127,13 +127,11 @@ export default function LoginPage() {
           type="text"
           value={username}
           onChange={handleUsernameChange}
-          className={`block w-full px-3 py-3 bg-white bg-opacity-90 border ${
-            usernameError
-              ? "border-purple-400 bg-purple-50"
-              : "border-white border-opacity-20"
-          } rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 ${
-            usernameError ? "focus:ring-purple-400" : "focus:ring-cyan-500"
-          } focus:border-transparent transition-all duration-200 outline-none backdrop-blur-sm`}
+          className={`block w-full px-3 py-3 bg-white bg-opacity-90 border ${usernameError
+            ? "border-purple-400 bg-purple-50"
+            : "border-white border-opacity-20"
+            } rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 ${usernameError ? "focus:ring-purple-400" : "focus:ring-cyan-500"
+            } focus:border-transparent transition-all duration-200 outline-none backdrop-blur-sm`}
           placeholder="Enter username"
         />
         {usernameError && (
@@ -173,13 +171,11 @@ export default function LoginPage() {
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={handlePasswordChange}
-            className={`block w-full px-3 py-3 bg-white bg-opacity-90 border  ${
-              passwordError
-                ? "border-purple-400 bg-purple-50"
-                : "border-white border-opacity-20"
-            } rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 ${
-              passwordError ? "focus:ring-purple-400" : "focus:ring-cyan-500"
-            } focus:border-transparent transition-all duration-200 outline-none backdrop-blur-sm`}
+            className={`block w-full px-3 py-3 bg-white bg-opacity-90 border  ${passwordError
+              ? "border-purple-400 bg-purple-50"
+              : "border-white border-opacity-20"
+              } rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 ${passwordError ? "focus:ring-purple-400" : "focus:ring-cyan-500"
+              } focus:border-transparent transition-all duration-200 outline-none backdrop-blur-sm`}
             placeholder="Enter your password"
           />
           <button
@@ -267,12 +263,12 @@ export default function LoginPage() {
 
       {/* Forgot Password Link */}
       <div className="text-center pt-2">
-        <a
-          href="#"
+        <Link
+          to="/forget-password"
           className="text-sm text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
         >
           Forgot your password?
-        </a>
+        </Link>
       </div>
 
       <style>
