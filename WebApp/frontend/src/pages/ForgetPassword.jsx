@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
 
 const ForgetPassword = () => {
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -10,6 +12,8 @@ const ForgetPassword = () => {
   const [message, setMessage] = useState({ text: '', type: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -69,6 +73,18 @@ const ForgetPassword = () => {
     setIsLoading(false);
   };
 
+  const handleKeyDownUsername = (e) => {
+    if (e.key === 'Enter' && !otpSent && !isLoading) {
+      handleSendOTP(e);
+    }
+  };
+
+  const handleKeyDownForm = (e) => {
+    if (e.key === 'Enter' && showAdditionalFields && !isLoading) {
+      handleResetPassword(e);
+    }
+  };
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
     createRipple(e);
@@ -111,12 +127,7 @@ const ForgetPassword = () => {
       if (res.status === 200) {
         showMessage(data.message || "Password reset successful", "success");
         setTimeout(() => {
-          setUsername('');
-          setOtp('');
-          setNewPassword('');
-          setConfirmPassword('');
-          setShowAdditionalFields(false);
-          setOtpSent(false);
+          navigate('/');
         }, 2000);
       } else {
         showMessage(data.message || "Failed to reset password", "error");
@@ -304,6 +315,7 @@ const ForgetPassword = () => {
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        onKeyDown={handleKeyDownUsername}
                         disabled={otpSent}
                         placeholder="Enter your username"
                         className="flex-1 bg-slate-800/50 text-white px-4 py-3 rounded-lg border-2 border-slate-700 focus:border-cyan-500 outline-none transition-all duration-300 input-glow disabled:opacity-50 disabled:cursor-not-allowed placeholder-slate-500"
@@ -347,6 +359,7 @@ const ForgetPassword = () => {
                           type="text"
                           value={otp}
                           onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
+                          onKeyDown={handleKeyDownForm}
                           maxLength="6"
                           placeholder="Enter 6-digit OTP"
                           className="w-full bg-slate-800/50 text-white px-4 py-3 rounded-lg border-2 border-slate-700 focus:border-cyan-500 outline-none transition-all duration-300 input-glow placeholder-slate-500"
@@ -358,13 +371,23 @@ const ForgetPassword = () => {
                         <label className="block text-slate-300 font-medium mb-2 text-sm">
                           New Password:
                         </label>
-                        <input
-                          type="password"
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder="Enter new password"
-                          className="w-full bg-slate-800/50 text-white px-4 py-3 rounded-lg border-2 border-slate-700 focus:border-cyan-500 outline-none transition-all duration-300 input-glow placeholder-slate-500"
-                        />
+                        <div className="relative">
+                          <input
+                            type={showNewPassword ? "text" : "password"}
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            onKeyDown={handleKeyDownForm}
+                            placeholder="Enter new password"
+                            className="w-full bg-slate-800/50 text-white px-4 py-3 pr-12 rounded-lg border-2 border-slate-700 focus:border-cyan-500 outline-none transition-all duration-300 input-glow placeholder-slate-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewPassword(!showNewPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-400 transition-colors"
+                          >
+                            {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                          </button>
+                        </div>
                       </div>
 
                       {/* Confirm Password */}
@@ -372,13 +395,23 @@ const ForgetPassword = () => {
                         <label className="block text-slate-300 font-medium mb-2 text-sm">
                           Confirm Password:
                         </label>
-                        <input
-                          type="password"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="Confirm new password"
-                          className="w-full bg-slate-800/50 text-white px-4 py-3 rounded-lg border-2 border-slate-700 focus:border-cyan-500 outline-none transition-all duration-300 input-glow placeholder-slate-500"
-                        />
+                        <div className="relative">
+                          <input
+                            type={showConfirmPassword ? "text" : "password"}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            onKeyDown={handleKeyDownForm}
+                            placeholder="Confirm new password"
+                            className="w-full bg-slate-800/50 text-white px-4 py-3 pr-12 rounded-lg border-2 border-slate-700 focus:border-cyan-500 outline-none transition-all duration-300 input-glow placeholder-slate-500"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-400 transition-colors"
+                          >
+                            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                          </button>
+                        </div>
                       </div>
 
                       {/* Reset Button */}

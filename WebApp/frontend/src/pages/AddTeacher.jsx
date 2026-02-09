@@ -176,12 +176,19 @@ export default function AddTeacherPage() {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !loading) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   // ---------------- Render ----------------
   return (
     <div className="bg-gray-50 min-h-screen">
       <NavBar />
 
-      <div className="max-w-5xl mx-auto p-6 space-y-8 pt-24 mb-16">
+      <div className="max-w-5xl mx-auto p-6 space-y-8 pt-24 mb-16" onKeyDown={handleKeyDown}>
         <h1 className="text-3xl font-bold text-gray-800">
           Add New Teacher
         </h1>
