@@ -9,6 +9,7 @@ import apiClient from '../../utills/apiClient';
  * @param {Object} props
  * @param {string} props.userRole - User role: "admin", "teacher", or "student"
  * @param {string} props.userId - Optional user ID for filtering data (teacher/student specific)
+ * @param {string} props.userName - Optional user name for filtering (teacher/student specific)
  * @param {boolean} props.showCreateButton - Show or hide the Create Classroom button (default: true)
  * @param {string} props.createButtonLabel - Custom label for create button (default: "Create Classroom")
  * @param {string} props.createButtonRoute - Custom route for create button (default: "/admin/create-academic-class")
@@ -17,6 +18,7 @@ import apiClient from '../../utills/apiClient';
 export default function ClassroomManagementCard({
   userRole = 'admin',
   userId = null,
+  userName = null,
   showCreateButton = true,
   createButtonLabel = 'Create Classroom',
   createButtonRoute = '/admin/create-academic-class',
@@ -34,8 +36,12 @@ export default function ClassroomManagementCard({
   });
 
   useEffect(() => {
+    // For teachers, wait until we have either userId or userName
+    if (userRole === 'teacher' && !userId && !userName) {
+      return;
+    }
     fetchClassroomStats();
-  }, [userRole, userId]);
+  }, [userRole, userId, userName]);
 
   const fetchClassroomStats = async () => {
     try {
@@ -44,11 +50,25 @@ export default function ClassroomManagementCard({
       // Fetch academic classes from API
       const response = await apiClient.get('/academic-class');
       const classes = response.data.data || [];
-
+      
       // Filter based on user role
       let filteredClasses = classes;
-      if (userRole === 'teacher' && userId) {
-        filteredClasses = classes.filter(cls => cls.Teacher?._id === userId);
+      if (userRole === 'teacher' && (userId || userName)) {
+        // For teachers, we need to match by Teacher username from context
+        // Since Teacher table IDs don't match User table IDs
+        const storedUserName = userName || window.localStorage.getItem('name') || window.sessionStorage.getItem('name');
+        
+        filteredClasses = classes.filter(cls => {
+          // Try matching by ID first (in case it's linked properly)
+          if (userId && cls.Teacher?._id === userId) return true;
+          
+          // Match by name
+          if (storedUserName && cls.Teacher?.FullName) {
+            return cls.Teacher.FullName.toLowerCase() === storedUserName.toLowerCase();
+          }
+          
+          return false;
+        });
       } else if (userRole === 'student' && userId) {
         filteredClasses = classes.filter(cls => 
           cls.Students?.some(student => student._id === userId)

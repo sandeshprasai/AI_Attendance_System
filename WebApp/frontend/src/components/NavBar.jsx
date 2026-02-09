@@ -82,16 +82,39 @@ function NavBar({ links }) {
     }
   };
 
-  // 🔥 Default links with Add Academics added
-  const navLinks = links || [
-    { label: "Home", to: "/admin-dashboard" },
-    { label: "Add Student", to: "/add-student" },
-    { label: "Add Teacher", to: "/add-teacher" },
-    { label: "Add Academics", to: "/add-academics" }, // 🆕 Added here
-    // { label: "Create Classroom", to: "/create-classroom" },
-    // { label: "Create Academic Class", to: "/admin/create-academic-class" }, // 🆕 New link
-    { label: "Academic Classes", to: "/admin/academic-classes" }, // 🆕 View all classes
-  ];
+  // 🔥 Role-based navigation links
+  const getNavLinksByRole = () => {
+    const role = user?.role?.toLowerCase();
+    
+    switch (role) {
+      case 'admin':
+      case 'administrator':
+        return [
+          { label: "Home", to: "/admin-dashboard" },
+          { label: "Add Student", to: "/add-student" },
+          { label: "Add Teacher", to: "/add-teacher" },
+          { label: "Add Academics", to: "/add-academics" },
+          { label: "Academic Classes", to: "/admin/academic-classes" },
+        ];
+      
+      case 'teacher':
+        return [
+          { label: "Home", to: "/teacher-dashboard" },
+          { label: "My Classes", to: "/teacher/my-classes" },
+        ];
+      
+      case 'student':
+        return [
+          { label: "Home", to: "/student-dashboard" },
+          { label: "My Classes", to: "/student/my-classes" },
+        ];
+      
+      default:
+        return [];
+    }
+  };
+
+  const navLinks = links || getNavLinksByRole();
 
   // Close user menu when clicking outside
   useEffect(() => {

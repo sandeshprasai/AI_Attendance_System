@@ -50,7 +50,7 @@ export default function AdminDashboard() {
  
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Your Existing Navbar */}
       <Navbar  />
       
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
       {/* Main Content */}
        {/* Scrollable Area */}
  
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           
           {/* Left Column - Greeting & Quick Actions */}
