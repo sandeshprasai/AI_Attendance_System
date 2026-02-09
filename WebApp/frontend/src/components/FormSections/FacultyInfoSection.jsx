@@ -49,7 +49,7 @@ export default function FacultyInfoSection({ formData, handleInputChange, errors
         if (err.response?.status === 401) {
           localStorage.removeItem("accessToken");
           sessionStorage.removeItem("accessToken");
-          window.location.href = "/login";
+          window.location.href = "/";
         }
       } finally {
         setDataLoading(false);
@@ -74,8 +74,10 @@ export default function FacultyInfoSection({ formData, handleInputChange, errors
 
         const res = await axios.get(`${API_URL}api/v1/academics/allSubjects`, config);
         if (res.data.success && res.data.data) {
-          const subjectNames = res.data.data.map((s) => s.SubjectName);
-          setSubjects(subjectNames.map((s) => ({ label: s, value: s })));
+          setSubjects(res.data.data.map((s) => ({ 
+            label: `${s.SubjectName} (${s.SubjectCode})`, 
+            value: s._id 
+          })));
         }
       } catch (err) {
         console.error("Error fetching subjects:", err);
@@ -83,7 +85,7 @@ export default function FacultyInfoSection({ formData, handleInputChange, errors
         if (err.response?.status === 401) {
           localStorage.removeItem("accessToken");
           sessionStorage.removeItem("accessToken");
-          window.location.href = "/login";
+          window.location.href = "/";
         }
       } finally {
         setDataLoading(false);
@@ -170,7 +172,7 @@ export default function FacultyInfoSection({ formData, handleInputChange, errors
           <Select
             isMulti
             name="Subject"
-            value={formData.Subject.map((s) => ({ label: s, value: s }))}
+            value={subjects.filter((s) => formData.Subject.includes(s.value))}
             onChange={(selected) =>
               handleInputChange({
                 target: {
