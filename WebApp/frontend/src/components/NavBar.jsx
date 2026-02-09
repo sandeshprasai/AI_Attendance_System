@@ -19,7 +19,9 @@ function NavBar({ links }) {
     { label: "Add Student", to: "/add-student" },
     { label: "Add Teacher", to: "/add-teacher" },
     { label: "Add Academics", to: "/add-academics" }, // 🆕 Added here
-    { label: "Create Classroom", to: "/create-classroom" },
+    // { label: "Create Classroom", to: "/create-classroom" },
+    // { label: "Create Academic Class", to: "/admin/create-academic-class" }, // 🆕 New link
+    { label: "Academic Classes", to: "/admin/academic-classes" }, // 🆕 View all classes
   ];
 
   // Close user menu when clicking outside
