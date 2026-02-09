@@ -1,74 +1,56 @@
-const bcrypt = require("bcryptjs");
 const users = require("../../models/users");
-const generateOtp = require("../../middlewares/generateOpt");
-const sendOtpMail = require("../../middlewares/mailOtp");
-const logger = require("../../logger/logger");
-const { Mongoose, default: mongoose } = require("mongoose");
-const { date } = require("joi");
+const bcrypt = require("bcryptjs");
 
 const resetPassword = async (req, res) => {
   const username = req.body?.username?.trim();
+  const { otp, password, confirmPassword } = req.body;
 
-  if (!username) {
-    logger.warn(`Missing or empty username | IP: ${req.ip} `);
-    return res.status(400).json({ message: "Username is required", data: [] });
+  if (!username || !otp || !password || !confirmPassword) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
+  if (password !== confirmPassword) {
+    return res.status(400).json({ message: "Passwords do not match" });
   }
 
   try {
-    const isValidUser = await users.findOne(
-      { username: username },
-      { username: 1, email: 1 },
+    const user = await users.findOne(
+      { username },
+      { otp: 1, otpExpiry: 1, otpUsed: 1 }
     );
 
-    if (!isValidUser) {
-      logger.warn(
-        `Password reset requested for non-existing user | ${username}`,
-      );
-      return res.status(200).json({
-        message: "If the account exists, an OTP has been sent",
-        data: [],
-      });
+    if (!user || !user.otp || !user.otpExpiry || user.otpUsed) {
+      return res.status(400).json({ message: "Invalid OTP or expired" });
     }
 
-    const plainOtp = generateOtp();
-    const hashedOtp = await bcrypt.hash(plainOtp, 10);
-    const otpExpiry = Date.now() + 10 * 60 * 1000;
+    if (user.otpExpiry < Date.now()) {
+      return res.status(400).json({ message: "OTP expired" });
+    }
 
-    logger.info(`Password reset initiated | User: ${username} | IP: ${req.ip}`);
+    const isOtpValid = await bcrypt.compare(otp, user.otp);
+    if (!isOtpValid) {
+      return res.status(400).json({ message: "Invalid OTP or expired" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     await users.updateOne(
-      { _id: new mongoose.Types.ObjectId(isValidUser._id) },
+      { username },
       {
-        otp: hashedOtp,
-        otpExpiry: otpExpiry,
-      },
+        password: hashedPassword,
+        otp: undefined,
+        otpExpiry: undefined,
+        otpUsed: true,
+      }
     );
 
-    const otpSent = await sendOtpMail(isValidUser.email, plainOtp);
-
-    if (!otpSent) {
-      logger.warn(`OTP email failed | User: ${username}`);
-      return res
-        .status(500)
-        .json({
-          message:
-            "`Internal Server error while sending OTP. Please try again later `",
-          data: [],
-        });
-    }
-
-    return res.status(200).json({
-      message: "If the account exists, an OTP has been sent",
-      data: [],
-    });
+    return res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
-    logger.error(
-      `Error while resetting the password ${error} || ${error.stack}`,
-    );
-    return res
-      .status(500)
-      .json({ message: "Internal server error ", data: [] });
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal server error. Failed to update password",
+    });
   }
 };
 
-module.exports = resetPassword;
+module.exports =  resetPassword ;

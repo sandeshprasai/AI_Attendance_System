@@ -1,4 +1,4 @@
-const { required } = require("joi");
+const { required, boolean } = require("joi");
 const mongoose = require("mongoose");
 
 const users = new mongoose.Schema(
@@ -28,10 +28,13 @@ const users = new mongoose.Schema(
     },
     otp: {
       type: String,
-      minLength: 6,
     },
     otpExpiry: {
       type: Date,
+    },
+    otpUsed: {
+      type: Boolean,
+      default: false,
     },
     ProfileImagePath: {
       type: String,
