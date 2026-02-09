@@ -13,6 +13,7 @@ import {
   Calendar,
   Hash,
   FileText,
+  ArrowLeft,
 } from "lucide-react";
 import {
   fetchClassrooms,
@@ -285,7 +286,7 @@ export default function CreateAcademicClass() {
 
       // Reset form after 1 second
       setTimeout(() => {
-        navigate("/admin/dashboard");
+        navigate("/admin/academic-classes");
       }, 1500);
     } catch (error) {
       setToast({
@@ -349,6 +350,13 @@ export default function CreateAcademicClass() {
       <main className="container mx-auto px-6 py-12 mt-20 mb-12 max-w-7xl">
         {/* Header */}
         <div className="mb-10">
+          <button
+            onClick={() => navigate("/admin/academic-classes")}
+            className="flex items-center gap-2 text-gray-600 hover:text-cyan-600 transition-colors mb-4 font-medium"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Academic Classes
+          </button>
           <h1 className="text-4xl font-bold text-gray-800 mb-3">
             Create Academic Class
           </h1>
@@ -583,7 +591,7 @@ export default function CreateAcademicClass() {
             <div className="flex gap-4 justify-end pt-8 border-t border-gray-200 mt-2">
               <button
                 type="button"
-                onClick={() => navigate("/admin/dashboard")}
+                onClick={() => navigate("/admin/academic-classes")}
                 className="px-10 py-3.5 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
               >
                 Cancel

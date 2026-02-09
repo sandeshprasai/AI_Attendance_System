@@ -134,7 +134,9 @@ export default function AddTeacherPage() {
       Object.entries(formData).forEach(([key, value]) => {
         if (key === "ProfileImagePath") return;
         if (key === "Subject") {
-          data.append("Subject", JSON.stringify(value));
+          value.forEach((subject) => {
+            data.append("Subject", subject);
+          });
         } else {
           data.append(key, value);
         }
