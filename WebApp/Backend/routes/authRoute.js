@@ -1,7 +1,11 @@
 const express = require("express");
-const { loginController, getCurrentUser } = require("../controllers/authcontroller/loginController");
-const initiatePasswordReset = require("../controllers/authcontroller/initiatePasswordReset")
-const resetPassword = require("../controllers/authcontroller/resetPassword")
+const {
+  loginController,
+  getCurrentUser,
+} = require("../controllers/authcontroller/loginController");
+const initiatePasswordReset = require("../controllers/authcontroller/initiatePasswordReset");
+const resetPassword = require("../controllers/authcontroller/resetPassword");
+const changePassword = require("../controllers/authcontroller/changePassword");
 const sanitizeLoginInput = require("../middlewares/sanitizeLoginInput");
 const authMiddleware = require("../middlewares/authMiddleware");
 
@@ -12,8 +16,8 @@ authRouter.get("/", (req, res) => {
 });
 
 authRouter.post("/login", sanitizeLoginInput, loginController);
-authRouter.post("/initiate-reset", initiatePasswordReset)
-authRouter.post("/reset-password",resetPassword)
-
+authRouter.post("/initiate-reset", initiatePasswordReset);
+authRouter.post("/reset-password", resetPassword);
+authRouter.post("/change-password", authMiddleware,changePassword);
 
 module.exports = authRouter;
