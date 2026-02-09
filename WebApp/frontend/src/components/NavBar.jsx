@@ -11,7 +11,67 @@ function NavBar({ links }) {
 
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const menuRef = useRef(null);
+
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const handleChangePassword = async () => {
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    try {
+      setIsChangingPassword(true);
+      const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+
+      const response = await fetch(`${API_URL}api/v1/auth/change-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          oldpassword: oldPassword,
+          newpassword: newPassword,
+          confirmpassword: confirmPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || "Password changed successfully");
+        setShowPasswordModal(false);
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        // Optionally logout user to force re-login
+      } else {
+        toast.error(data.message || "Failed to change password");
+      }
+    } catch (error) {
+      console.error("Change password error:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
 
   // 🔥 Default links with Add Academics added
   const navLinks = links || [
@@ -155,11 +215,10 @@ function NavBar({ links }) {
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setShowLogoutMenu(!showLogoutMenu)}
-                  className={`w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-300 ease-out hover:scale-110 hover:shadow-lg active:scale-95 overflow-hidden ${
-                    showLogoutMenu
-                      ? "ring-4 ring-white ring-opacity-40 scale-110"
-                      : ""
-                  }`}
+                  className={`w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center transition-all duration-300 ease-out hover:scale-110 hover:shadow-lg active:scale-95 overflow-hidden ${showLogoutMenu
+                    ? "ring-4 ring-white ring-opacity-40 scale-110"
+                    : ""
+                    }`}
                 >
                   {user?.photoURL && !imageError ? (
                     <img
@@ -170,20 +229,18 @@ function NavBar({ links }) {
                     />
                   ) : (
                     <User
-                      className={`w-5 h-5 text-cyan-600 transition-transform duration-300 ${
-                        showLogoutMenu ? "rotate-12" : ""
-                      }`}
+                      className={`w-5 h-5 text-cyan-600 transition-transform duration-300 ${showLogoutMenu ? "rotate-12" : ""
+                        }`}
                     />
                   )}
                 </button>
 
                 {/* Dropdown */}
                 <div
-                  className={`absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ease-out origin-top-right ${
-                    showLogoutMenu
-                      ? "opacity-100 scale-100 translate-y-0"
-                      : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
-                  }`}
+                  className={`absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ease-out origin-top-right ${showLogoutMenu
+                    ? "opacity-100 scale-100 translate-y-0"
+                    : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+                    }`}
                 >
                   {/* User Info */}
                   <div className="px-4 py-4 bg-linear-to-r from-cyan-50 to-teal-50 border-b border-gray-100">
@@ -210,16 +267,14 @@ function NavBar({ links }) {
                     </div>
                   </div>
 
-                  {/* Settings Button */}
+                  {/* Change Password Button */}
                   <div className="py-2">
                     <button
-                      onClick={() =>
-                        toast.success("Settings feature coming soon!")
-                      }
+                      onClick={() => setShowPasswordModal(true)}
                       className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-all duration-200 active:scale-95"
                     >
                       <Settings className="w-4 h-4 text-gray-500" />
-                      <span className="font-medium">Settings</span>
+                      <span className="font-medium">Change Password</span>
                     </button>
                   </div>
 
@@ -239,6 +294,79 @@ function NavBar({ links }) {
           </div>
         </div>
       </nav>
+
+      {/* Change Password Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100 p-0">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-cyan-600 to-teal-600 p-6 text-center">
+              <h2 className="text-2xl font-bold text-white mb-1">Change Password</h2>
+              <p className="text-cyan-100 text-sm">Update your account security</p>
+            </div>
+
+            {/* Form */}
+            <div className="p-6 space-y-4">
+              {/* Old Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                <input
+                  type="password"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+                  placeholder="Enter current password"
+                />
+              </div>
+
+              {/* New Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+                  placeholder="Enter new password"
+                />
+              </div>
+
+              {/* Confirm Password */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-cyan-500 focus:border-transparent outline-none transition-all"
+                  placeholder="Confirm new password"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setShowPasswordModal(false)}
+                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleChangePassword}
+                  disabled={isChangingPassword}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-cyan-600 to-teal-600 text-white rounded-lg hover:shadow-lg hover:opacity-90 font-medium transition-all disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center"
+                >
+                  {isChangingPassword ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    "Change Password"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
