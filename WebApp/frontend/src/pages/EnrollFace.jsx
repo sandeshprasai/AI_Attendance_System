@@ -1,11 +1,15 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 import Toast from "../components/ui/Toast";
 
 export default function EnrollFace() {
     const FLASK_API_URL = "http://localhost:5001";
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState(null);
@@ -32,6 +36,81 @@ export default function EnrollFace() {
     const [studentDetails, setStudentDetails] = useState(null);
     const [findingStudent, setFindingStudent] = useState(false);
     const [enrollmentWarning, setEnrollmentWarning] = useState(false);
+
+    // Define handleFindStudent with useCallback to avoid dependency issues
+    const handleFindStudent = useCallback(async (rollNoParam = null) => {
+        const rollNoToUse = rollNoParam || formData.roll_no;
+        
+        if (!rollNoToUse || !rollNoToUse.trim()) {
+            setToast({ message: "Please enter a Roll Number", type: "error" });
+            return;
+        }
+
+        try {
+            setFindingStudent(true);
+            setEnrollmentWarning(false); // Reset warning
+
+            const response = await axios.post(`${FLASK_API_URL}/find-student`, {
+                roll_no: rollNoToUse
+            });
+
+            if (response.data.status === "success") {
+                const student = response.data.data[0];
+                setStudentDetails(student);
+                setStudentVerified(true);
+                
+                // Check if already enrolled
+                if (student.is_enrolled) {
+                    setEnrollmentWarning(true);
+                    setToast({
+                        message: `${student.full_name} is already enrolled. You can re-enroll to update face data.`,
+                        type: "warning",
+                    });
+                } else {
+                    setToast({
+                        message: `Student found: ${student.full_name}`,
+                        type: "success",
+                    });
+                }
+            }
+
+        } catch (error) {
+            console.error("Find student error:", error);
+            
+            let errorMessage;
+            
+            // Check if it's a network error (Flask server not running)
+            if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+                errorMessage = "⚠️ Face Recognition Server is not running. Please start the Flask server (port 5001) to verify students.";
+            } else {
+                errorMessage = error.response?.data?.message 
+                    || "Student not found. Please check the Roll Number.";
+            }
+            
+            setToast({
+                message: errorMessage,
+                type: "error",
+            });
+            
+            setStudentVerified(false);
+            setStudentDetails(null);
+            setEnrollmentWarning(false);
+
+        } finally {
+            setFindingStudent(false);
+        }
+    }, [formData.roll_no, FLASK_API_URL]);
+
+    // Prefill roll number from URL parameter and auto-verify
+    useEffect(() => {
+        const rollNoFromUrl = searchParams.get('rollNo');
+        if (rollNoFromUrl) {
+            console.log('Roll number from URL:', rollNoFromUrl);
+            setFormData({ roll_no: rollNoFromUrl });
+            // Auto-trigger find student immediately
+            handleFindStudent(rollNoFromUrl);
+        }
+    }, [searchParams, handleFindStudent]);
 
     // Enumerate available cameras
     const enumerateCameras = async () => {
@@ -173,61 +252,6 @@ export default function EnrollFace() {
             setStudentVerified(false);
             setStudentDetails(null);
             setEnrollmentWarning(false);
-        }
-    };
-
-    // Find Student Function
-    const handleFindStudent = async () => {
-        if (!formData.roll_no.trim()) {
-            setToast({ message: "Please enter a Roll Number", type: "error" });
-            return;
-        }
-
-        try {
-            setFindingStudent(true);
-            setEnrollmentWarning(false); // Reset warning
-
-            const response = await axios.post(`${FLASK_API_URL}/find-student`, {
-                roll_no: formData.roll_no
-            });
-
-            if (response.data.status === "success") {
-                const student = response.data.data[0];
-                setStudentDetails(student);
-                setStudentVerified(true);
-                
-                // Check if already enrolled
-                if (student.is_enrolled) {
-                    setEnrollmentWarning(true);
-                    setToast({
-                        message: `${student.full_name} is already enrolled. You can re-enroll to update face data.`,
-                        type: "error",
-                    });
-                } else {
-                    setToast({
-                        message: `Student found: ${student.full_name}`,
-                        type: "success",
-                    });
-                }
-            }
-
-        } catch (error) {
-            console.error("Find student error:", error);
-            
-            const errorMessage = error.response?.data?.message 
-                || "Student not found. Please check the Roll Number.";
-            
-            setToast({
-                message: errorMessage,
-                type: "error",
-            });
-            
-            setStudentVerified(false);
-            setStudentDetails(null);
-            setEnrollmentWarning(false);
-
-        } finally {
-            setFindingStudent(false);
         }
     };
 
@@ -442,6 +466,15 @@ export default function EnrollFace() {
             <NavBar />
 
             <div className="max-w-4xl mx-auto p-6 space-y-8 mb-16 pt-24">
+                {/* Back Button */}
+                <button
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-4"
+                >
+                    <ArrowLeft size={20} />
+                    <span className="font-medium">Back</span>
+                </button>
+
                 <h1 className="text-3xl font-bold text-gray-800">
                     Face Enrollment System
                 </h1>

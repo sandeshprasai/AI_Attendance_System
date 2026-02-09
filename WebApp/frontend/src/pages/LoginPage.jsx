@@ -112,6 +112,13 @@ export default function LoginPage() {
       alert("Something went wrong!");
     }
   };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !isLoading) {
+      handleLogin();
+    }
+  };
+
   return (
     <div className="w-full space-y-5">
       {/* Username Field */}
@@ -127,6 +134,7 @@ export default function LoginPage() {
           type="text"
           value={username}
           onChange={handleUsernameChange}
+          onKeyDown={handleKeyDown}
           className={`block w-full px-3 py-3 bg-white bg-opacity-90 border ${usernameError
             ? "border-purple-400 bg-purple-50"
             : "border-white border-opacity-20"
@@ -171,6 +179,7 @@ export default function LoginPage() {
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={handlePasswordChange}
+            onKeyDown={handleKeyDown}
             className={`block w-full px-3 py-3 bg-white bg-opacity-90 border  ${passwordError
               ? "border-purple-400 bg-purple-50"
               : "border-white border-opacity-20"
