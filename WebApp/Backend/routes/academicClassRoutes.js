@@ -3,6 +3,7 @@ const academicClassRoutes = express.Router();
 
 // ------------------------------------------------Import Middleware ------------------------------------------------
 const preventAccess = require("../middlewares/adminAccessControl");
+const allowTeacherAndAdmin = require("../middlewares/teacherAdminAccessControl");
 const validateAcademicClass = require("../middlewares/validateAcademicClass");
 
 // ------------------------------------------------Import Controllers ------------------------------------------------
@@ -25,8 +26,8 @@ academicClassRoutes.get("/students", preventAccess, getStudentsByDepartment);
 
 // ------------------------------------------------Academic Class CRUD Routes ------------------------------------------------
 academicClassRoutes.post("/", preventAccess, validateAcademicClass, createAcademicClass);
-academicClassRoutes.get("/", preventAccess, getAllAcademicClasses);
-academicClassRoutes.get("/:id", preventAccess, getAcademicClassById);
+academicClassRoutes.get("/", allowTeacherAndAdmin, getAllAcademicClasses); // Allow teacher and admin
+academicClassRoutes.get("/:id", allowTeacherAndAdmin, getAcademicClassById); // Allow teacher and admin
 academicClassRoutes.patch("/:id/status", preventAccess, updateAcademicClassStatus);
 
 module.exports = academicClassRoutes;

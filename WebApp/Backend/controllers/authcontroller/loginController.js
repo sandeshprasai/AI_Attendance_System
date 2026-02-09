@@ -46,6 +46,7 @@ const loginController = async (req, res) => {
       accessToken,
       refreshToken,
       user: {
+        id: user._id,
         name: user.name,
         username: user.username,
         role: user.role,
@@ -58,4 +59,38 @@ const loginController = async (req, res) => {
   }
 };
 
-module.exports = { loginController };
+// Get current logged-in user details
+const getCurrentUser = async (req, res) => {
+  try {
+    // req.user is set by authMiddleware after verifying JWT
+    const userId = req.user.id;
+    
+    const user = await users.findById(userId).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        username: user.username,
+        role: user.role,
+        ProfileImagePath: user.ProfileImagePath,
+      },
+    });
+  } catch (err) {
+    logger.error(`Get current user failed | Error: ${err.message} | IP: ${req.ip}`);
+    return res.status(500).json({ 
+      success: false,
+      error: "Internal server error" 
+    });
+  }
+};
+
+module.exports = { loginController, getCurrentUser };

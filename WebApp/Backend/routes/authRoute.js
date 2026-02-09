@@ -17,6 +17,7 @@ authRouter.get("/", (req, res) => {
 });
 
 authRouter.post("/login", sanitizeLoginInput, loginController);
+authRouter.get("/me", authMiddleware, getCurrentUser); // Get current user profile
 authRouter.post("/refresh", refreshTokenController);
 authRouter.post("/initiate-reset", initiatePasswordReset);
 authRouter.post("/reset-password", resetPassword);
