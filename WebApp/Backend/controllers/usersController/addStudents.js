@@ -31,11 +31,36 @@ const addStudents = async (req, res) => {
       Section,
     } = req.body;
 
-    // Check if student already exists
-    const existingStudent = await students.findOne({ RollNo });
+    // Check if student already exists (check all unique fields)
+    const existingStudent = await students.findOne({
+      $or: [
+        { RollNo },
+        { Email: Email.toLowerCase() },
+        { UniversityReg }
+      ]
+    });
+    
     if (existingStudent) {
-      logger.warn(`Student with RollNo ${RollNo} already exists`);
-      return res.status(400).json({ error: "Student already registered" });
+      let errorMessage = "Student already registered";
+      let fieldName = "RollNo";
+      
+      if (existingStudent.RollNo === RollNo) {
+        errorMessage = `Roll number "${RollNo}" is already registered`;
+        fieldName = "RollNo";
+      } else if (existingStudent.Email === Email.toLowerCase()) {
+        errorMessage = `Email "${Email}" is already registered`;
+        fieldName = "Email";
+      } else if (existingStudent.UniversityReg === UniversityReg) {
+        errorMessage = `University registration number "${UniversityReg}" is already registered`;
+        fieldName = "UniversityReg";
+      }
+      
+      logger.warn(`Duplicate student registration attempt: ${fieldName} = ${existingStudent[fieldName]}`);
+      
+      return res.status(400).json({ 
+        error: errorMessage,
+        field: fieldName
+      });
     }
 
     logger.info("Uploading student image to Cloudinary...");
@@ -137,6 +162,47 @@ const addStudents = async (req, res) => {
   } catch (err) {
     console.log(err);
     logger.error(`Error adding student: ${err.stack || err}`);
+
+    // Handle MongoDB duplicate key error (code 11000)
+    if (err.code === 11000) {
+      const duplicateField = Object.keys(err.keyPattern || {})[0];
+      const duplicateValue = err.keyValue?.[duplicateField];
+      
+      logger.warn(
+        `Duplicate key error on field: ${duplicateField}, value: ${duplicateValue}`
+      );
+
+      let errorMessage = "This record already exists";
+      let fieldName = duplicateField;
+
+      // Create user-friendly messages based on the field
+      switch (duplicateField) {
+        case "Email":
+          errorMessage = `Email "${duplicateValue}" is already registered`;
+          fieldName = "Email";
+          break;
+        case "RollNo":
+          errorMessage = `Roll number "${duplicateValue}" is already registered`;
+          fieldName = "RollNo";
+          break;
+        case "UniversityReg":
+          errorMessage = `University registration number "${duplicateValue}" is already registered`;
+          fieldName = "UniversityReg";
+          break;
+        case "Phone":
+          errorMessage = `Phone number "${duplicateValue}" is already registered`;
+          fieldName = "Phone";
+          break;
+        default:
+          errorMessage = `${duplicateField} "${duplicateValue}" already exists`;
+      }
+
+      return res.status(400).json({
+        error: errorMessage,
+        field: fieldName,
+        value: duplicateValue,
+      });
+    }
 
     return res.status(500).json({
       error: "An error occurred while adding the student",
