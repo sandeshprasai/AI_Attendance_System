@@ -29,6 +29,7 @@ import ProfilePhotoSection from "../components/FormSections/ProfilePhotoSection"
 import GuardianInfoSection from "../components/FormSections/GuardianInfoSection";
 
 import useDepartments from "../hooks/useDepartments";
+import useClassrooms from "../hooks/useClassrooms";
 
 
 export default function AddStudent() {
@@ -36,6 +37,9 @@ export default function AddStudent() {
 
   const { departments: facultyOptions, loading: facultyLoading } =
     useDepartments();
+  
+  const { classrooms: classroomOptions, loading: classroomLoading } =
+    useClassrooms();
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -95,7 +99,7 @@ export default function AddStudent() {
         error = validatePhone(value);
         break;
       case "Class":
-        error = validateClass(value);
+        error = validateClass(value, classroomOptions);
         break;
       case "Section":
         error = validateSection(value);
@@ -156,7 +160,10 @@ export default function AddStudent() {
       Email: { value: formData.Email, validator: validateEmail },
       Phone: { value: formData.Phone, validator: validatePhone },
       DateOfBirth: { value: formData.DateOfBirth, validator: validateDOB },
-      Class: { value: formData.Class, validator: validateClass },
+      Class: { 
+        value: formData.Class, 
+        validator: (v) => validateClass(v, classroomOptions) 
+      },
       Section: { value: formData.Section, validator: validateSection },
       FullAddress: { value: formData.FullAddress, validator: validateAddress },
       UniversityReg: {
@@ -216,12 +223,41 @@ export default function AddStudent() {
       setErrors({});
       setImagePreview(null);
     } catch (error) {
-      setToast({
-        message:
-          error.response?.data?.error ||
-          "Failed to add student. Server error.",
-        type: "error",
-      });
+      console.error("Add student error:", error);
+      
+      // Handle field-specific errors (like duplicate key errors)
+      if (error.response?.data?.field) {
+        const fieldName = error.response.data.field;
+        const errorMessage = error.response.data.error;
+        
+        // Set the error on the specific field
+        setErrors(prev => ({
+          ...prev,
+          [fieldName]: errorMessage
+        }));
+        
+        // Also show a toast
+        setToast({
+          message: errorMessage,
+          type: "error",
+        });
+        
+        // Scroll to the field with error (optional)
+        const fieldElement = document.querySelector(`[name="${fieldName}"]`);
+        if (fieldElement) {
+          fieldElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          fieldElement.focus();
+        }
+      } else {
+        // Generic error
+        setToast({
+          message:
+            error.response?.data?.error ||
+            error.response?.data?.details ||
+            "Failed to add student. Server error.",
+          type: "error",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -269,7 +305,9 @@ export default function AddStudent() {
           formData={formData}
           handleInputChange={handleInputChange}
           facultyOptions={facultyOptions}
+          classroomOptions={classroomOptions}
           facultyLoading={facultyLoading}
+          classroomLoading={classroomLoading}
           errors={errors}
           loading={loading}
         />

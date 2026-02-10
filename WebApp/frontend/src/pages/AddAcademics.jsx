@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 import AddSubjectsCard from "../components/cards/AddSubjectsCard";
+import AddClassroomCard from "../components/cards/AddClassroomCard";
 
 import {
   addDepartments,
@@ -47,10 +48,6 @@ export default function AddAcademicsPage() {
     { Department: "", SubjectCode: "", SubjectName: "" ,  Semester: ""},
   ]);
 
-  const [classrooms, setClassrooms] = useState([
-    { Code: "", Capacity: "", Description: "" },
-  ]);
-
   const [deptOptions, setDeptOptions] = useState([]);
   const [loadingDept, setLoadingDept] = useState(false);
   const [toast, setToast] = useState(null);
@@ -74,33 +71,6 @@ export default function AddAcademicsPage() {
     } catch (err) {
       setToast({
         message: err.response?.data?.message || "Failed to add departments",
-        type: "error",
-      });
-    }
-  };
-
-  const handleAddClassroom = async () => {
-    const payload = classrooms
-      .filter((c) => c.Code && c.Capacity)
-      .map((c) => ({
-        Class: c.Code,
-        Capacity: c.Capacity,
-        Description: c.Description || "",
-      }));
-
-    if (!payload.length)
-      return setToast({ message: "No valid classroom to add", type: "error" });
-
-    try {
-      const res = await addClassrooms(payload);
-      setToast({
-        message: res.data.message || "Classes added successfully!",
-        type: "success",
-      });
-      setClassrooms([{ Code: "", Capacity: "", Description: "" }]);
-    } catch (err) {
-      setToast({
-        message: err.response?.data?.message || "Failed to add classrooms",
         type: "error",
       });
     }
@@ -138,8 +108,6 @@ export default function AddAcademicsPage() {
       setter([...list, { DepartmentCode: "", DepartmentName: "" }]);
     if (type === "sub")
       setter([...list, { Department: "", SubjectCode: "", SubjectName: "" ,}]);
-    if (type === "room")
-      setter([...list, { Code: "", Capacity: "", Description: "" }]);
   };
 
   // ================= UI =================
@@ -203,60 +171,9 @@ export default function AddAcademicsPage() {
           loadingDept={loadingDept}
           addSubjectAPI={addSubjects}
         />
+        
         {/* ================= CLASSROOM CARD ================= */}
-        <section className="bg-white p-6 rounded-xl shadow-sm border">
-          <h2 className="text-xl font-bold text-cyan-600 mb-6">
-            Add Classroom
-          </h2>
-
-          {classrooms.map((room, i) => (
-            <div key={i} className="flex gap-4 mb-4 items-end">
-              <input
-                className="flex-1 px-4 py-2 border rounded-lg"
-                placeholder="Code"
-                value={room.Code}
-                onChange={(e) => {
-                  const r = [...classrooms];
-                  r[i].Code = e.target.value;
-                  setClassrooms(r);
-                }}
-              />
-              <input
-                className="flex-1 px-4 py-2 border rounded-lg"
-                placeholder="Capacity"
-                value={room.Capacity}
-                onChange={(e) => {
-                  const r = [...classrooms];
-                  r[i].Capacity = e.target.value;
-                  setClassrooms(r);
-                }}
-              />
-              <input
-                className="flex-1 px-4 py-2 border rounded-lg"
-                placeholder="Description"
-                value={room.Description}
-                onChange={(e) => {
-                  const r = [...classrooms];
-                  r[i].Description = e.target.value;
-                  setClassrooms(r);
-                }}
-              />
-              <button
-                onClick={() => addRow(setClassrooms, classrooms, "room")}
-                className="w-10 h-10 bg-cyan-600 text-white rounded-lg"
-              >
-                +
-              </button>
-            </div>
-          ))}
-
-          <button
-            onClick={handleAddClassroom}
-            className="bg-cyan-600 text-white px-8 py-2 rounded-lg"
-          >
-            Add
-          </button>
-        </section>
+        <AddClassroomCard addClassroomAPI={addClassrooms} />
       </div>
 
       {toast && <Toast {...toast} onClose={() => setToast(null)} />}
