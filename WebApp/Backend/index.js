@@ -28,6 +28,7 @@ const authRoute = require("./routes/authRoute");
 const userRouter = require("./routes/usersRoutes");
 const academicRoutes = require("./routes/academicRoutes");
 const academicClassRoutes = require("./routes/academicClassRoutes");
+const attendanceRoutes = require("./routes/attendanceRoutes");
 
 // -----------------------------------------------------Routes Import Completed-----------------------------------------------------
 
@@ -56,8 +57,9 @@ app.use("/public", express.static(path.join(__dirname, "public")));
 app.use("/api/v1/auth/", authRoute);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/academics", academicRoutes)
-app.use("/api/v1/academics",academicRoutes);
+app.use("/api/v1/academics", academicRoutes);
 app.use("/api/v1/academic-class", academicClassRoutes);
+app.use("/api/v1/attendance", attendanceRoutes);
 
 app.listen(port, () => {
   console.log(`Server is up and running at http://localhost:${port}/ `);

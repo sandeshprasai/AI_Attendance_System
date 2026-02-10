@@ -2,12 +2,16 @@ const students = require("../../models/students");
 const embedding = require("../../models/studentEmbedding");
 
 const logger = require("../../logger/logger");
+const { promises } = require("winston-daily-rotate-file");
 
 const pendingEmbeddingVerifcation = async (req, res) => {
   try {
     logger.info(`Get remaining embedding verification requested $ {req.ip} `);
-    const totalStuddents = await students.countDocuments({});
-    const totalEmbedings = await embedding.countDocuments({});
+    const [totalStuddents, totalEmbedings] = await Promise.all(
+      students.countDocuments({}),
+      embedding.countDocuments({}),
+    );
+
     const remeningVerification = totalStuddents - totalEmbedings;
     logger.info(
       `Fetched total  ${remeningVerification}  remaining embedding verification `,

@@ -21,6 +21,8 @@ import EnrollFace from "./pages/EnrollFace"; // 🆕 Face enrollment page
 // Academic Class pages
 import CreateAcademicClass from "./pages/CreateAcademicClass";
 import AcademicClassList from "./pages/AcademicClassList";
+import AcademicClassDetails from "./pages/AcademicClassDetails";
+import TakeAttendance from "./pages/TakeAttendance";
 
 // route protection
 import RoleProtectedRoute from "./routes/RoleProtectedRoute";
@@ -115,6 +117,24 @@ export default function App() {
           element={
             <RoleProtectedRoute allowedRoles={["admin"]}>
               <AcademicClassList />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/academic-class/:id"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AcademicClassDetails />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/take-attendance/:id"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <TakeAttendance />
             </RoleProtectedRoute>
           }
         />
