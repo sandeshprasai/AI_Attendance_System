@@ -39,8 +39,12 @@ API.interceptors.response.use(
           { refreshToken }
         );
 
-        // Save new access token
-        localStorage.setItem("accessToken", data.accessToken);
+        // Save to the same storage where refresh token exists
+        if (localStorage.getItem("refreshToken")) {
+          localStorage.setItem("accessToken", data.accessToken);
+        } else {
+          sessionStorage.setItem("accessToken", data.accessToken);
+        }
 
         // Retry original request with new token
         originalRequest.headers.authorization = `Bearer ${data.accessToken}`;

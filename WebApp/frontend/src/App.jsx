@@ -9,6 +9,7 @@ import Unauthorized from "./pages/Unauthorized";
 import UsersPage from "./pages/UsersPage";
 import ContactUs from "./pages/ContactUs";
 import ForgetPassword from "./pages/ForgetPassword";
+import TeacherMyClasses from "./pages/TeacherMyClasses";
 
 // components
 import CreateClassroom from "./components/CreateClassroom";
@@ -124,6 +125,15 @@ export default function App() {
           element={
             <RoleProtectedRoute allowedRoles={["teacher"]}>
               <TeacherDashboard />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/teacher/my-classes"
+          element={
+            <RoleProtectedRoute allowedRoles={["teacher"]}>
+              <TeacherMyClasses />
             </RoleProtectedRoute>
           }
         />

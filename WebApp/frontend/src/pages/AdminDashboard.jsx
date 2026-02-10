@@ -4,6 +4,7 @@ import Navbar from '../components/NavBar';
 import Footer from '../components/Footer';
 import GreetingCard from '../components/GreetingCard';
 import UserCard from"../components/cards/UserCard";
+import ClassroomManagementCard from '../components/cards/ClassroomManagementCard';
 import { useAuth } from '.././context/AuthContext';
 
 
@@ -49,7 +50,7 @@ export default function AdminDashboard() {
  
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Your Existing Navbar */}
       <Navbar  />
       
@@ -57,7 +58,7 @@ export default function AdminDashboard() {
       {/* Main Content */}
        {/* Scrollable Area */}
  
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           
           {/* Left Column - Greeting & Quick Actions */}
@@ -395,36 +396,13 @@ export default function AdminDashboard() {
               </div>
 
               {/* Classroom Management */}
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-purple-600" />
-                    Classroom Management
-                  </h3>
-                  <button className="text-purple-600 hover:text-purple-700 text-sm font-medium">
-                    View All
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">Active Classrooms</p>
-                      <p className="text-xs text-gray-600">With assigned teachers</p>
-                    </div>
-                    <span className="text-2xl font-bold text-purple-600">8</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">Avg. Students/Class</p>
-                      <p className="text-xs text-gray-600">Current distribution</p>
-                    </div>
-                    <span className="text-2xl font-bold text-cyan-600">18</span>
-                  </div>
-                </div>
-                <button className="mt-4 w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
-                  Create Classroom
-                </button>
-              </div>
+              <ClassroomManagementCard 
+                userRole="admin"
+                showCreateButton={true}
+                createButtonLabel="Create Classroom"
+                createButtonRoute="/admin/create-academic-class"
+                viewAllRoute="/admin/academic-classes"
+              />
 
               {/* System Status */}
               <div className="bg-white rounded-xl shadow-md p-6">

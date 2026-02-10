@@ -2,6 +2,8 @@ import React from "react";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 import GreetingCard from "../components/GreetingCard";
+import ClassroomManagementCard from "../components/cards/ClassroomManagementCard";
+import { useAuth } from "../context/AuthContext";
 import { CheckCircle, XCircle, Clock, TrendingUp, Calendar, FileText, BarChart3, AlertCircle, ChevronRight } from "lucide-react";
 
 const AttendanceCard = ({ type, count, percentage, icon: Icon, bgColor, textColor, barColor }) => {
@@ -140,17 +142,29 @@ const ClassAttendanceRow = ({ subject, teacher, present, total, percentage }) =>
 };
 
 const StudentDashboard = () => {
+  const { user } = useAuth();
+
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <NavBar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-20">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-16">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Left Sidebar - Greeting Card, Analytics & Reports */}
           <div className="lg:col-span-1 space-y-6">
             {/* Greeting Card */}
             <div>
               <GreetingCard />
+            </div>
+
+            {/* My Classes Card */}
+            <div>
+              <ClassroomManagementCard 
+                userRole="student"
+                userId={user?.id}
+                showCreateButton={false}
+                viewAllRoute="/student/my-classes"
+              />
             </div>
 
             {/* Analytics Section */}
@@ -283,7 +297,7 @@ const StudentDashboard = () => {
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       <Footer />
     </div>

@@ -84,6 +84,7 @@ export default function LoginPage() {
 
       storage.setItem("accessToken", data.accessToken);
       storage.setItem("refreshToken", data.refreshToken);
+      storage.setItem("userId", data.user.id);
       storage.setItem("username", data.user.username);
       storage.setItem("name", data.user.name);
       storage.setItem("role", data.user.role);
@@ -93,6 +94,7 @@ export default function LoginPage() {
 
       // -----🔥 UPDATE CONTEXT -----
       setUser({
+        id: data.user.id,
         name: data.user.name,
         username: data.user.username,
         role: data.user.role,
