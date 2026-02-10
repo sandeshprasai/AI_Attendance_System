@@ -29,6 +29,7 @@ const userRouter = require("./routes/usersRoutes");
 const academicRoutes = require("./routes/academicRoutes");
 const academicClassRoutes = require("./routes/academicClassRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 // -----------------------------------------------------Routes Import Completed-----------------------------------------------------
 
@@ -60,6 +61,7 @@ app.use("/api/v1/academics", academicRoutes)
 app.use("/api/v1/academics", academicRoutes);
 app.use("/api/v1/academic-class", academicClassRoutes);
 app.use("/api/v1/attendance", attendanceRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 app.listen(port, () => {
   console.log(`Server is up and running at http://localhost:${port}/ `);
