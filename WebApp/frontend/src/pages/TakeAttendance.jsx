@@ -58,14 +58,20 @@ export default function TakeAttendance() {
                 video: { width: 640, height: 480 }
             });
             setCameraStream(stream);
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-            }
             setIsCameraActive(true);
+            // Note: videoRef.current might be null here because it hasn't rendered yet
+            // The useEffect below will handle attaching the stream
         } catch (err) {
             setToast({ message: "Camera access denied", type: "error" });
         }
     };
+
+    // Effect to attach stream when video element is ready
+    useEffect(() => {
+        if (isCameraActive && cameraStream && videoRef.current) {
+            videoRef.current.srcObject = cameraStream;
+        }
+    }, [isCameraActive, cameraStream]);
 
     const stopCamera = () => {
         if (cameraStream) {
@@ -94,40 +100,55 @@ export default function TakeAttendance() {
                 formData.append("image", blob);
 
                 try {
-                    // 1. Detect Face for Bounding Box
-                    const detectRes = await axios.post(`${FLASK_API_URL}/detect-face`, formData);
-                    const bbox = detectRes.data?.bbox;
+                    // Prepare roll numbers for filtering
+                    const rollNos = classData?.Students?.map(s => s.RollNo).join(",") || "";
+                    formData.append("roll_nos", rollNos);
 
-                    // Draw bbox on overlay canvas
+                    // 1. Recognize All Faces (Multi-face detection is now integrated)
+                    const recognizeRes = await axios.post(`${FLASK_API_URL}/recognize`, formData);
+                    const { faces_detected, results } = recognizeRes.data;
+
+                    // 2. Draw bboxes for all detected faces on overlay canvas
                     if (canvasRef.current) {
                         const overlayCtx = canvasRef.current.getContext("2d");
                         overlayCtx.clearRect(0, 0, 640, 480);
-                        if (bbox) {
-                            const [x1, y1, x2, y2] = bbox;
-                            overlayCtx.strokeStyle = "#00FF00";
-                            overlayCtx.lineWidth = 3;
-                            overlayCtx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+
+                        if (results && results.length > 0) {
+                            results.forEach(res => {
+                                const [x1, y1, x2, y2] = res.bbox;
+                                // Use green for matches, red for unknowns
+                                overlayCtx.strokeStyle = res.match ? "#00FF00" : "#FF0000";
+                                overlayCtx.lineWidth = 3;
+                                overlayCtx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+
+                                // Optional: Draw name above bbox if matched
+                                if (res.match && res.student) {
+                                    overlayCtx.fillStyle = "#00FF00";
+                                    overlayCtx.font = "bold 16px Arial";
+                                    overlayCtx.fillText(res.student.name, x1, y1 > 20 ? y1 - 5 : y1 + 20);
+                                }
+                            });
                         }
                     }
 
-                    // 2. Recognize Face
-                    const recognizeRes = await axios.post(`${FLASK_API_URL}/recognize`, formData);
-                    if (recognizeRes.data?.match) {
-                        const student = recognizeRes.data.student;
+                    // 3. Process matched students
+                    if (results && results.length > 0) {
+                        results.forEach(res => {
+                            if (res.match && res.student) {
+                                const student = res.student;
 
-                        // Check if student belongs to this class
-                        const isInCategory = classData?.Students?.some(s => s.RollNo === student.roll_no);
+                                setPresentStudents(prev => {
+                                    if (prev.has(student.roll_no)) return prev;
+                                    const next = new Set(prev);
+                                    next.add(student.roll_no);
+                                    return next;
+                                });
 
-                        if (isInCategory) {
-                            setPresentStudents(prev => {
-                                const next = new Set(prev);
-                                next.add(student.roll_no);
-                                return next;
-                            });
-                            setLastRecognized(student.name);
-                            // Clear name after 2 seconds
-                            setTimeout(() => setLastRecognized(null), 2000);
-                        }
+                                setLastRecognized(student.name);
+                                // Clear name display after 2 seconds
+                                setTimeout(() => setLastRecognized(null), 2000);
+                            }
+                        });
                     }
                 } catch (err) {
                     console.error("AI Server Error:", err);
@@ -266,15 +287,15 @@ export default function TakeAttendance() {
                                 <div
                                     key={student._id}
                                     className={`p-4 rounded-2xl border transition-all flex items-center justify-between cursor-pointer group ${presentStudents.has(student.RollNo)
-                                            ? 'bg-emerald-50 border-emerald-200 shadow-sm'
-                                            : 'bg-white border-gray-100 hover:border-cyan-200'
+                                        ? 'bg-emerald-50 border-emerald-200 shadow-sm'
+                                        : 'bg-white border-gray-100 hover:border-cyan-200'
                                         }`}
                                     onClick={() => toggleAttendance(student.RollNo)}
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${presentStudents.has(student.RollNo)
-                                                ? 'bg-emerald-500 text-white'
-                                                : 'bg-gray-100 text-gray-500 group-hover:bg-cyan-100 group-hover:text-cyan-600'
+                                            ? 'bg-emerald-500 text-white'
+                                            : 'bg-gray-100 text-gray-500 group-hover:bg-cyan-100 group-hover:text-cyan-600'
                                             }`}>
                                             {student.RollNo}
                                         </div>

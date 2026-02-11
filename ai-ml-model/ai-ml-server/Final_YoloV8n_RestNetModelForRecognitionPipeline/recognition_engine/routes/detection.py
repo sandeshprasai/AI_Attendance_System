@@ -12,13 +12,13 @@ detection_bp = Blueprint('detection', __name__)
 @detection_bp.route("/detect-face", methods=["POST"])
 def detect_face():
     """
-    Detect face in an image and return bounding box coordinates.
+    Detect faces in an image and return bounding box coordinates.
     
     Expected input:
         - image: Image file (multipart/form-data)
     
     Returns:
-        - bbox: [x1, y1, x2, y2] or None if no face detected
+        - bboxes: List of [x1, y1, x2, y2] coordinates
     """
     if "image" not in request.files:
         return jsonify({"error": "image required"}), 400
@@ -27,13 +27,11 @@ def detect_face():
     
     # Get pipeline from app config
     pipe = current_app.config['RECOGNITION_PIPELINE']
-    _, bbox = pipe.process_image(img)
+    results = pipe.process_all_faces(img)
 
-    if bbox is None:
-        return jsonify({"bbox": None})
-
-    x1, y1, x2, y2 = map(int, bbox)
+    bboxes = [face['bbox'] for face in results]
 
     return jsonify({
-        "bbox": [x1, y1, x2, y2]
+        "faces_detected": len(bboxes),
+        "bboxes": bboxes
     })

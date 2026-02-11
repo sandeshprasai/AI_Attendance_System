@@ -51,19 +51,36 @@ def save_embedding_to_db(student_id, roll_no, embedding, images_processed, image
         traceback.print_exc()
         return False
 
-def load_all_enroll_embeddings():
-    """Load all embeddings from MongoDB"""
+def load_all_enroll_embeddings(roll_nos=None):
+    """
+    Load embeddings from MongoDB.
+    Args:
+        roll_nos: Optional list of roll numbers to filter by.
+    """
     gallery = []
     
     try:
-        embeddings = embeddings_collection.find()
+        query = {}
+        if roll_nos:
+            # Convert roll_nos to integers safely
+            roll_nos_ints = []
+            for r in roll_nos:
+                try:
+                    roll_nos_ints.append(int(r))
+                except (ValueError, TypeError):
+                    print(f"Warning: Skipping invalid roll number filter: {r}")
+            
+            if roll_nos_ints:
+                query = {"RollNo": {"$in": roll_nos_ints}}
+            
+        embeddings = embeddings_collection.find(query)
         
         for emb_doc in embeddings:
             roll_no = emb_doc["RollNo"]
             embedding = np.array(emb_doc["Embedding"], dtype=np.float32)
             gallery.append((roll_no, embedding))
         
-        print(f"Loaded {len(gallery)} embeddings from database")
+        print(f"Loaded {len(gallery)} embeddings from database (filtered: {roll_nos is not None})")
         return gallery
     except Exception as e:
         print(f"Error loading embeddings: {str(e)}")

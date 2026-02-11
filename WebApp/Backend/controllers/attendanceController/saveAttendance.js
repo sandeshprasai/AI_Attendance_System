@@ -24,44 +24,54 @@ const saveAttendance = async (req, res) => {
             });
         }
 
-        // Prepare data for attendance record
-        const attendanceData = {
+        // Normalize date to start of the day (YYYY-MM-DD)
+        const recordDate = new Date(date);
+        recordDate.setHours(0, 0, 0, 0);
+
+        // Check if attendance record already exists for this class and date
+        let attendance = await Attendance.findOne({
             AcademicClass: academicClassId,
-            Date: new Date(date),
-            Subject: academicClass.Subject,
-            Teacher: academicClass.Teacher,
-            TotalStudents: academicClass.Students.length,
-            AttendanceRecords: attendanceRecords,
-            SessionType: sessionType || "lecture",
-            Status: "finalized",
-        };
+            Date: recordDate
+        });
 
-        // Use findOneAndUpdate with upsert to avoid duplicate records for same class and date
-        const updatedAttendance = await Attendance.findOneAndUpdate(
-            { AcademicClass: academicClassId, Date: new Date(date) },
-            attendanceData,
-            { new: true, upsert: true, runValidators: true }
-        );
+        if (attendance) {
+            // Update existing record
+            attendance.AttendanceRecords = attendanceRecords;
+            attendance.SessionType = sessionType || "lecture";
+            attendance.Status = "finalized";
+            attendance.TotalStudents = academicClass.Students.length;
+            // The Subject and Teacher might have changed so update them too
+            attendance.Subject = academicClass.Subject;
+            attendance.Teacher = academicClass.Teacher;
 
-        logger.info(`Attendance saved successfully | ID: ${updatedAttendance._id} | IP: ${req.ip}`);
+            await attendance.save(); // This triggers pre-save middleware
+            logger.info(`Attendance updated successfully | ID: ${attendance._id} | IP: ${req.ip}`);
+        } else {
+            // Create new record
+            const attendanceData = {
+                AcademicClass: academicClassId,
+                Date: recordDate,
+                Subject: academicClass.Subject,
+                Teacher: academicClass.Teacher,
+                TotalStudents: academicClass.Students.length,
+                AttendanceRecords: attendanceRecords,
+                SessionType: sessionType || "lecture",
+                Status: "finalized",
+            };
+
+            attendance = new Attendance(attendanceData);
+            await attendance.save(); // This triggers pre-save middleware
+            logger.info(`Attendance created successfully | ID: ${attendance._id} | IP: ${req.ip}`);
+        }
 
         return res.status(200).json({
             success: true,
             message: "Attendance saved successfully",
-            data: updatedAttendance,
+            data: attendance,
         });
 
     } catch (error) {
         logger.error(`Save attendance failed | Error: ${error.message} | IP: ${req.ip}`);
-
-        // Handle duplicate key error if not caught by findOneAndUpdate (unlikely but safe)
-        if (error.code === 11000) {
-            return res.status(400).json({
-                success: false,
-                message: "Attendance for this class on this date already exists",
-            });
-        }
-
         return res.status(500).json({
             success: false,
             message: "Internal server error while saving attendance",

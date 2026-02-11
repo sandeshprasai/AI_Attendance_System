@@ -41,9 +41,9 @@ export default function EnrollFace() {
     const handleFindStudent = useCallback(async (rollNoParam = null) => {
         // Safely convert to string and trim
         const rollNoToUse = String(rollNoParam || formData.roll_no || '').trim();
-        
+
         console.log('Finding student with roll number:', rollNoToUse); // Debug log
-        
+
         if (!rollNoToUse) {
             setToast({ message: "Please enter a Roll Number", type: "error" });
             return;
@@ -61,7 +61,7 @@ export default function EnrollFace() {
                 const student = response.data.data[0];
                 setStudentDetails(student);
                 setStudentVerified(true);
-                
+
                 // Check if already enrolled
                 if (student.is_enrolled) {
                     setEnrollmentWarning(true);
@@ -79,22 +79,22 @@ export default function EnrollFace() {
 
         } catch (error) {
             console.error("Find student error:", error);
-            
+
             let errorMessage;
-            
+
             // Check if it's a network error (Flask server not running)
             if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
                 errorMessage = "⚠️ Face Recognition Server is not running. Please start the Flask server (port 5001) to verify students.";
             } else {
-                errorMessage = error.response?.data?.message 
+                errorMessage = error.response?.data?.message
                     || "Student not found. Please check the Roll Number.";
             }
-            
+
             setToast({
                 message: errorMessage,
                 type: "error",
             });
-            
+
             setStudentVerified(false);
             setStudentDetails(null);
             setEnrollmentWarning(false);
@@ -119,15 +119,15 @@ export default function EnrollFace() {
     const enumerateCameras = async () => {
         try {
             console.log("Starting camera enumeration...");
-            
+
             const devices = await navigator.mediaDevices.enumerateDevices();
             const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            
+
             console.log("Found video devices:", videoDevices);
             console.log("Number of cameras:", videoDevices.length);
-            
+
             setAvailableCameras(videoDevices);
-            
+
             if (videoDevices.length > 0 && !selectedCameraId) {
                 setSelectedCameraId(videoDevices[0].deviceId);
                 console.log("Default camera set to:", videoDevices[0].deviceId);
@@ -198,45 +198,47 @@ export default function EnrollFace() {
                     formData
                 );
 
-                const bbox = response.data?.bbox;
-                if (!bbox) return;
+                const bboxes = response.data?.bboxes;
+                if (!bboxes || bboxes.length === 0) return;
 
-                const [x1, y1, x2, y2] = bbox;
+                bboxes.forEach(bbox => {
+                    const [x1, y1, x2, y2] = bbox;
 
-                ctx.strokeStyle = "#00FF00";
-                ctx.lineWidth = 3;
-                ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+                    ctx.strokeStyle = "#00FF00";
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
 
-                const cornerSize = 20;
-                ctx.lineWidth = 4;
-                
-                // Top-left corner
-                ctx.beginPath();
-                ctx.moveTo(x1, y1 + cornerSize);
-                ctx.lineTo(x1, y1);
-                ctx.lineTo(x1 + cornerSize, y1);
-                ctx.stroke();
-                
-                // Top-right corner
-                ctx.beginPath();
-                ctx.moveTo(x2 - cornerSize, y1);
-                ctx.lineTo(x2, y1);
-                ctx.lineTo(x2, y1 + cornerSize);
-                ctx.stroke();
-                
-                // Bottom-left corner
-                ctx.beginPath();
-                ctx.moveTo(x1, y2 - cornerSize);
-                ctx.lineTo(x1, y2);
-                ctx.lineTo(x1 + cornerSize, y2);
-                ctx.stroke();
-                
-                // Bottom-right corner
-                ctx.beginPath();
-                ctx.moveTo(x2 - cornerSize, y2);
-                ctx.lineTo(x2, y2);
-                ctx.lineTo(x2, y2 - cornerSize);
-                ctx.stroke();
+                    const cornerSize = 20;
+                    ctx.lineWidth = 4;
+
+                    // Top-left corner
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1 + cornerSize);
+                    ctx.lineTo(x1, y1);
+                    ctx.lineTo(x1 + cornerSize, y1);
+                    ctx.stroke();
+
+                    // Top-right corner
+                    ctx.beginPath();
+                    ctx.moveTo(x2 - cornerSize, y1);
+                    ctx.lineTo(x2, y1);
+                    ctx.lineTo(x2, y1 + cornerSize);
+                    ctx.stroke();
+
+                    // Bottom-left corner
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y2 - cornerSize);
+                    ctx.lineTo(x1, y2);
+                    ctx.lineTo(x1 + cornerSize, y2);
+                    ctx.stroke();
+
+                    // Bottom-right corner
+                    ctx.beginPath();
+                    ctx.moveTo(x2 - cornerSize, y2);
+                    ctx.lineTo(x2, y2);
+                    ctx.lineTo(x2, y2 - cornerSize);
+                    ctx.stroke();
+                });
 
             } catch (error) {
                 console.error("YOLO detection error:", error);
@@ -249,7 +251,7 @@ export default function EnrollFace() {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-        
+
         // Reset verification when roll number changes
         if (name === "roll_no") {
             setStudentVerified(false);
@@ -276,18 +278,18 @@ export default function EnrollFace() {
     const startCamera = async (deviceId = selectedCameraId) => {
         try {
             console.log("Requesting camera access for device:", deviceId);
-            
+
             const constraints = {
-                video: deviceId 
-                    ? { 
+                video: deviceId
+                    ? {
                         deviceId: { exact: deviceId },
                         width: 640,
                         height: 480
-                      }
+                    }
                     : {
                         width: 640,
                         height: 480
-                      }
+                    }
             };
 
             const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -341,9 +343,9 @@ export default function EnrollFace() {
         canvas.toBlob((blob) => {
             const file = new File([blob], `capture_${Date.now()}.jpg`, { type: "image/jpeg" });
             const preview = URL.createObjectURL(blob);
-            
+
             setCapturedImages(prev => [...prev, { file, preview }]);
-            
+
             setToast({
                 message: `Image ${capturedImages.length + 1}/${MAX_IMAGES} captured!`,
                 type: "success"
@@ -354,7 +356,7 @@ export default function EnrollFace() {
     // Handle file upload (add to array)
     const handleImageUpload = (e) => {
         const files = Array.from(e.target.files);
-        
+
         const remainingSlots = MAX_IMAGES - capturedImages.length;
         if (files.length > remainingSlots) {
             setToast({
@@ -423,11 +425,11 @@ export default function EnrollFace() {
 
             if (response.data.status === "success") {
                 const responseData = response.data.data[0];
-                
-                const successMessage = enrollmentWarning 
+
+                const successMessage = enrollmentWarning
                     ? `Face data updated successfully for ${responseData.student_name} (${responseData.images_processed} processed, ${responseData.images_failed} failed)`
                     : `${response.data.message} for ${responseData.student_name} (${responseData.images_processed} processed, ${responseData.images_failed} failed)`;
-                
+
                 setToast({
                     message: successMessage,
                     type: "success",
@@ -452,24 +454,24 @@ export default function EnrollFace() {
 
         } catch (error) {
             console.error("Enrollment error:", error);
-            
+
             let errorMessage;
-            
+
             // Check if it's a network error (Flask server not running)
             if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
                 errorMessage = "⚠️ Face Recognition Server is not running. Please start the Flask server (port 5001) to enroll students.";
-            } 
+            }
             // Check if it's a conflict error (student already enrolled)
             else if (error.response?.status === 409) {
-                errorMessage = error.response?.data?.message 
+                errorMessage = error.response?.data?.message
                     || "Student is already enrolled. Please use re-enrollment option.";
             }
             // Other errors
             else {
-                errorMessage = error.response?.data?.message 
+                errorMessage = error.response?.data?.message
                     || "Failed to enroll student. Please try again.";
             }
-            
+
             setToast({
                 message: errorMessage,
                 type: "error",
@@ -522,11 +524,10 @@ export default function EnrollFace() {
                                 <button
                                     onClick={() => handleFindStudent()}
                                     disabled={loading || findingStudent || studentVerified || !formData.roll_no.trim()}
-                                    className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                                        studentVerified
+                                    className={`px-6 py-2 rounded-lg font-medium transition-colors ${studentVerified
                                             ? "bg-green-100 text-green-700 cursor-not-allowed"
                                             : "bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                    }`}
+                                        }`}
                                 >
                                     {findingStudent ? "Finding..." : studentVerified ? "✓ Verified" : "🔍 Find"}
                                 </button>
@@ -538,16 +539,14 @@ export default function EnrollFace() {
 
                         {/* Student Details Display - ENHANCED */}
                         {studentVerified && studentDetails && (
-                            <div className={`border-2 rounded-lg p-4 space-y-3 ${
-                                enrollmentWarning 
-                                    ? 'bg-yellow-50 border-yellow-400' 
+                            <div className={`border-2 rounded-lg p-4 space-y-3 ${enrollmentWarning
+                                    ? 'bg-yellow-50 border-yellow-400'
                                     : 'bg-emerald-50 border-emerald-300'
-                            }`}>
+                                }`}>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <h3 className={`font-semibold text-lg ${
-                                            enrollmentWarning ? 'text-yellow-800' : 'text-emerald-800'
-                                        }`}>
+                                        <h3 className={`font-semibold text-lg ${enrollmentWarning ? 'text-yellow-800' : 'text-emerald-800'
+                                            }`}>
                                             Student Verified ✓
                                         </h3>
                                         {enrollmentWarning && (
@@ -566,16 +565,15 @@ export default function EnrollFace() {
                                             stopCamera();
                                         }}
                                         disabled={loading}
-                                        className={`text-sm underline font-medium ${
-                                            enrollmentWarning 
-                                                ? 'text-yellow-700 hover:text-yellow-900' 
+                                        className={`text-sm underline font-medium ${enrollmentWarning
+                                                ? 'text-yellow-700 hover:text-yellow-900'
                                                 : 'text-emerald-700 hover:text-emerald-900'
-                                        }`}
+                                            }`}
                                     >
                                         Change Student
                                     </button>
                                 </div>
-                                
+
                                 {enrollmentWarning && (
                                     <div className="bg-yellow-200 border-l-4 border-yellow-600 rounded p-3">
                                         <div className="flex items-start gap-2">
@@ -585,14 +583,14 @@ export default function EnrollFace() {
                                                     Warning: Face Data Already Exists
                                                 </p>
                                                 <p className="text-xs text-yellow-800 mt-1">
-                                                    This student has already been enrolled in the system. 
+                                                    This student has already been enrolled in the system.
                                                     Proceeding will <strong>overwrite</strong> the existing face embeddings.
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
                                 )}
-                                
+
                                 <div className="bg-white rounded-lg p-3 border border-gray-200">
                                     <div className="grid grid-cols-2 gap-3 text-sm">
                                         <div>
@@ -785,19 +783,18 @@ export default function EnrollFace() {
                 <button
                     onClick={handleSubmit}
                     disabled={loading || capturedImages.length === 0 || !studentVerified}
-                    className={`w-full px-6 py-3 rounded-xl text-white font-semibold ${
-                        loading || capturedImages.length === 0 || !studentVerified
+                    className={`w-full px-6 py-3 rounded-xl text-white font-semibold ${loading || capturedImages.length === 0 || !studentVerified
                             ? "bg-gray-400"
                             : enrollmentWarning
-                            ? "bg-yellow-600 hover:bg-yellow-700"
-                            : "bg-emerald-600 hover:bg-emerald-700"
-                    }`}
+                                ? "bg-yellow-600 hover:bg-yellow-700"
+                                : "bg-emerald-600 hover:bg-emerald-700"
+                        }`}
                 >
-                    {loading 
-                        ? "Processing..." 
-                        : enrollmentWarning 
-                        ? `⚠️ Re-enroll Student (${capturedImages.length} image${capturedImages.length !== 1 ? 's' : ''})` 
-                        : `✓ Enroll Student (${capturedImages.length} image${capturedImages.length !== 1 ? 's' : ''})`
+                    {loading
+                        ? "Processing..."
+                        : enrollmentWarning
+                            ? `⚠️ Re-enroll Student (${capturedImages.length} image${capturedImages.length !== 1 ? 's' : ''})`
+                            : `✓ Enroll Student (${capturedImages.length} image${capturedImages.length !== 1 ? 's' : ''})`
                     }
                 </button>
             </div>
