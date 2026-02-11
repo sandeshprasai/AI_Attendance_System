@@ -1,13 +1,15 @@
 import InputGroup from "../ui/InputGroup";
-import { Building2, Calendar, GraduationCap, Hash } from "lucide-react";
+import { Building2, Calendar, Hash } from "lucide-react";
 
 export default function AcademicInfoSection({
   formData,
   handleInputChange,
   facultyOptions,
+  classroomOptions,
   errors,
   loading,
   facultyLoading = false,
+  classroomLoading = false,
 }) {
   return (
     <div className="bg-white p-6 rounded-xl shadow space-y-6">
@@ -76,17 +78,36 @@ export default function AcademicInfoSection({
         />
 
         {/* Class */}
-        <InputGroup
-          label="Class"
-          name="Class"
-          type="text"
-          value={formData.Class}
-          onChange={handleInputChange}
-          Icon={GraduationCap}
-          error={errors?.Class}
-          disabled={loading}
-          placeholder="Enter classroom number."
-        />
+        <div className="space-y-1">
+          <label className="text-sm font-bold">Class</label>
+          <select
+            name="Class"
+            value={formData.Class}
+            onChange={handleInputChange}
+            disabled={loading || classroomLoading}
+            className={`w-full h-12 border-2 rounded-xl p-2 focus:outline-none ${
+              errors?.Class
+                ? "border-red-500"
+                : "border-emerald-400 focus:border-emerald-600"
+            }`}
+          >
+            <option value="">
+              {classroomLoading ? "Loading classrooms..." : "Select Classroom"}
+            </option>
+
+            {classroomOptions.map((classroom, index) => (
+              <option key={index} value={classroom}>
+                {classroom}
+              </option>
+            ))}
+          </select>
+
+          {errors?.Class && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.Class}
+            </p>
+          )}
+        </div>
 
         {/* Section */}
         <InputGroup

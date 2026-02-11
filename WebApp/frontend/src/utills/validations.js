@@ -89,8 +89,12 @@ export const validateEmployeeID=(empID)=>{
 };
 
 
-export const validateClass = (cls) => {
+export const validateClass = (cls, classroomOptions = []) => {
   if (!cls) return "Class is required.";
+  // Optional: Validate if classroom exists in the list (only if options are provided)
+  if (classroomOptions.length > 0 && !classroomOptions.includes(cls)) {
+    return "Please select a valid classroom.";
+  }
   return "";
 };
 

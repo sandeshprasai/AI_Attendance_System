@@ -10,6 +10,8 @@ import UsersPage from "./pages/UsersPage";
 import ContactUs from "./pages/ContactUs";
 import ForgetPassword from "./pages/ForgetPassword";
 import TeacherMyClasses from "./pages/TeacherMyClasses";
+import AllStudents from "./pages/AllStudents";
+import StudentDetails from "./pages/StudentDetails";
 
 // components
 import CreateClassroom from "./components/CreateClassroom";
@@ -98,6 +100,24 @@ export default function App() {
           element={
             <RoleProtectedRoute allowedRoles={["admin"]}>
               <UsersPage />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/all-students"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AllStudents />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/:id"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <StudentDetails />
             </RoleProtectedRoute>
           }
         />

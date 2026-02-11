@@ -15,6 +15,7 @@ export default function UsersPage() {
   const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
   const [deleteModal, setDeleteModal] = useState({ show: false, user: null });
@@ -24,10 +25,20 @@ export default function UsersPage() {
   const currentUser = getCurrentUser();
   const isSuperAdmin = currentUser?.role === "superadmin";
 
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1); // Reset to first page on search
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const params = { page, limit, search, role };
+      const params = { page, limit, search: debouncedSearch, role };
       const { data } = await API.get("/users/all", { params });
 
       if (data.success) {
@@ -43,7 +54,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, [page, search, role]);
+  }, [page, debouncedSearch, role]);
 
   const handleDeleteUser = async () => {
     if (!deleteModal.user) return;

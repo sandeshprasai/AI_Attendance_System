@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import GreetingCard from '../components/GreetingCard';
 import UserCard from"../components/cards/UserCard";
 import ClassroomManagementCard from '../components/cards/ClassroomManagementCard';
+import SystemOverview from '../components/cards/AdminCards/SystemOverview';
 import { useAuth } from '.././context/AuthContext';
 
 
@@ -17,20 +18,7 @@ export default function AdminDashboard() {
   
 
   const [currentTime, setCurrentTime] = useState(new Date());
- 
   
-  
-
-  // Mock stats - replace with actual data from your backend
-  const stats = {
-    totalStudents: 145,
-    totalTeachers: 12,
-    totalClassrooms: 8,
-    activeClasses: 3,
-    presentToday: 118,
-    absentToday: 27
-  };
-
   // Mock absent students data - replace with actual data
   const absentStudents = [
     { id: 1, name: "John Smith", class: "Class 10-A", reason: "Not detected", time: "8:30 AM" },
@@ -39,6 +27,13 @@ export default function AdminDashboard() {
     { id: 4, name: "Sarah Wilson", class: "Class 8-C", reason: "Not detected", time: "9:15 AM" },
     { id: 5, name: "David Lee", class: "Class 10-B", reason: "Not detected", time: "9:30 AM" }
   ];
+
+  // Temporary stats for attendance rate calculation - will be replaced by SystemOverview component
+  const stats = {
+    totalStudents: 145,
+    presentToday: 118,
+    absentToday: 27
+  };
 
   const attendanceRate = ((stats.presentToday / stats.totalStudents) * 100).toFixed(1);
 
@@ -258,75 +253,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* System Overview Stats */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">System Overview</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                {/* Total Students */}
-                <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500 hover:shadow-lg transition-shadow">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <p className="text-gray-600 text-sm font-medium">Total Students</p>
-                      <p className="text-3xl font-bold text-gray-800 mt-2">{stats.totalStudents}</p>
-                    </div>
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Users className="w-6 h-6 text-blue-600" />
-                    </div>
-                  </div>
-                  <button className="text-blue-600 text-sm font-medium hover:text-blue-700 flex items-center gap-1">
-                    View all →
-                  </button>
-                </div>
-
-                {/* Total Teachers */}
-                <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500 hover:shadow-lg transition-shadow">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <p className="text-gray-600 text-sm font-medium">Total Teachers</p>
-                      <p className="text-3xl font-bold text-gray-800 mt-2">{stats.totalTeachers}</p>
-                    </div>
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                      <User className="w-6 h-6 text-green-600" />
-                    </div>
-                  </div>
-                  <button className="text-green-600 text-sm font-medium hover:text-green-700 flex items-center gap-1">
-                    View all →
-                  </button>
-                </div>
-
-                {/* Total Classrooms */}
-                <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500 hover:shadow-lg transition-shadow">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <p className="text-gray-600 text-sm font-medium">Classrooms</p>
-                      <p className="text-3xl font-bold text-gray-800 mt-2">{stats.totalClassrooms}</p>
-                    </div>
-                    <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <BookOpen className="w-6 h-6 text-purple-600" />
-                    </div>
-                  </div>
-                  <button className="text-purple-600 text-sm font-medium hover:text-purple-700 flex items-center gap-1">
-                    Manage →
-                  </button>
-                </div>
-
-                {/* Active Classes */}
-                <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-orange-500 hover:shadow-lg transition-shadow">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <p className="text-gray-600 text-sm font-medium">Active Now</p>
-                      <p className="text-3xl font-bold text-gray-800 mt-2">{stats.activeClasses}</p>
-                    </div>
-                    <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                      <Camera className="w-6 h-6 text-orange-600" />
-                    </div>
-                  </div>
-                  <button className="text-orange-600 text-sm font-medium hover:text-orange-700 flex items-center gap-1">
-                    Monitor →
-                  </button>
-                </div>
-              </div>
-            </div>
+            <SystemOverview />
 
             {/* Management Sections */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
