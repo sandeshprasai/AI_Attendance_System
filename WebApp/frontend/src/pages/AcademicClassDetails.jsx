@@ -15,6 +15,7 @@ import {
     Mail,
     Phone,
     Layout,
+    Eye,
 } from "lucide-react";
 import { fetchAcademicClassById } from "../services/academicClass.service";
 import apiClient from "../utills/apiClient";
@@ -241,9 +242,13 @@ export default function AcademicClassDetails() {
                             <div className="p-8 space-y-6">
                                 {attendanceHistory.length > 0 ? (
                                     attendanceHistory.map((record) => (
-                                        <div key={record._id} className="p-4 rounded-2xl bg-gray-50 border border-gray-100 hover:border-cyan-200 transition-all">
+                                        <div 
+                                            key={record._id} 
+                                            onClick={() => navigate(`/admin/attendance/${record.SessionId}`)}
+                                            className="p-4 rounded-2xl bg-gray-50 border border-gray-100 hover:border-cyan-200 hover:shadow-md transition-all cursor-pointer group"
+                                        >
                                             <div className="flex justify-between items-start mb-2">
-                                                <p className="font-bold text-gray-800">
+                                                <p className="font-bold text-gray-800 group-hover:text-cyan-600 transition-colors">
                                                     {new Date(record.Date).toLocaleDateString("en-US", {
                                                         weekday: 'short',
                                                         year: 'numeric',
@@ -255,10 +260,14 @@ export default function AcademicClassDetails() {
                                                     {record.AttendancePercentage}%
                                                 </span>
                                             </div>
-                                            <div className="flex gap-4 text-sm">
+                                            <div className="flex gap-4 text-sm mb-2">
                                                 <span className="text-emerald-600 font-semibold">{record.PresentCount} Present</span>
                                                 <span className="text-red-500 font-semibold">{record.AbsentCount} Absent</span>
                                             </div>
+                                            <p className="text-xs text-gray-500 group-hover:text-cyan-600 transition-colors flex items-center gap-1">
+                                                <Eye className="w-3 h-3" />
+                                                Click to view details
+                                            </p>
                                         </div>
                                     ))
                                 ) : (
