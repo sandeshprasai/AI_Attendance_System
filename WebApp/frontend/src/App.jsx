@@ -25,6 +25,7 @@ import CreateAcademicClass from "./pages/CreateAcademicClass";
 import AcademicClassList from "./pages/AcademicClassList";
 import AcademicClassDetails from "./pages/AcademicClassDetails";
 import TakeAttendance from "./pages/TakeAttendance";
+import AttendanceDetails from "./pages/AttendanceDetails";
 
 // route protection
 import RoleProtectedRoute from "./routes/RoleProtectedRoute";
@@ -155,6 +156,15 @@ export default function App() {
           element={
             <RoleProtectedRoute allowedRoles={["admin"]}>
               <TakeAttendance />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/attendance/:sessionId"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AttendanceDetails />
             </RoleProtectedRoute>
           }
         />
