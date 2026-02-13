@@ -25,6 +25,18 @@ pipe = RecognitionPipeline(
 app.config['RECOGNITION_PIPELINE'] = pipe
 
 # =========================================================
+# Health Check Endpoint
+# =========================================================
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Simple health check endpoint for system status monitoring"""
+    return {
+        "status": "online",
+        "message": "AI Recognition Server is running",
+        "service": "Face Recognition API"
+    }, 200
+
+# =========================================================
 # Blueprint Registration
 # =========================================================
 # Register all route blueprints
