@@ -6,6 +6,9 @@ import GreetingCard from '../components/GreetingCard';
 import UserCard from"../components/cards/UserCard";
 import ClassroomManagementCard from '../components/cards/ClassroomManagementCard';
 import SystemOverview from '../components/cards/AdminCards/SystemOverview';
+import StudentManagementCard from '../components/cards/AdminCards/StudentManagementCard';
+import TeacherManagementCard from '../components/cards/AdminCards/TeacherManagementCard';
+import SystemStatusCard from '../components/cards/AdminCards/SystemStatusCard';
 import { useAuth } from '.././context/AuthContext';
 
 
@@ -257,73 +260,16 @@ export default function AdminDashboard() {
 
             {/* Management Sections */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
               {/* Student Management */}
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                    <Users className="w-5 h-5 text-blue-600" />
-                    Student Management
-                  </h3>
-                  <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                    View All
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">Recently Added</p>
-                      <p className="text-xs text-gray-600">Last 7 days</p>
-                    </div>
-                    <span className="text-2xl font-bold text-blue-600">12</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">Pending Verification</p>
-                      <p className="text-xs text-gray-600">Face photos needed</p>
-                    </div>
-                    <span className="text-2xl font-bold text-orange-600">3</span>
-                  </div>
-                </div>
-                <button className="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                  Add New Student
-                </button>
-              </div>
+              <StudentManagementCard />
 
               {/* Teacher Management */}
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                    <User className="w-5 h-5 text-green-600" />
-                    Teacher Management
-                  </h3>
-                  <button className="text-green-600 hover:text-green-700 text-sm font-medium">
-                    View All
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">Active Teachers</p>
-                      <p className="text-xs text-gray-600">Currently teaching</p>
-                    </div>
-                    <span className="text-2xl font-bold text-green-600">5</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="text-sm font-medium text-gray-800">Pending Assignment</p>
-                      <p className="text-xs text-gray-600">No classroom assigned</p>
-                    </div>
-                    <span className="text-2xl font-bold text-orange-600">2</span>
-                  </div>
-                </div>
-                <button className="mt-4 w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-                  Add New Teacher
-                </button>
-              </div>
+              <TeacherManagementCard />
+            </div>
 
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Classroom Management */}
-              <ClassroomManagementCard 
+              <ClassroomManagementCard
                 userRole="admin"
                 showCreateButton={true}
                 createButtonLabel="Create Classroom"
@@ -332,38 +278,7 @@ export default function AdminDashboard() {
               />
 
               {/* System Status */}
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-cyan-600" />
-                    System Status
-                  </h3>
-                  <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                    ONLINE
-                  </span>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Camera className="w-4 h-4 text-green-600" />
-                      <p className="text-sm font-medium text-gray-800">AI Recognition</p>
-                    </div>
-                    <span className="text-sm font-semibold text-green-600">Active</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-green-600" />
-                      <p className="text-sm font-medium text-gray-800">Database</p>
-                    </div>
-                    <span className="text-sm font-semibold text-green-600">Connected</span>
-                  </div>
-                </div>
-                <div className="mt-4 p-3 bg-cyan-50 rounded-lg">
-                  <p className="text-xs text-cyan-800">
-                    <strong>Last sync:</strong> {currentTime.toLocaleTimeString()}
-                  </p>
-                </div>
-              </div>
+              <SystemStatusCard />
             </div>
 
             {/* Recent Activity */}
