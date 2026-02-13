@@ -5,6 +5,7 @@ const Subject = require("../../models/subjects");
 const Teacher = require("../../models/teachers");
 const Student = require("../../models/students");
 const logger = require("../../logger/logger");
+const { logClassroomCreated } = require("../../Utills/activityLogger");
 
 const createAcademicClass = async (req, res) => {
   try {
@@ -143,6 +144,25 @@ const createAcademicClass = async (req, res) => {
     ]);
 
     logger.info(`Academic Class created successfully | Code: ${ClassCode} | IP: ${req.ip}`);
+
+    // Log activity
+    try {
+      await logClassroomCreated(
+        academicClass._id,
+        ClassName,
+        req.user?._id || null,
+        {
+          classCode: ClassCode,
+          department: department.DepartmentName,
+          subject: subject.SubjectName,
+          teacher: teacher.FullName,
+          studentsCount: StudentIds?.length || 0,
+          maxCapacity: MaxCapacity || 48
+        }
+      );
+    } catch (logError) {
+      logger.warn("Failed to log activity:", logError);
+    }
 
     return res.status(201).json({
       success: true,
