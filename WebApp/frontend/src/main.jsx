@@ -6,9 +6,9 @@ import { AuthProvider } from './context/AuthContext'  // make sure path is corre
 
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  // <StrictMode> - disabled to prevent double API calls in development
     <AuthProvider>
       <App />
     </AuthProvider>
-  </StrictMode>
+  // </StrictMode>
 )

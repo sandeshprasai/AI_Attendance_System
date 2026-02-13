@@ -19,6 +19,7 @@ import ActiveTeachersList from "./pages/ActiveTeachersList";
 import PendingVerificationStudents from "./pages/PendingVerificationStudents";
 import StudentDetails from "./pages/StudentDetails";
 import TeacherDetails from "./pages/TeacherDetails";
+import RecentActivityPage from "./pages/RecentActivityPage";
 
 // components
 import CreateClassroom from "./components/CreateClassroom";
@@ -33,6 +34,7 @@ import AcademicClassList from "./pages/AcademicClassList";
 import AcademicClassDetails from "./pages/AcademicClassDetails";
 import TakeAttendance from "./pages/TakeAttendance";
 import AttendanceDetails from "./pages/AttendanceDetails";
+import AbsentNotificationsPage from "./pages/AbsentNotificationsPage";
 
 // route protection
 import RoleProtectedRoute from "./routes/RoleProtectedRoute";
@@ -189,6 +191,24 @@ export default function App() {
           element={
             <RoleProtectedRoute allowedRoles={["admin"]}>
               <TeacherDetails />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/recent-activity"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <RecentActivityPage />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/absent-notifications"
+          element={
+            <RoleProtectedRoute allowedRoles={["admin"]}>
+              <AbsentNotificationsPage />
             </RoleProtectedRoute>
           }
         />

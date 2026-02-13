@@ -19,6 +19,7 @@ import Footer from "../components/Footer";
 import Toast from "../components/ui/Toast";
 import { fetchAcademicClassById } from "../services/academicClass.service";
 import apiClient from "../utills/apiClient";
+import { getTodayKathmandu } from "../utils/timezoneHelper";
 
 export default function TakeAttendance() {
     const { id: classId } = useParams();
@@ -214,7 +215,7 @@ export default function TakeAttendance() {
 
             const payload = {
                 academicClassId: classId,
-                date: new Date().toISOString().split('T')[0],
+                date: getTodayKathmandu(), // Use Kathmandu timezone date (YYYY-MM-DD)
                 snapshotNumber: snapshotNumber,
                 recognizedStudents: recognizedStudents,
                 sessionType: "lecture",
