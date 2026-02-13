@@ -106,7 +106,7 @@ export default function EnrollFace() {
 
     // Prefill roll number from URL parameter and auto-verify
     useEffect(() => {
-        const rollNoFromUrl = searchParams.get('rollNo');
+        const rollNoFromUrl = searchParams.get('roll_no') || searchParams.get('rollNo');
         if (rollNoFromUrl) {
             console.log('Roll number from URL:', rollNoFromUrl);
             setFormData({ roll_no: rollNoFromUrl });
