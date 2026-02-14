@@ -25,6 +25,9 @@ export default function TakeAttendance() {
     const { id: classId } = useParams();
     const navigate = useNavigate();
     const FLASK_API_URL = "http://localhost:5001";
+    
+    // Get user role for navigation
+    const userRole = localStorage.getItem("role") || sessionStorage.getItem("role");
 
     // State
     const [classData, setClassData] = useState(null);
@@ -62,6 +65,15 @@ export default function TakeAttendance() {
         };
         loadClass();
     }, [classId]);
+
+    // Helper function to navigate based on user role
+    const navigateToClassDetails = (classId) => {
+        if (userRole === "teacher") {
+            navigate(`/admin/academic-class/${classId}`);
+        } else {
+            navigate(`/admin/academic-class/${classId}`);
+        }
+    };
 
     // Timer countdown for next snapshot
     useEffect(() => {
@@ -268,7 +280,7 @@ export default function TakeAttendance() {
                         message: "All snapshots complete! Attendance finalized.", 
                         type: "success" 
                     });
-                    setTimeout(() => navigate(`/admin/academic-class/${classId}`), 2000);
+                    setTimeout(() => navigateToClassDetails(classId), 2000);
                 }
             }
         } catch (err) {
@@ -322,7 +334,7 @@ export default function TakeAttendance() {
             if (response.data.success) {
                 setSessionStatus("finalized");
                 setToast({ message: "Attendance finalized!", type: "success" });
-                setTimeout(() => navigate(`/admin/academic-class/${classId}`), 1500);
+                setTimeout(() => navigateToClassDetails(classId), 1500);
             }
         } catch (err) {
             console.error('Finalize error:', err);
