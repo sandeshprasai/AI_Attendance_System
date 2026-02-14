@@ -2,6 +2,7 @@ const users = require("./../../models/users");
 const bcryptjs = require("bcryptjs");
 const generateToken = require("./../../middlewares/generateToken");
 const logger = require("./../../logger/logger");
+const { logUserLogin } = require("../../Utills/activityLogger");
 
 const loginController = async (req, res) => {
   const { username, password, rememberMe } = req.body;
@@ -29,6 +30,21 @@ const loginController = async (req, res) => {
       return res.status(400).json({ message: "Invalid Password" });
     }
     logger.info(`Login success for user: ${username}, IP: ${req.ip}`);
+
+    // Log activity
+    try {
+      await logUserLogin(
+        user._id,
+        user.name,
+        {
+          username: user.username,
+          role: user.role,
+          ipAddress: req.ip
+        }
+      );
+    } catch (logError) {
+      logger.warn("Failed to log login activity:", logError);
+    }
 
     // Payload with UI data
     const payload = {

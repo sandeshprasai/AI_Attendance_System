@@ -82,6 +82,23 @@ function NavBar({ links }) {
     }
   };
 
+  // 🔥 Get dashboard route based on user role
+  const getDashboardRoute = () => {
+    const role = user?.role?.toLowerCase();
+    
+    switch (role) {
+      case 'admin':
+      case 'administrator':
+        return '/admin-dashboard';
+      case 'teacher':
+        return '/teacher-dashboard';
+      case 'student':
+        return '/student-dashboard';
+      default:
+        return '/';
+    }
+  };
+
   // 🔥 Role-based navigation links
   const getNavLinksByRole = () => {
     const role = user?.role?.toLowerCase();
@@ -208,24 +225,29 @@ function NavBar({ links }) {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <svg
-                  className="w-6 h-6 text-cyan-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <h1 className="text-xl font-bold text-yellow-300">
-                SmartAttendanceSystem
-              </h1>
+              <Link 
+                to={getDashboardRoute()} 
+                className="flex items-center gap-3 hover:opacity-90 transition-opacity"
+              >
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                  <svg
+                    className="w-6 h-6 text-cyan-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <h1 className="text-xl font-bold text-yellow-300 hover:text-yellow-200 transition-colors">
+                  SmartAttendanceSystem
+                </h1>
+              </Link>
             </div>
 
             {/* Nav Links + User Menu */}

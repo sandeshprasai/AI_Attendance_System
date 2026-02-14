@@ -1,0 +1,118 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { UserCheck, UserPlus, TrendingUp, ArrowRight, Users, BookOpen } from "lucide-react";
+import API from "../../../utills/api";
+
+export default function TeacherManagementCard() {
+  const navigate = useNavigate();
+  const [stats, setStats] = useState({
+    totalTeachers: 0,
+    recentlyAdded: 0,
+    activeTeachers: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    setLoading(true);
+    try {
+      const response = await API.get("/admin/teacher-management-stats");
+      if (response.data.success) {
+        setStats(response.data.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch teacher management stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl shadow-md p-6 animate-pulse">
+        <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+        <div className="space-y-3">
+          <div className="h-20 bg-gray-200 rounded"></div>
+          <div className="h-20 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  const items = [
+    {
+      title: "Recently Added",
+      value: stats.recentlyAdded,
+      icon: UserPlus,
+      color: "green",
+      bgColor: "bg-green-50",
+      textColor: "text-green-600",
+      hoverColor: "hover:bg-green-100",
+      link: "/teachers-recently-added",
+    },
+    {
+      title: "Active Teachers",
+      value: stats.activeTeachers,
+      icon: TrendingUp,
+      color: "cyan",
+      bgColor: "bg-cyan-50",
+      textColor: "text-cyan-600",
+      hoverColor: "hover:bg-cyan-100",
+      link: "/teachers-active-list",
+    },
+  ];
+
+  return (
+    <div className="bg-white rounded-2xl shadow-md p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <UserCheck className="w-5 h-5 text-green-600" />
+          Teacher Management
+        </h3>
+        <div className="text-sm text-gray-500">
+          Total: <span className="font-bold text-green-600">{stats.totalTeachers}</span>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {items.map((item) => (
+          <button
+            key={item.title}
+            onClick={() => navigate(item.link)}
+            className={`w-full p-4 rounded-xl ${item.bgColor} ${item.hoverColor} transition-all duration-200 border-2 border-transparent hover:border-${item.color}-200 group`}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg bg-white shadow-sm`}>
+                  <item.icon className={`w-5 h-5 ${item.textColor}`} />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm text-gray-600 font-medium">
+                    {item.title}
+                  </p>
+                  <p className={`text-2xl font-bold ${item.textColor}`}>
+                    {item.value}
+                  </p>
+                </div>
+              </div>
+              <ArrowRight
+                className={`w-5 h-5 ${item.textColor} group-hover:translate-x-1 transition-transform`}
+              />
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <button
+        onClick={() => navigate("/add-teacher")}
+        className="w-full mt-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all font-medium shadow-md flex items-center justify-center gap-2"
+      >
+        <UserCheck className="w-4 h-4" />
+        Add Teacher
+      </button>
+    </div>
+  );
+}

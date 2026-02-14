@@ -1,6 +1,9 @@
 const Attendance = require("../../models/attendance");
 const AcademicClass = require("../../models/accademicClass");
 const logger = require("../../logger/logger");
+const { logAttendanceMarked } = require("../../Utills/activityLogger");
+const { parseAndNormalizeKathmanduDate } = require("../../Utills/timezoneHelper");
+const { createAbsentNotifications } = require("../absentNotificationController");
 
 // Save individual snapshot (1-4) during lecture
 const saveAttendanceSnapshot = async (req, res) => {
@@ -33,9 +36,8 @@ const saveAttendanceSnapshot = async (req, res) => {
             });
         }
 
-        // Normalize date to start of the day
-        const recordDate = new Date(date);
-        recordDate.setHours(0, 0, 0, 0);
+        // Normalize date to start of the day in Kathmandu timezone
+        const recordDate = parseAndNormalizeKathmanduDate(date);
 
         let attendance;
 
@@ -131,6 +133,34 @@ const finalizeAttendance = async (req, res) => {
 
         logger.info(`Attendance finalized | SessionId: ${sessionId} | Present: ${attendance.PresentCount} | Absent: ${attendance.AbsentCount} | IP: ${req.ip}`);
 
+        // Create absent notifications for students marked absent
+        try {
+          await createAbsentNotifications(attendance._id);
+          logger.info(`Absent notifications created for session: ${sessionId}`);
+        } catch (notificationError) {
+          logger.warn("Failed to create absent notifications:", notificationError);
+          // Don't fail the request if notification creation fails
+        }
+
+        // Log activity
+        try {
+          const academicClass = await AcademicClass.findById(attendance.AcademicClass).populate('ClassName');
+          await logAttendanceMarked(
+            attendance.AcademicClass,
+            academicClass?.ClassName || 'Unknown Class',
+            req.user?._id || null,
+            {
+              sessionId: attendance.SessionId,
+              present: attendance.PresentCount,
+              absent: attendance.AbsentCount,
+              totalStudents: attendance.TotalStudents,
+              date: attendance.Date
+            }
+          );
+        } catch (logError) {
+          logger.warn("Failed to log activity:", logError);
+        }
+
         return res.status(200).json({
             success: true,
             message: "Attendance finalized successfully",
@@ -170,9 +200,8 @@ const saveAttendance = async (req, res) => {
             });
         }
 
-        // Normalize date to start of the day (YYYY-MM-DD)
-        const recordDate = new Date(date);
-        recordDate.setHours(0, 0, 0, 0);
+        // Normalize date to start of the day in Kathmandu timezone (YYYY-MM-DD)
+        const recordDate = parseAndNormalizeKathmanduDate(date);
 
         // Create new attendance session with single snapshot
         const attendanceData = {

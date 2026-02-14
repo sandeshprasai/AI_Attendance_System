@@ -30,6 +30,9 @@ const academicRoutes = require("./routes/academicRoutes");
 const academicClassRoutes = require("./routes/academicClassRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const activityRoutes = require("./routes/activityRoutes");
+const attendanceAnalyticsRoutes = require("./routes/attendanceAnalyticsRoutes");
+const absentNotificationRoutes = require("./routes/absentNotificationRoutes");
 
 // -----------------------------------------------------Routes Import Completed-----------------------------------------------------
 
@@ -62,6 +65,9 @@ app.use("/api/v1/academics", academicRoutes);
 app.use("/api/v1/academic-class", academicClassRoutes);
 app.use("/api/v1/attendance", attendanceRoutes);
 app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/activities", activityRoutes);
+app.use("/api/v1/attendance-analytics", attendanceAnalyticsRoutes);
+app.use("/api/v1/absent-notifications", absentNotificationRoutes);
 
 app.listen(port, () => {
   console.log(`Server is up and running at http://localhost:${port}/ `);

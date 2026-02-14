@@ -8,6 +8,7 @@ const generateCredentials = require("./../../middlewares/generateCredentials");
 const sendCredentialsEmail = require("./../../middlewares/mailCredentials");
 const uploadToCloudinary = require("./../../middlewares/cloudinaryUpload");
 const { default: mongoose } = require("mongoose");
+const { logStudentAdded } = require("../../Utills/activityLogger");
 
 const addStudents = async (req, res) => {
   logger.info(
@@ -153,6 +154,24 @@ const addStudents = async (req, res) => {
 
     // Send credentials via email
     await sendCredentialsEmail(Email, username, password);
+
+    // Log activity
+    try {
+      await logStudentAdded(
+        newStudent._id,
+        FullName,
+        req.user?._id || null,
+        {
+          rollNo: RollNo,
+          email: Email,
+          class: Class,
+          faculty: Faculty,
+          subjectsAssigned: subjectIds.length
+        }
+      );
+    } catch (logError) {
+      logger.warn("Failed to log activity:", logError);
+    }
 
     return res.status(200).json({
       success: true,

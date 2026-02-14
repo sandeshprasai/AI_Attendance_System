@@ -113,9 +113,40 @@ const getActiveClasses = async (req, res) => {
   }
 };
 
+/**
+ * Get system status (database connection)
+ */
+const getSystemStatus = async (req, res) => {
+  try {
+    const mongoose = require("mongoose");
+    
+    const dbStatus = mongoose.connection.readyState === 1 ? "connected" : "disconnected";
+    
+    return res.status(200).json({
+      success: true,
+      message: "System status fetched successfully",
+      data: {
+        database: {
+          status: dbStatus,
+          connected: mongoose.connection.readyState === 1,
+        },
+      },
+    });
+  } catch (error) {
+    logger.error(
+      `Failed to fetch system status | Error: ${error.message} | IP: ${req.ip}`
+    );
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error while fetching system status",
+    });
+  }
+};
+
 module.exports = {
   getTotalStudents,
   getTotalTeachers,
   getTotalClassrooms,
   getActiveClasses,
+  getSystemStatus,
 };

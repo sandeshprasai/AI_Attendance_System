@@ -6,6 +6,7 @@ const bcrypt = require("bcryptjs");
 const generateTeacherCredentials = require("../../middlewares/generateTeacherCredentials");
 const sendCredentialsEmail = require("../../middlewares/mailCredentials");
 const uploadBufferToCloudinary = require("../../middlewares/cloudinaryUpload");
+const { logTeacherAdded } = require("../../Utills/activityLogger");
 
 const addTeachers = async (req, res) => {
   const session = await mongoose.startSession();
@@ -161,6 +162,23 @@ const addTeachers = async (req, res) => {
       .catch((err) =>
         logger.warn("Failed to send credentials email:", err),
       );
+
+    // Log activity
+    try {
+      await logTeacherAdded(
+        newTeacher._id,
+        FullName,
+        req.user?._id || null,
+        {
+          employeeId: EmployeeId,
+          email: Email,
+          faculty: Faculty,
+          subject: Subject
+        }
+      );
+    } catch (logError) {
+      logger.warn("Failed to log activity:", logError);
+    }
 
     return res.status(201).json({
       success: true,

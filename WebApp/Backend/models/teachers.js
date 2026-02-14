@@ -40,7 +40,7 @@ const teachersSchema = new mongoose.Schema(
     },
     Classroom: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "classes",
+      ref: "Classroom",
     },
 
     JoinedYear: {
