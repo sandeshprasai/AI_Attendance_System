@@ -76,7 +76,6 @@ export function AuthProvider({ children }) {
           photoURL: storedPhotoURL || defaultUser.photoURL,
         };
         
-        console.log("AuthContext - User data loaded:", userData);
         setUser(userData);
       }
     };

@@ -158,13 +158,13 @@ export default function TeacherAttendanceOverview() {
       {classWiseStats.length > 0 && (
         <div className="bg-white rounded-xl shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">Class-wise Breakdown</h3>
+            <h3 className="text-lg font-semibold text-gray-800">Recent Attendance Sessions</h3>
             {classWiseStats.length > 5 && (
               <Link
                 to="/teacher/attendance/class-breakdown"
                 className="text-sm text-cyan-600 hover:text-cyan-700 font-medium flex items-center gap-1"
               >
-                View All ({classWiseStats.length})
+                View All Records ({classWiseStats.length})
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -178,8 +178,13 @@ export default function TeacherAttendanceOverview() {
                 className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <div className="flex-1">
-                  <p className="font-semibold text-gray-800">{cls.className}</p>
+                  <p className="font-bold text-gray-800">
+                    {cls.subjectName} {cls.subjectCode && `(${cls.subjectCode})`}
+                  </p>
                   <p className="text-sm text-gray-600">
+                    {cls.subjectName} • {cls.semester && `Semester ${cls.semester}`}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
                     Present: {cls.present} • Absent: {cls.absent} • Total: {cls.total}
                   </p>
                 </div>

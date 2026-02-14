@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Search, Filter, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { ArrowLeft, Search, Filter, ChevronLeft, ChevronRight, Loader2, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
@@ -24,6 +24,7 @@ export default function TeacherClassBreakdown() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [attendanceFilter, setAttendanceFilter] = useState('all'); // all, high, medium, low
   const [sortBy, setSortBy] = useState('attendanceRate'); // attendanceRate, className, present
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // Today's date in YYYY-MM-DD
 
   // Debounce search
   useEffect(() => {
@@ -38,7 +39,7 @@ export default function TeacherClassBreakdown() {
   // Fetch data
   useEffect(() => {
     fetchClassBreakdown();
-  }, [currentPage, debouncedSearch, attendanceFilter, sortBy]);
+  }, [currentPage, debouncedSearch, attendanceFilter, sortBy, selectedDate]);
 
   const fetchClassBreakdown = async () => {
     try {
@@ -53,7 +54,8 @@ export default function TeacherClassBreakdown() {
           limit: itemsPerPage,
           search: debouncedSearch,
           filter: attendanceFilter,
-          sortBy: sortBy
+          sortBy: sortBy,
+          date: selectedDate
         }
       });
 
@@ -63,7 +65,6 @@ export default function TeacherClassBreakdown() {
         setTotalClasses(response.data.data.totalClasses);
       }
     } catch (err) {
-      console.error('Error fetching class breakdown:', err);
       setError(err.response?.data?.message || 'Failed to load data');
     } finally {
       setLoading(false);
@@ -98,25 +99,92 @@ export default function TeacherClassBreakdown() {
             <ArrowLeft className="w-5 h-5" />
             Back
           </button>
-          <h1 className="text-3xl font-bold text-gray-800">Class-wise Attendance Breakdown</h1>
+          <h1 className="text-3xl font-bold text-gray-800">All Attendance Records</h1>
           <p className="text-gray-600 mt-1">
-            Today's attendance statistics for all your classes
+            Viewing all attendance sessions for {new Date(selectedDate).toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
           </p>
+        </div>
+
+        {/* Quick Date Filters */}
+        <div className="flex gap-2 mb-4 flex-wrap">
+          <button
+            onClick={() => {
+              setSelectedDate(new Date().toISOString().split('T')[0]);
+              setCurrentPage(1);
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              selectedDate === new Date().toISOString().split('T')[0]
+                ? 'bg-cyan-600 text-white'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            Today
+          </button>
+          <button
+            onClick={() => {
+              const yesterday = new Date();
+              yesterday.setDate(yesterday.getDate() - 1);
+              setSelectedDate(yesterday.toISOString().split('T')[0]);
+              setCurrentPage(1);
+            }}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              selectedDate === new Date(Date.now() - 86400000).toISOString().split('T')[0]
+                ? 'bg-cyan-600 text-white'
+                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+            }`}
+          >
+            Yesterday
+          </button>
+          <button
+            onClick={() => {
+              const lastWeek = new Date();
+              lastWeek.setDate(lastWeek.getDate() - 7);
+              setSelectedDate(lastWeek.toISOString().split('T')[0]);
+              setCurrentPage(1);
+            }}
+            className="px-4 py-2 bg-white text-gray-700 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            Last Week
+          </button>
         </div>
 
         {/* Filters & Search */}
         <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* Date Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Date
+              </label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => {
+                    setSelectedDate(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
             {/* Search */}
             <div className="lg:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search Classes
+                Search Records
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search by class name, subject..."
+                  placeholder="Search by subject, class, session ID..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
@@ -137,7 +205,7 @@ export default function TeacherClassBreakdown() {
                 }}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
               >
-                <option value="all">All Classes</option>
+                <option value="all">All Records</option>
                 <option value="high">High (≥75%)</option>
                 <option value="medium">Medium (50-74%)</option>
                 <option value="low">Low (&lt;50%)</option>
@@ -155,7 +223,7 @@ export default function TeacherClassBreakdown() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
               >
                 <option value="attendanceRate">Attendance Rate</option>
-                <option value="className">Class Name</option>
+                <option value="className">Subject/Class Name</option>
                 <option value="present">Present Count</option>
                 <option value="absent">Absent Count</option>
               </select>
@@ -180,13 +248,13 @@ export default function TeacherClassBreakdown() {
           </div>
         ) : classes.length === 0 ? (
           <div className="bg-white rounded-xl shadow-md p-12 text-center">
-            <p className="text-gray-600 text-lg">No classes found matching your criteria</p>
+            <p className="text-gray-600 text-lg">No attendance sessions found matching your criteria</p>
           </div>
         ) : (
           <>
             {/* Results Info */}
             <div className="mb-4 text-sm text-gray-600">
-              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalClasses)} of {totalClasses} classes
+              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, totalClasses)} of {totalClasses} attendance sessions
             </div>
 
             {/* Classes Grid */}
@@ -198,12 +266,19 @@ export default function TeacherClassBreakdown() {
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-800 mb-1">
-                        {cls.className}
+                      <h3 className="text-xl font-bold text-gray-800 mb-1">
+                        {cls.subjectName} {cls.subjectCode && `(${cls.subjectCode})`}
                       </h3>
-                      {cls.subjectName && (
-                        <p className="text-sm text-gray-600">
-                          {cls.subjectName} • {cls.semester && `Semester ${cls.semester}`}
+                      <p className="text-sm text-gray-600">
+                        {cls.className} • {cls.semester && `Semester ${cls.semester}`}
+                      </p>
+                      {cls.time && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(cls.time).toLocaleTimeString('en-US', { 
+                            hour: '2-digit', 
+                            minute: '2-digit',
+                            hour12: true 
+                          })}
                         </p>
                       )}
                     </div>
@@ -227,13 +302,11 @@ export default function TeacherClassBreakdown() {
                     </div>
                   </div>
 
-                  {cls.sessionsToday > 0 && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <p className="text-xs text-gray-600 text-center">
-                        {cls.sessionsToday} session{cls.sessionsToday !== 1 ? 's' : ''} taken today
-                      </p>
-                    </div>
-                  )}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-xs text-gray-600 text-center">
+                      Session ID: {cls.sessionId}
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
