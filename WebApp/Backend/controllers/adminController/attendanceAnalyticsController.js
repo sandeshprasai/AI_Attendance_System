@@ -240,7 +240,9 @@ const getTeacherTodayAttendanceAnalytics = async (req, res) => {
       if (record.AcademicClass) {
         classWiseStats.push({
           className: `${record.AcademicClass.ClassName} ${record.AcademicClass.Section || ''}`.trim(),
-          subject: record.Subject?.SubjectName || 'Unknown',
+          subjectName: record.Subject?.SubjectName || 'Unknown',
+          subjectCode: record.Subject?.SubjectCode || '',
+          semester: record.AcademicClass.Semester || null,
           present: record.PresentCount,
           absent: record.AbsentCount,
           total: record.TotalStudents,
@@ -284,11 +286,21 @@ const getTeacherTodayAttendanceAnalytics = async (req, res) => {
 const getTeacherClassBreakdown = async (req, res) => {
   try {
     const teacherId = req.user.id;
-    const { page = 1, limit = 10, search = '', filter = 'all', sortBy = 'attendanceRate' } = req.query;
+    const { page = 1, limit = 10, search = '', filter = 'all', sortBy = 'attendanceRate', date } = req.query;
     
-    const { startOfDay, endOfDay } = getTodayKathmanduRange();
-    
-    logger.info(`Fetching teacher class breakdown for user ID: ${teacherId}`);
+    // Use provided date or default to today
+    let startOfDay, endOfDay;
+    if (date) {
+      // Parse the provided date
+      const selectedDate = new Date(date);
+      startOfDay = getKathmanduStartOfDay(selectedDate);
+      endOfDay = getKathmanduEndOfDay(selectedDate);
+    } else {
+      // Default to today
+      const { startOfDay: todayStart, endOfDay: todayEnd } = getTodayKathmanduRange();
+      startOfDay = todayStart;
+      endOfDay = todayEnd;
+    }
 
     // Get teacher document
     const Teacher = require('../../models/teachers');
@@ -310,57 +322,49 @@ const getTeacherClassBreakdown = async (req, res) => {
       });
     }
 
-    // Get all finalized attendance records for today for this teacher
+    // Get all finalized attendance records for the selected date for this teacher
     const todayAttendance = await Attendance.find({
       Date: { $gte: startOfDay, $lte: endOfDay },
       Status: 'finalized',
       Teacher: teacher._id
-    }).select('PresentCount AbsentCount TotalStudents AcademicClass Subject Date')
+    }).select('SessionId PresentCount AbsentCount TotalStudents AcademicClass Subject Date createdAt')
       .populate('AcademicClass', 'ClassName Section Semester')
       .populate('Subject', 'SubjectName SubjectCode')
+      .sort({ createdAt: -1 }) // Most recent first
       .lean();
 
-    // Build class-wise statistics
-    const classStatsMap = new Map();
-    
-    todayAttendance.forEach((record) => {
-      if (record.AcademicClass) {
-        const classId = record.AcademicClass._id.toString();
-        const className = `${record.AcademicClass.ClassName} ${record.AcademicClass.Section || ''}`.trim();
-        
-        if (!classStatsMap.has(classId)) {
-          classStatsMap.set(classId, {
-            className,
-            subjectName: record.Subject?.SubjectName || 'Unknown',
-            semester: record.AcademicClass.Semester,
-            present: 0,
-            absent: 0,
-            total: 0,
-            sessionsToday: 0,
-            attendanceRate: 0
-          });
-        }
-        
-        const stats = classStatsMap.get(classId);
-        stats.present += record.PresentCount || 0;
-        stats.absent += record.AbsentCount || 0;
-        stats.total += record.TotalStudents || 0;
-        stats.sessionsToday += 1;
-        stats.attendanceRate = stats.total > 0 
-          ? ((stats.present / stats.total) * 100).toFixed(1)
-          : 0;
-      }
-    });
-
-    // Convert map to array
-    let classStats = Array.from(classStatsMap.values());
+    // Build individual session statistics (don't group by class)
+    let classStats = todayAttendance.map((record) => {
+      if (!record.AcademicClass) return null;
+      
+      const className = `${record.AcademicClass.ClassName} ${record.AcademicClass.Section || ''}`.trim();
+      const attendanceRate = record.TotalStudents > 0 
+        ? ((record.PresentCount / record.TotalStudents) * 100).toFixed(1)
+        : 0;
+      
+      return {
+        sessionId: record.SessionId,
+        className,
+        subjectName: record.Subject?.SubjectName || 'Unknown',
+        subjectCode: record.Subject?.SubjectCode || '',
+        semester: record.AcademicClass.Semester,
+        present: record.PresentCount || 0,
+        absent: record.AbsentCount || 0,
+        total: record.TotalStudents || 0,
+        attendanceRate,
+        date: record.Date,
+        time: record.createdAt
+      };
+    }).filter(Boolean); // Remove null entries
 
     // Apply search filter
     if (search) {
       const searchLower = search.toLowerCase();
       classStats = classStats.filter(cls => 
         cls.className.toLowerCase().includes(searchLower) ||
-        cls.subjectName.toLowerCase().includes(searchLower)
+        cls.subjectName.toLowerCase().includes(searchLower) ||
+        cls.subjectCode.toLowerCase().includes(searchLower) ||
+        cls.sessionId.toLowerCase().includes(searchLower)
       );
     }
 
@@ -391,19 +395,19 @@ const getTeacherClassBreakdown = async (req, res) => {
     });
 
     // Apply pagination
-    const totalClasses = classStats.length;
-    const totalPages = Math.ceil(totalClasses / limit);
+    const totalSessions = classStats.length;
+    const totalPages = Math.ceil(totalSessions / limit);
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + parseInt(limit);
-    const paginatedClasses = classStats.slice(startIndex, endIndex);
+    const paginatedSessions = classStats.slice(startIndex, endIndex);
 
     res.status(200).json({
       success: true,
       data: {
-        classes: paginatedClasses,
+        classes: paginatedSessions, // Array of individual sessions, not aggregated
         currentPage: parseInt(page),
         totalPages,
-        totalClasses,
+        totalClasses: totalSessions, // Total number of individual sessions
         itemsPerPage: parseInt(limit)
       }
     });
