@@ -36,6 +36,14 @@ const saveAttendanceSnapshot = async (req, res) => {
             });
         }
 
+        // Check if class is completed or archived
+        if (academicClass.Status === 'completed' || academicClass.Status === 'archived') {
+            return res.status(403).json({
+                success: false,
+                message: `Cannot take attendance for ${academicClass.Status} classes`,
+            });
+        }
+
         // Normalize date to start of the day in Kathmandu timezone
         const recordDate = parseAndNormalizeKathmanduDate(date);
 
@@ -139,11 +147,19 @@ const finalizeAttendance = async (req, res) => {
             });
         }
 
-        const attendance = await Attendance.findOne({ SessionId: sessionId });
+        const attendance = await Attendance.findOne({ SessionId: sessionId }).populate('AcademicClass');
         if (!attendance) {
             return res.status(404).json({
                 success: false,
                 message: "Attendance session not found",
+            });
+        }
+
+        // Check if the associated class is completed or archived
+        if (attendance.AcademicClass && (attendance.AcademicClass.Status === 'completed' || attendance.AcademicClass.Status === 'archived')) {
+            return res.status(403).json({
+                success: false,
+                message: `Cannot finalize attendance for ${attendance.AcademicClass.Status} classes`,
             });
         }
 
