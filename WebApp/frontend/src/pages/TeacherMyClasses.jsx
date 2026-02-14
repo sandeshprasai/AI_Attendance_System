@@ -12,6 +12,7 @@ import {
   GraduationCap,
   ChevronRight,
   Loader2,
+  History,
 } from "lucide-react";
 import apiClient from "../utills/apiClient";
 
@@ -35,11 +36,10 @@ const StatusBadge = ({ status }) => {
 };
 
 // Class Card Component
-const ClassCard = ({ classData, onClick }) => {
+const ClassCard = ({ classData, onClick, onTakeAttendance, onViewHistory }) => {
   return (
     <div
-      onClick={onClick}
-      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-200 overflow-hidden group"
+      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 overflow-hidden group"
     >
       {/* Header with gradient */}
       <div className="bg-gradient-to-r from-cyan-500 to-teal-500 p-4 text-white">
@@ -85,7 +85,7 @@ const ClassCard = ({ classData, onClick }) => {
           <div className="flex items-center gap-2 text-sm">
             <Building2 className="w-4 h-4 text-cyan-600" />
             <span className="text-gray-700">
-              {classData.Classroom?.ClassroomName || "N/A"}
+              {classData.PhysicalClassroom?.Classroom || "N/A"}
             </span>
           </div>
         </div>
@@ -114,7 +114,35 @@ const ClassCard = ({ classData, onClick }) => {
               </p>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-cyan-600 group-hover:translate-x-1 transition-all" />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 pt-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onTakeAttendance(classData);
+            }}
+            disabled={classData.Status === 'completed' || classData.Status === 'archived'}
+            className={`flex-1 px-3 py-2 text-white text-sm font-medium rounded-lg transition-all shadow-sm ${
+              classData.Status === 'completed' || classData.Status === 'archived'
+                ? 'bg-gray-400 cursor-not-allowed opacity-60'
+                : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700'
+            }`}
+            title={classData.Status === 'completed' || classData.Status === 'archived' ? 'Cannot take attendance for completed/archived classes' : 'Take Attendance'}
+          >
+            Take Attendance
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewHistory(classData);
+            }}
+            className="flex-1 px-3 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-sm font-medium rounded-lg hover:from-cyan-700 hover:to-blue-700 transition-all shadow-sm flex items-center justify-center gap-1"
+          >
+            <History className="w-4 h-4" />
+            History
+          </button>
         </div>
       </div>
     </div>
@@ -185,7 +213,7 @@ const StudentListModal = ({ classData, onClose }) => {
             <div>
               <p className="text-xs text-gray-600 mb-1">Classroom</p>
               <p className="font-semibold text-gray-800">
-                {classData.Classroom?.ClassroomName || "N/A"}
+                {classData.PhysicalClassroom?.Classroom || "N/A"}
               </p>
             </div>
             <div>
@@ -251,16 +279,28 @@ export default function TeacherMyClasses() {
   const [filter, setFilter] = useState("all"); // all, active, completed
 
   useEffect(() => {
-    fetchMyClasses();
-  }, []);
+    // Wait for user data to be loaded before fetching classes
+    if (user?.id && user?.name) {
+      fetchMyClasses();
+    }
+  }, [user?.id, user?.name]);
 
   const fetchMyClasses = async () => {
     try {
       setLoading(true);
       setError(null);
 
+      // Debug: Log user info
+      console.log("TeacherMyClasses - User info:", { 
+        id: user?.id, 
+        name: user?.name,
+        role: user?.role 
+      });
+
       const response = await apiClient.get("/academic-class");
       const allClasses = response.data.data || [];
+
+      console.log("TeacherMyClasses - Total classes fetched:", allClasses.length);
 
       // Filter classes where the logged-in user is the teacher
       // Match by name since Teacher table IDs don't match User table IDs
@@ -276,6 +316,8 @@ export default function TeacherMyClasses() {
         
         return false;
       });
+
+      console.log("TeacherMyClasses - Filtered classes:", myClasses.length);
 
       setClasses(myClasses);
     } catch (err) {
@@ -408,6 +450,8 @@ export default function TeacherMyClasses() {
                 key={classData._id}
                 classData={classData}
                 onClick={() => setSelectedClass(classData)}
+                onTakeAttendance={(cls) => navigate(`/teacher/take-attendance/${cls._id}`)}
+                onViewHistory={(cls) => navigate(`/admin/academic-class/${cls._id}`)}
               />
             ))}
           </div>
