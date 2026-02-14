@@ -70,6 +70,13 @@ export default function RecentActivityCard({ activities: propActivities = [], lo
     // Only fetch if no activities provided via props
     if (propActivities.length === 0) {
       fetchActivities();
+      
+      // Set up polling every 30 seconds to refresh activities
+      const pollInterval = setInterval(() => {
+        fetchActivities();
+      }, 30000); // Poll every 30 seconds
+      
+      return () => clearInterval(pollInterval);
     } else {
       setActivities(propActivities);
       setLoading(propLoading);
