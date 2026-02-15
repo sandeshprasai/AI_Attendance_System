@@ -3,6 +3,7 @@ import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 import GreetingCard from "../components/GreetingCard";
 import ClassroomManagementCard from "../components/cards/ClassroomManagementCard";
+import TeacherAttendanceOverview from "../components/cards/TeacherCards/TeacherAttendanceOverview";
 import { useAuth } from "../context/AuthContext";
 import { Calendar, Users, BookOpen, TrendingUp } from "lucide-react";
 
@@ -32,21 +33,8 @@ const TeacherDashboard = () => {
 
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Calendar className="w-6 h-6 text-blue-600" />
-                <h2 className="text-2xl font-bold text-gray-800">Today's Schedule</h2>
-              </div>
-              <p className="text-gray-600">Your classes and attendance tracking will appear here.</p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-md p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="w-6 h-6 text-green-600" />
-                <h2 className="text-2xl font-bold text-gray-800">Attendance Overview</h2>
-              </div>
-              <p className="text-gray-600">Class-wise attendance statistics will be displayed here.</p>
-            </div>
+            {/* Today's Attendance Overview */}
+            <TeacherAttendanceOverview />
           </div>
         </div>
       </main>

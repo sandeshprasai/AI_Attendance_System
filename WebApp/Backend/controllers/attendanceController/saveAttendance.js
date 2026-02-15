@@ -36,6 +36,14 @@ const saveAttendanceSnapshot = async (req, res) => {
             });
         }
 
+        // Check if class is completed or archived
+        if (academicClass.Status === 'completed' || academicClass.Status === 'archived') {
+            return res.status(403).json({
+                success: false,
+                message: `Cannot take attendance for ${academicClass.Status} classes`,
+            });
+        }
+
         // Normalize date to start of the day in Kathmandu timezone
         const recordDate = parseAndNormalizeKathmanduDate(date);
 
@@ -66,7 +74,42 @@ const saveAttendanceSnapshot = async (req, res) => {
 
         // Add the snapshot
         attendance.addSnapshot(snapshotNumber, recognizedStudents);
+        const wasInProgress = attendance.Status === "in_progress";
         await attendance.save(); // Auto-finalizes if all snapshots complete
+        const isNowFinalized = attendance.Status === "finalized";
+
+        // If attendance was auto-finalized, create notifications and log activity
+        if (wasInProgress && isNowFinalized) {
+            logger.info(`Attendance auto-finalized | SessionId: ${attendance.SessionId} | Present: ${attendance.PresentCount} | Absent: ${attendance.AbsentCount}`);
+            
+            // Create absent notifications for students marked absent
+            try {
+                await createAbsentNotifications(attendance._id);
+                logger.info(`Absent notifications created for session: ${attendance.SessionId}`);
+            } catch (notificationError) {
+                logger.warn(`Failed to create absent notifications: ${notificationError.message}`);
+            }
+
+            // Log activity
+            try {
+                const academicClass = await AcademicClass.findById(attendance.AcademicClass).populate('ClassName');
+                await logAttendanceMarked(
+                    attendance.AcademicClass,
+                    academicClass?.ClassName || 'Unknown Class',
+                    req.user?.id || attendance.Teacher,
+                    {
+                        sessionId: attendance.SessionId,
+                        present: attendance.PresentCount,
+                        absent: attendance.AbsentCount,
+                        totalStudents: attendance.TotalStudents,
+                        date: attendance.Date
+                    }
+                );
+                logger.info(`Activity logged for session: ${attendance.SessionId}`);
+            } catch (logError) {
+                logger.warn(`Failed to log activity: ${logError.message}`);
+            }
+        }
 
         return res.status(200).json({
             success: true,
@@ -104,11 +147,19 @@ const finalizeAttendance = async (req, res) => {
             });
         }
 
-        const attendance = await Attendance.findOne({ SessionId: sessionId });
+        const attendance = await Attendance.findOne({ SessionId: sessionId }).populate('AcademicClass');
         if (!attendance) {
             return res.status(404).json({
                 success: false,
                 message: "Attendance session not found",
+            });
+        }
+
+        // Check if the associated class is completed or archived
+        if (attendance.AcademicClass && (attendance.AcademicClass.Status === 'completed' || attendance.AcademicClass.Status === 'archived')) {
+            return res.status(403).json({
+                success: false,
+                message: `Cannot finalize attendance for ${attendance.AcademicClass.Status} classes`,
             });
         }
 
@@ -148,7 +199,7 @@ const finalizeAttendance = async (req, res) => {
           await logAttendanceMarked(
             attendance.AcademicClass,
             academicClass?.ClassName || 'Unknown Class',
-            req.user?._id || null,
+            req.user?.id || attendance.Teacher,
             {
               sessionId: attendance.SessionId,
               present: attendance.PresentCount,

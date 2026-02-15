@@ -14,6 +14,13 @@ export default function TodayAttendanceAnalytics() {
 
   useEffect(() => {
     fetchAnalytics();
+    
+    // Set up polling every 30 seconds to auto-refresh attendance data
+    const pollInterval = setInterval(() => {
+      fetchAnalytics();
+    }, 30000); // Poll every 30 seconds
+    
+    return () => clearInterval(pollInterval);
   }, []);
 
   const fetchAnalytics = async () => {

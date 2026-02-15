@@ -35,6 +35,13 @@ export default function AbsentNotificationsPage() {
 
   useEffect(() => {
     fetchNotifications();
+    
+    // Set up polling every 30 seconds to auto-refresh notifications
+    const pollInterval = setInterval(() => {
+      fetchNotifications();
+    }, 30000); // Poll every 30 seconds
+    
+    return () => clearInterval(pollInterval);
   }, [currentPage, statusFilter, dateFilter]);
 
   useEffect(() => {

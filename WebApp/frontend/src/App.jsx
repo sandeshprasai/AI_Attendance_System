@@ -10,6 +10,7 @@ import UsersPage from "./pages/UsersPage";
 import ContactUs from "./pages/ContactUs";
 import ForgetPassword from "./pages/ForgetPassword";
 import TeacherMyClasses from "./pages/TeacherMyClasses";
+import TeacherClassBreakdown from "./pages/TeacherClassBreakdown";
 import AllStudents from "./pages/AllStudents";
 import AllTeachers from "./pages/AllTeachers";
 import ActiveClasses from "./pages/ActiveClasses";
@@ -235,7 +236,7 @@ export default function App() {
         <Route
           path="/admin/academic-class/:id"
           element={
-            <RoleProtectedRoute allowedRoles={["admin"]}>
+            <RoleProtectedRoute allowedRoles={["admin", "teacher"]}>
               <AcademicClassDetails />
             </RoleProtectedRoute>
           }
@@ -253,7 +254,7 @@ export default function App() {
         <Route
           path="/admin/attendance/:sessionId"
           element={
-            <RoleProtectedRoute allowedRoles={["admin"]}>
+            <RoleProtectedRoute allowedRoles={["admin", "teacher"]}>
               <AttendanceDetails />
             </RoleProtectedRoute>
           }
@@ -274,6 +275,24 @@ export default function App() {
           element={
             <RoleProtectedRoute allowedRoles={["teacher"]}>
               <TeacherMyClasses />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/teacher/attendance/class-breakdown"
+          element={
+            <RoleProtectedRoute allowedRoles={["teacher"]}>
+              <TeacherClassBreakdown />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/teacher/take-attendance/:id"
+          element={
+            <RoleProtectedRoute allowedRoles={["teacher", "admin"]}>
+              <TakeAttendance />
             </RoleProtectedRoute>
           }
         />

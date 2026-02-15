@@ -23,6 +23,7 @@ import apiClient from "../utills/apiClient";
 export default function AcademicClassDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const userRole = localStorage.getItem("role") || sessionStorage.getItem("role");
     const [classData, setClassData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -122,8 +123,14 @@ export default function AcademicClassDetails() {
                             </div>
                             <div className="flex gap-4">
                                 <button
-                                    onClick={() => navigate(`/admin/take-attendance/${id}`)}
-                                    className="px-8 py-3.5 bg-white text-cyan-700 rounded-xl font-bold hover:bg-cyan-50 transition-all flex items-center gap-2 shadow-lg"
+                                    onClick={() => navigate(userRole === "teacher" ? `/teacher/take-attendance/${id}` : `/admin/take-attendance/${id}`)}
+                                    disabled={classData.Status === 'completed' || classData.Status === 'archived'}
+                                    className={`px-8 py-3.5 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg ${
+                                        classData.Status === 'completed' || classData.Status === 'archived'
+                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed opacity-60'
+                                            : 'bg-white text-cyan-700 hover:bg-cyan-50'
+                                    }`}
+                                    title={classData.Status === 'completed' || classData.Status === 'archived' ? 'Cannot take attendance for completed/archived classes' : 'Take Attendance'}
                                 >
                                     <Camera className="w-5 h-5" />
                                     Take Attendance

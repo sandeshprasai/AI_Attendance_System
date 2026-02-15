@@ -68,13 +68,15 @@ export function AuthProvider({ children }) {
           }
         }
 
-        setUser({
+        const userData = {
           id: userId || defaultUser.id,
           name: storedName || defaultUser.name,
           username: storedUsername,
           role: storedRole || defaultUser.role,
           photoURL: storedPhotoURL || defaultUser.photoURL,
-        });
+        };
+        
+        setUser(userData);
       }
     };
 
