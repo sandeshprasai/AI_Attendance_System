@@ -32,7 +32,10 @@ export default function StudentMyClasses() {
       const response = await apiClient.get('/student-dashboard/my-classes-detailed');
       
       if (response.data.success) {
-        setClasses(response.data.data);
+        const classesData = response.data.data;
+        console.log('Fetched classes:', classesData);
+        console.log('Sample semester value:', classesData[0]?.semester, 'Type:', typeof classesData[0]?.semester);
+        setClasses(classesData);
       }
     } catch (err) {
       console.error('Error fetching classes:', err);
@@ -61,8 +64,12 @@ export default function StudentMyClasses() {
 
   // Filter and search classes
   const filteredClasses = classes.filter(cls => {
-    // Filter by semester
-    if (filters.semester !== 'all' && cls.semester !== filters.semester) return false;
+    // Filter by semester - convert both to string for comparison
+    if (filters.semester !== 'all') {
+      const filterSemester = filters.semester.toString();
+      const classSemester = cls.semester?.toString() || '';
+      if (filterSemester !== classSemester) return false;
+    }
     
     // Filter by status
     if (filters.status !== 'all' && cls.status?.toLowerCase() !== filters.status) return false;
@@ -91,6 +98,14 @@ export default function StudentMyClasses() {
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({ ...prev, [filterType]: value }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      semester: 'all',
+      status: 'all'
+    });
+    setSearchQuery('');
   };
 
   const handlePageChange = (page) => {
@@ -205,9 +220,20 @@ export default function StudentMyClasses() {
               </div>
             </div>
 
-            {/* Results count */}
-            <div className="mt-4 text-sm text-gray-600">
-              Showing {currentClasses.length} of {filteredClasses.length} classes
+            {/* Results count and Clear Button */}
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Showing {currentClasses.length} of {filteredClasses.length} classes
+              </div>
+              {(filters.semester !== 'all' || filters.status !== 'all' || searchQuery.trim()) && (
+                <button
+                  onClick={handleClearFilters}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Clear Filters
+                </button>
+              )}
             </div>
           </div>
         )}
