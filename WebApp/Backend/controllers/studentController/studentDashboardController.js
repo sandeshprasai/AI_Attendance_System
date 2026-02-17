@@ -304,9 +304,137 @@ const getStudentClasses = async (req, res) => {
   }
 };
 
+// Get student's enrolled classes with attendance details
+const getStudentClassesWithAttendance = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Find user and get student profile
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    const student = await Student.findOne({ 
+      $or: [
+        { Email: user.email },
+        { FullName: user.name }
+      ]
+    });
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student profile not found'
+      });
+    }
+
+    // Find all classes where student is enrolled
+    const classes = await AcademicClass.find({
+      Students: student._id
+    })
+    .populate('Subject', 'SubjectName SubjectCode')
+    .populate('Teacher', 'FullName EmployeeId Email')
+    .select('ClassName ClassCode Section Subject Teacher Schedule Status Semester')
+    .lean();
+
+    // For each class, get attendance statistics
+    const classesWithAttendance = await Promise.all(
+      classes.map(async (cls) => {
+        // Get all attendance sessions for this class and student
+        const attendanceSessions = await Attendance.find({
+          AcademicClass: cls._id,
+          Status: 'finalized',
+          'FinalAttendanceRecords.Student': student._id
+        })
+        .select('Date SessionId SessionType FinalAttendanceRecords')
+        .sort({ Date: -1 })
+        .lean();
+
+        // Calculate stats
+        let presentCount = 0;
+        let absentCount = 0;
+        const attendanceHistory = [];
+
+        attendanceSessions.forEach(session => {
+          const studentRecord = session.FinalAttendanceRecords.find(
+            r => r.Student.toString() === student._id.toString()
+          );
+
+          if (studentRecord) {
+            const status = studentRecord.FinalStatus;
+            if (status === 'present') {
+              presentCount++;
+            } else {
+              absentCount++;
+            }
+
+            attendanceHistory.push({
+              sessionId: session.SessionId,
+              date: session.Date,
+              status: status,
+              sessionType: session.SessionType,
+              presenceCount: studentRecord.PresenceCount || 0,
+              snapshotsPresent: studentRecord.SnapshotsPresent || []
+            });
+          }
+        });
+
+        const totalSessions = presentCount + absentCount;
+        const attendancePercentage = totalSessions > 0
+          ? ((presentCount / totalSessions) * 100).toFixed(1)
+          : 0;
+
+        return {
+          classId: cls._id,
+          className: `${cls.ClassName} ${cls.Section || ''}`.trim(),
+          classCode: cls.ClassCode,
+          subject: {
+            name: cls.Subject?.SubjectName || 'Unknown',
+            code: cls.Subject?.SubjectCode || ''
+          },
+          teacher: {
+            name: cls.Teacher?.FullName || 'Unknown',
+            employeeId: cls.Teacher?.EmployeeId,
+            email: cls.Teacher?.Email
+          },
+          schedule: cls.Schedule,
+          semester: cls.Semester,
+          status: cls.Status,
+          attendance: {
+            totalSessions,
+            presentCount,
+            absentCount,
+            attendancePercentage: parseFloat(attendancePercentage),
+            history: attendanceHistory
+          }
+        };
+      })
+    );
+
+    res.status(200).json({
+      success: true,
+      data: classesWithAttendance,
+      count: classesWithAttendance.length
+    });
+
+  } catch (error) {
+    logger.error('Error fetching student classes with attendance:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch classes',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getStudentOverallStats,
   getStudentRecentAbsences,
   getStudentClassWiseAttendance,
-  getStudentClasses
+  getStudentClasses,
+  getStudentClassesWithAttendance
 };
