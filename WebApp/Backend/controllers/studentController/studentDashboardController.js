@@ -350,7 +350,7 @@ const getStudentClassesWithAttendance = async (req, res) => {
           Status: 'finalized',
           'FinalAttendanceRecords.Student': student._id
         })
-        .select('Date SessionId SessionType FinalAttendanceRecords')
+        .select('Date SessionId SessionType FinalAttendanceRecords createdAt updatedAt')
         .sort({ Date: -1 })
         .lean();
 

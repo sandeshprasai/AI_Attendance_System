@@ -204,7 +204,21 @@ export default function StudentMyClasses() {
                       {cls.attendance.history.map((record, index) => {
                         // Use createdAt if available, otherwise fall back to date
                         const timestamp = record.createdAt || record.date;
+                        
+                        // Debug logging
+                        if (index === 0) {
+                          console.log('First attendance record:', {
+                            record,
+                            timestamp,
+                            createdAt: record.createdAt,
+                            date: record.date
+                          });
+                        }
+                        
                         const dateTime = timestamp ? formatKathmanduDateTime(timestamp) : { date: 'N/A', time: 'N/A' };
+                        
+                        console.log('Formatted dateTime:', dateTime);
+                        
                         return (
                           <div 
                             key={index}
