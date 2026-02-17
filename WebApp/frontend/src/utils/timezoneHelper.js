@@ -11,8 +11,9 @@ const KATHMANDU_OFFSET_MS = (5 * 60 + 45) * 60 * 1000; // UTC+5:45 in millisecon
  */
 export const getKathmanduTime = () => {
   const now = new Date();
-  const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
-  return new Date(utcTime + KATHMANDU_OFFSET_MS);
+  // Simply add Kathmandu offset to current UTC time
+  // getTime() returns milliseconds since epoch (timezone-independent)
+  return new Date(now.getTime() + KATHMANDU_OFFSET_MS);
 };
 
 /**
@@ -22,8 +23,8 @@ export const getKathmanduTime = () => {
  */
 export const convertToKathmandu = (date) => {
   const inputDate = typeof date === 'string' ? new Date(date) : date;
-  const utcTime = inputDate.getTime() + (inputDate.getTimezoneOffset() * 60000);
-  return new Date(utcTime + KATHMANDU_OFFSET_MS);
+  // Add Kathmandu offset to the input date
+  return new Date(inputDate.getTime() + KATHMANDU_OFFSET_MS);
 };
 
 /**
@@ -34,9 +35,10 @@ export const convertToKathmandu = (date) => {
 export const formatKathmanduDate = (date) => {
   const kathmanduDate = convertToKathmandu(date);
   
-  const year = kathmanduDate.getFullYear();
-  const month = String(kathmanduDate.getMonth() + 1).padStart(2, '0');
-  const day = String(kathmanduDate.getDate()).padStart(2, '0');
+  // Use UTC methods since kathmanduDate is now adjusted to Kathmandu time
+  const year = kathmanduDate.getUTCFullYear();
+  const month = String(kathmanduDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(kathmanduDate.getUTCDate()).padStart(2, '0');
   
   return `${year}-${month}-${day}`;
 };
@@ -49,12 +51,13 @@ export const formatKathmanduDate = (date) => {
 export const formatKathmanduDateTime = (date) => {
   const kathmanduDate = convertToKathmandu(date);
   
-  const day = String(kathmanduDate.getDate()).padStart(2, '0');
-  const month = String(kathmanduDate.getMonth() + 1).padStart(2, '0');
-  const year = kathmanduDate.getFullYear();
+  // Use UTC methods since kathmanduDate is now adjusted to Kathmandu time
+  const day = String(kathmanduDate.getUTCDate()).padStart(2, '0');
+  const month = String(kathmanduDate.getUTCMonth() + 1).padStart(2, '0');
+  const year = kathmanduDate.getUTCFullYear();
   
-  const hours = String(kathmanduDate.getHours()).padStart(2, '0');
-  const minutes = String(kathmanduDate.getMinutes()).padStart(2, '0');
+  const hours = String(kathmanduDate.getUTCHours()).padStart(2, '0');
+  const minutes = String(kathmanduDate.getUTCMinutes()).padStart(2, '0');
   
   return {
     date: `${day}/${month}/${year}`,
@@ -93,13 +96,15 @@ export const getTodayKathmandu = () => {
 export const getKathmanduDateTimeString = () => {
   const kathmanduDate = getKathmanduTime();
   
+  // Use UTC methods to extract date parts
   const options = { 
     day: '2-digit', 
     month: 'short', 
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    hour12: false
+    hour12: false,
+    timeZone: 'UTC' // Use UTC since we've already adjusted the date
   };
   
   const formatted = kathmanduDate.toLocaleDateString('en-GB', options);
