@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Calendar, User, TrendingUp, CheckCircle, XCircle, ChevronDown, ChevronUp, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BookOpen, Calendar, User, TrendingUp, CheckCircle, XCircle, ChevronDown, ChevronUp, Filter, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
 import apiClient from '../utills/apiClient';
@@ -15,12 +15,12 @@ export default function StudentMyClasses() {
   const [currentPage, setCurrentPage] = useState(1);
   const classesPerPage = 3;
   
-  // Filter state
+  // Filter and search state
   const [filters, setFilters] = useState({
     semester: 'all',
-    status: 'all',
-    subject: 'all'
+    status: 'all'
   });
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchClasses();
@@ -55,21 +55,28 @@ export default function StudentMyClasses() {
   const getStatusColor = (status) => {
     if (status === 'active' || status === 'ongoing') return 'bg-green-100 text-green-700';
     if (status === 'completed') return 'bg-blue-100 text-blue-700';
+    if (status === 'archived') return 'bg-gray-100 text-gray-700';
     return 'bg-gray-100 text-gray-700';
   };
 
-  // Filter classes based on selected filters
+  // Filter and search classes
   const filteredClasses = classes.filter(cls => {
+    // Filter by semester
     if (filters.semester !== 'all' && cls.semester !== filters.semester) return false;
-    if (filters.status !== 'all' && cls.status !== filters.status) return false;
-    if (filters.subject !== 'all' && cls.subject.name !== filters.subject) return false;
+    
+    // Filter by status
+    if (filters.status !== 'all' && cls.status?.toLowerCase() !== filters.status) return false;
+    
+    // Search by subject name or teacher name
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const subjectMatch = cls.subject?.name?.toLowerCase().includes(query);
+      const teacherMatch = cls.teacher?.name?.toLowerCase().includes(query);
+      if (!subjectMatch && !teacherMatch) return false;
+    }
+    
     return true;
   });
-
-  // Get unique values for filters
-  const uniqueSemesters = [...new Set(classes.map(cls => cls.semester))].filter(Boolean);
-  const uniqueStatuses = [...new Set(classes.map(cls => cls.status))].filter(Boolean);
-  const uniqueSubjects = [...new Set(classes.map(cls => cls.subject.name))].filter(Boolean);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredClasses.length / classesPerPage);
@@ -77,10 +84,10 @@ export default function StudentMyClasses() {
   const endIndex = startIndex + classesPerPage;
   const currentClasses = filteredClasses.slice(startIndex, endIndex);
 
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters or search change
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters]);
+  }, [filters, searchQuery]);
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({ ...prev, [filterType]: value }));
@@ -136,15 +143,30 @@ export default function StudentMyClasses() {
           <p className="text-gray-600 mt-2">View all your enrolled classes and attendance history</p>
         </div>
 
-        {/* Filters */}
+        {/* Filters and Search */}
         {classes.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <Filter className="w-5 h-5 text-purple-600" />
-              <h2 className="text-lg font-semibold text-gray-800">Filter Classes</h2>
+              <h2 className="text-lg font-semibold text-gray-800">Filter & Search Classes</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Search Bar */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search by Subject or Teacher</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for subject name or teacher name..."
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Semester Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Semester</label>
@@ -154,9 +176,16 @@ export default function StudentMyClasses() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
                   <option value="all">All Semesters</option>
-                  {uniqueSemesters.map(sem => (
-                    <option key={sem} value={sem}>{sem}</option>
-                  ))}
+                  <option value="1">Semester 1</option>
+                  <option value="2">Semester 2</option>
+                  <option value="3">Semester 3</option>
+                  <option value="4">Semester 4</option>
+                  <option value="5">Semester 5</option>
+                  <option value="6">Semester 6</option>
+                  <option value="7">Semester 7</option>
+                  <option value="8">Semester 8</option>
+                  <option value="9">Semester 9</option>
+                  <option value="10">Semester 10</option>
                 </select>
               </div>
 
@@ -169,24 +198,9 @@ export default function StudentMyClasses() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
                   <option value="all">All Status</option>
-                  {uniqueStatuses.map(status => (
-                    <option key={status} value={status}>{status}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Subject Filter */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-                <select
-                  value={filters.subject}
-                  onChange={(e) => handleFilterChange('subject', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  <option value="all">All Subjects</option>
-                  {uniqueSubjects.map(subject => (
-                    <option key={subject} value={subject}>{subject}</option>
-                  ))}
+                  <option value="active">Active</option>
+                  <option value="completed">Completed</option>
+                  <option value="archived">Archived</option>
                 </select>
               </div>
             </div>
@@ -195,6 +209,10 @@ export default function StudentMyClasses() {
             <div className="mt-4 text-sm text-gray-600">
               Showing {currentClasses.length} of {filteredClasses.length} classes
             </div>
+          </div>
+        )}
+
+        {/* Classes List */}
           </div>
         )}
 
