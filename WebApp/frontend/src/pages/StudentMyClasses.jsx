@@ -470,7 +470,7 @@ export default function StudentMyClasses() {
               </button>
             </div>
           )}
-          </>
+        </>
         )}
       </main>
 
