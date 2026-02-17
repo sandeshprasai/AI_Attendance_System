@@ -213,10 +213,6 @@ export default function StudentMyClasses() {
         )}
 
         {/* Classes List */}
-          </div>
-        )}
-
-        {/* Classes List */}
         {classes.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 shadow-lg text-center">
             <BookOpen className="w-20 h-20 text-gray-300 mx-auto mb-4" />
