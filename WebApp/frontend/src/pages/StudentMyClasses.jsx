@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Calendar, User, TrendingUp, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { BookOpen, Calendar, User, TrendingUp, CheckCircle, XCircle, ChevronDown, ChevronUp, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
 import apiClient from '../utills/apiClient';
@@ -10,6 +10,17 @@ export default function StudentMyClasses() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedClass, setExpandedClass] = useState(null);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const classesPerPage = 3;
+  
+  // Filter state
+  const [filters, setFilters] = useState({
+    semester: 'all',
+    status: 'all',
+    subject: 'all'
+  });
 
   useEffect(() => {
     fetchClasses();
@@ -45,6 +56,39 @@ export default function StudentMyClasses() {
     if (status === 'active' || status === 'ongoing') return 'bg-green-100 text-green-700';
     if (status === 'completed') return 'bg-blue-100 text-blue-700';
     return 'bg-gray-100 text-gray-700';
+  };
+
+  // Filter classes based on selected filters
+  const filteredClasses = classes.filter(cls => {
+    if (filters.semester !== 'all' && cls.semester !== filters.semester) return false;
+    if (filters.status !== 'all' && cls.status !== filters.status) return false;
+    if (filters.subject !== 'all' && cls.subject.name !== filters.subject) return false;
+    return true;
+  });
+
+  // Get unique values for filters
+  const uniqueSemesters = [...new Set(classes.map(cls => cls.semester))].filter(Boolean);
+  const uniqueStatuses = [...new Set(classes.map(cls => cls.status))].filter(Boolean);
+  const uniqueSubjects = [...new Set(classes.map(cls => cls.subject.name))].filter(Boolean);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredClasses.length / classesPerPage);
+  const startIndex = (currentPage - 1) * classesPerPage;
+  const endIndex = startIndex + classesPerPage;
+  const currentClasses = filteredClasses.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
+
+  const handleFilterChange = (filterType, value) => {
+    setFilters(prev => ({ ...prev, [filterType]: value }));
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
@@ -92,6 +136,68 @@ export default function StudentMyClasses() {
           <p className="text-gray-600 mt-2">View all your enrolled classes and attendance history</p>
         </div>
 
+        {/* Filters */}
+        {classes.length > 0 && (
+          <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Filter className="w-5 h-5 text-purple-600" />
+              <h2 className="text-lg font-semibold text-gray-800">Filter Classes</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Semester Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Semester</label>
+                <select
+                  value={filters.semester}
+                  onChange={(e) => handleFilterChange('semester', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="all">All Semesters</option>
+                  {uniqueSemesters.map(sem => (
+                    <option key={sem} value={sem}>{sem}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <select
+                  value={filters.status}
+                  onChange={(e) => handleFilterChange('status', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="all">All Status</option>
+                  {uniqueStatuses.map(status => (
+                    <option key={status} value={status}>{status}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Subject Filter */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                <select
+                  value={filters.subject}
+                  onChange={(e) => handleFilterChange('subject', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="all">All Subjects</option>
+                  {uniqueSubjects.map(subject => (
+                    <option key={subject} value={subject}>{subject}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Results count */}
+            <div className="mt-4 text-sm text-gray-600">
+              Showing {currentClasses.length} of {filteredClasses.length} classes
+            </div>
+          </div>
+        )}
+
         {/* Classes List */}
         {classes.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 shadow-lg text-center">
@@ -99,9 +205,16 @@ export default function StudentMyClasses() {
             <h2 className="text-2xl font-bold text-gray-700 mb-2">No Classes Enrolled</h2>
             <p className="text-gray-500">You are not enrolled in any classes yet.</p>
           </div>
+        ) : filteredClasses.length === 0 ? (
+          <div className="bg-white rounded-2xl p-12 shadow-lg text-center">
+            <Filter className="w-20 h-20 text-gray-300 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-700 mb-2">No Classes Found</h2>
+            <p className="text-gray-500">No classes match your filter criteria.</p>
+          </div>
         ) : (
-          <div className="space-y-6">
-            {classes.map((cls) => (
+          <>
+            <div className="space-y-6">
+              {currentClasses.map((cls) => (
               <div 
                 key={cls.classId}
                 className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
@@ -265,6 +378,57 @@ export default function StudentMyClasses() {
               </div>
             ))}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-8 flex items-center justify-center gap-2">
+              {/* Previous Button */}
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+                  currentPage === 1
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-white text-purple-600 hover:bg-purple-50 shadow-md'
+                }`}
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Previous
+              </button>
+
+              {/* Page Numbers */}
+              <div className="flex gap-2">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      currentPage === page
+                        ? 'bg-purple-600 text-white shadow-md'
+                        : 'bg-white text-gray-700 hover:bg-purple-50 shadow-md'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+                  currentPage === totalPages
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-white text-purple-600 hover:bg-purple-50 shadow-md'
+                }`}
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </>
         )}
       </main>
 
