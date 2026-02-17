@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar } from 'lucide-react';
-import axios from 'axios';
-
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:9000').replace(/\/$/, '');
+import apiClient from '../../../utills/apiClient';
 
 export default function StudentClassWiseAttendanceCard() {
   const [classWiseData, setClassWiseData] = useState([]);
@@ -16,11 +14,8 @@ export default function StudentClassWiseAttendanceCard() {
   const fetchClassWiseAttendance = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
       
-      const response = await axios.get(`${API_BASE_URL}/api/v1/student-dashboard/class-wise-attendance`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await apiClient.get('/student-dashboard/class-wise-attendance');
 
       if (response.data.success) {
         setClassWiseData(response.data.data);

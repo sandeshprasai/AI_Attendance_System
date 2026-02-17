@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, Clock } from 'lucide-react';
-import axios from 'axios';
+import apiClient from '../../../utills/apiClient';
 import { formatKathmanduDateTime } from '../../../utils/timezoneHelper';
-
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:9000').replace(/\/$/, '');
 
 export default function StudentRecentAbsencesCard() {
   const [absences, setAbsences] = useState([]);
@@ -17,11 +15,8 @@ export default function StudentRecentAbsencesCard() {
   const fetchAbsences = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
       
-      const response = await axios.get(`${API_BASE_URL}/api/v1/student-dashboard/recent-absences?limit=5`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await apiClient.get('/student-dashboard/recent-absences?limit=5');
 
       if (response.data.success) {
         setAbsences(response.data.data);

@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:9000').replace(/\/$/, '');
+import apiClient from '../../../utills/apiClient';
 
 /**
  * StudentMyClassesCard - Displays student's enrolled classes
@@ -24,11 +22,8 @@ export default function StudentMyClassesCard() {
   const fetchStudentClasses = async () => {
     try {
       setStats(prev => ({ ...prev, loading: true, error: null }));
-      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
 
-      const response = await axios.get(`${API_BASE_URL}/api/v1/student-dashboard/my-classes`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await apiClient.get('/student-dashboard/my-classes');
 
       if (response.data.success) {
         const classes = response.data.data || [];

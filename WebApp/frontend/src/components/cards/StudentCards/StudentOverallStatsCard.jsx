@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart3, TrendingUp, CheckCircle } from 'lucide-react';
-import axios from 'axios';
-
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:9000').replace(/\/$/, '');
+import apiClient from '../../../utills/apiClient';
 
 export default function StudentOverallStatsCard() {
   const [stats, setStats] = useState(null);
@@ -16,11 +14,8 @@ export default function StudentOverallStatsCard() {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
       
-      const response = await axios.get(`${API_BASE_URL}/api/v1/student-dashboard/overall-stats`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await apiClient.get('/student-dashboard/overall-stats');
 
       if (response.data.success) {
         setStats(response.data.data);
