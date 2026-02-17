@@ -21,10 +21,20 @@ export default function StudentMyClasses() {
     status: 'all'
   });
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
   useEffect(() => {
     fetchClasses();
   }, []);
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const fetchClasses = async () => {
     try {
@@ -74,9 +84,9 @@ export default function StudentMyClasses() {
     // Filter by status
     if (filters.status !== 'all' && cls.status?.toLowerCase() !== filters.status) return false;
     
-    // Search by subject name or teacher name
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+    // Search by subject name or teacher name (using debounced query)
+    if (debouncedSearchQuery.trim()) {
+      const query = debouncedSearchQuery.toLowerCase();
       const subjectMatch = cls.subject?.name?.toLowerCase().includes(query);
       const teacherMatch = cls.teacher?.name?.toLowerCase().includes(query);
       if (!subjectMatch && !teacherMatch) return false;
@@ -91,10 +101,10 @@ export default function StudentMyClasses() {
   const endIndex = startIndex + classesPerPage;
   const currentClasses = filteredClasses.slice(startIndex, endIndex);
 
-  // Reset to page 1 when filters or search change
+  // Reset to page 1 when filters or debounced search change
   useEffect(() => {
     setCurrentPage(1);
-  }, [filters, searchQuery]);
+  }, [filters, debouncedSearchQuery]);
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({ ...prev, [filterType]: value }));
@@ -168,7 +178,12 @@ export default function StudentMyClasses() {
             
             {/* Search Bar */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Search by Subject or Teacher</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Search by Subject or Teacher
+                {searchQuery !== debouncedSearchQuery && (
+                  <span className="ml-2 text-xs text-purple-600 animate-pulse">Searching...</span>
+                )}
+              </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
