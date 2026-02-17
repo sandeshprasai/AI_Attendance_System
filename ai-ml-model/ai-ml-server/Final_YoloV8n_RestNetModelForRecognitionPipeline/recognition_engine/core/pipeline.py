@@ -6,6 +6,19 @@ class RecognitionPipeline:
     def __init__(self, detector_path, embedder_path):
         self.detector = FaceDetector(detector_path)
         self.embedder = FaceEmbedder(embedder_path)
+        self._gallery_cache = None  # Cache for embeddings
+
+    def set_gallery_cache(self, gallery):
+        """Cache the gallery embeddings to avoid repeated DB queries"""
+        self._gallery_cache = gallery
+    
+    def get_gallery_cache(self):
+        """Get cached gallery"""
+        return self._gallery_cache
+    
+    def clear_gallery_cache(self):
+        """Clear cache when new enrollments occur"""
+        self._gallery_cache = None
 
     def process_all_faces(self, image):
         """
@@ -42,3 +55,24 @@ class RecognitionPipeline:
     def compute_similarity(feat1, feat2):
         # Dot product of L2 normalized vectors
         return float(np.dot(feat1.flatten(), feat2.flatten()))
+    
+    @staticmethod
+    def compute_similarity_batch(query_embedding, gallery_embeddings):
+        """
+        Vectorized similarity computation for speed.
+        Args:
+            query_embedding: (512,) numpy array
+            gallery_embeddings: (N, 512) numpy array
+        Returns:
+            similarities: (N,) numpy array of cosine similarities
+        """
+        if len(gallery_embeddings) == 0:
+            return np.array([])
+        
+        # Ensure query is 2D: (1, 512)
+        query = query_embedding.reshape(1, -1)
+        
+        # Batch dot product: (1, 512) @ (512, N) -> (1, N) -> (N,)
+        similarities = np.dot(query, gallery_embeddings.T).flatten()
+        
+        return similarities

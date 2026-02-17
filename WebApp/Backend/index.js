@@ -33,6 +33,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 const attendanceAnalyticsRoutes = require("./routes/attendanceAnalyticsRoutes");
 const absentNotificationRoutes = require("./routes/absentNotificationRoutes");
+const studentDashboardRoutes = require("./routes/studentDashboardRoutes");
 
 // -----------------------------------------------------Routes Import Completed-----------------------------------------------------
 
@@ -68,6 +69,7 @@ app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/activities", activityRoutes);
 app.use("/api/v1/attendance-analytics", attendanceAnalyticsRoutes);
 app.use("/api/v1/absent-notifications", absentNotificationRoutes);
+app.use("/api/v1/student-dashboard", studentDashboardRoutes);
 
 app.listen(port, () => {
   console.log(`Server is up and running at http://localhost:${port}/ `);
