@@ -49,6 +49,10 @@ export const formatKathmanduDate = (date) => {
  * @returns {object} { date: 'DD/MM/YYYY', time: 'HH:MM' }
  */
 export const formatKathmanduDateTime = (date) => {
+  if (!date) {
+    return { date: 'N/A', time: 'N/A' };
+  }
+  
   const kathmanduDate = convertToKathmandu(date);
   
   // Use UTC methods since kathmanduDate is now adjusted to Kathmandu time

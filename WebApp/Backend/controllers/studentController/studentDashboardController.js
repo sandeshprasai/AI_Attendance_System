@@ -375,6 +375,7 @@ const getStudentClassesWithAttendance = async (req, res) => {
             attendanceHistory.push({
               sessionId: session.SessionId,
               date: session.Date,
+              createdAt: session.createdAt,
               status: status,
               sessionType: session.SessionType,
               presenceCount: studentRecord.PresenceCount || 0,

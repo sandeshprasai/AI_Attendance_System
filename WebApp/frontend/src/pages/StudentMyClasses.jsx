@@ -202,7 +202,9 @@ export default function StudentMyClasses() {
                     </h3>
                     <div className="space-y-3 max-h-96 overflow-y-auto">
                       {cls.attendance.history.map((record, index) => {
-                        const dateTime = formatKathmanduDateTime(record.date);
+                        // Use createdAt if available, otherwise fall back to date
+                        const timestamp = record.createdAt || record.date;
+                        const dateTime = timestamp ? formatKathmanduDateTime(timestamp) : { date: 'N/A', time: 'N/A' };
                         return (
                           <div 
                             key={index}
