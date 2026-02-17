@@ -2,7 +2,7 @@ import React from "react";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
 import GreetingCard from "../components/GreetingCard";
-import ClassroomManagementCard from "../components/cards/ClassroomManagementCard";
+import StudentMyClassesCard from "../components/cards/StudentCards/StudentMyClassesCard";
 import StudentOverallStatsCard from "../components/cards/StudentCards/StudentOverallStatsCard";
 import StudentRecentAbsencesCard from "../components/cards/StudentCards/StudentRecentAbsencesCard";
 import StudentClassWiseAttendanceCard from "../components/cards/StudentCards/StudentClassWiseAttendanceCard";
@@ -26,12 +26,7 @@ const StudentDashboard = () => {
 
             {/* My Classes Card */}
             <div>
-              <ClassroomManagementCard 
-                userRole="student"
-                userId={user?.id}
-                showCreateButton={false}
-                viewAllRoute="/student/my-classes"
-              />
+              <StudentMyClassesCard />
             </div>
 
             {/* Overall Attendance Stats Card */}
