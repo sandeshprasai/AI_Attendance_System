@@ -254,6 +254,10 @@ def enroll():
             }), 500
 
         print(f"Embedding saved to database for Roll No: {roll_no}")
+        
+        # Clear gallery cache since we have a new enrollment
+        pipe.clear_gallery_cache()
+        print("Gallery cache cleared after new enrollment")
 
         # Prepare response
         return jsonify({
@@ -281,4 +285,26 @@ def enroll():
             "status": "error",
             "message": f"Enrollment failed: {str(e)}",
             "data": []
+        }), 500
+
+
+@enrollment_bp.route("/clear-cache", methods=["POST"])
+def clear_cache():
+    """
+    Manually clear the embedding gallery cache.
+    Useful after database updates or re-enrollments.
+    """
+    try:
+        pipe = current_app.config['RECOGNITION_PIPELINE']
+        pipe.clear_gallery_cache()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Gallery cache cleared successfully"
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Failed to clear cache: {str(e)}"
         }), 500

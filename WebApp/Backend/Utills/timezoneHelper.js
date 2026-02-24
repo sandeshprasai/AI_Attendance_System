@@ -11,8 +11,10 @@ const KATHMANDU_OFFSET_MINUTES = 5 * 60 + 45; // UTC+5:45 in minutes
  */
 const getKathmanduTime = () => {
   const now = new Date();
-  // Add Kathmandu offset to UTC time
-  return new Date(now.getTime() + (KATHMANDU_OFFSET_MINUTES * 60000) - (now.getTimezoneOffset() * 60000));
+  // Get UTC time and add Kathmandu offset
+  // Use getTime() to get milliseconds since epoch (timezone-independent)
+  // Then add exactly 5:45 to get Kathmandu time
+  return new Date(now.getTime() + (KATHMANDU_OFFSET_MINUTES * 60000));
 };
 
 /**
@@ -49,9 +51,11 @@ const parseAndNormalizeKathmanduDate = (dateInput) => {
  */
 const getTodayKathmanduRange = () => {
   const kathmanduNow = getKathmanduTime();
-  const year = kathmanduNow.getFullYear();
-  const month = kathmanduNow.getMonth();
-  const day = kathmanduNow.getDate();
+  // Use UTC methods to extract date parts since kathmanduNow represents the instant in time
+  // The date object's UTC methods will give us the correct values
+  const year = kathmanduNow.getUTCFullYear();
+  const month = kathmanduNow.getUTCMonth();
+  const day = kathmanduNow.getUTCDate();
   
   // Start of day: Kathmandu midnight -> UTC
   const startOfDayUTC = Date.UTC(year, month, day, 0, 0, 0, 0);
@@ -75,10 +79,10 @@ const getKathmanduStartOfDay = (date) => {
   }
   
   // Convert date to Kathmandu time and get its start of day
-  const kathmanduDate = new Date(date.getTime() + (KATHMANDU_OFFSET_MINUTES * 60000) - (date.getTimezoneOffset() * 60000));
-  const year = kathmanduDate.getFullYear();
-  const month = kathmanduDate.getMonth();
-  const day = kathmanduDate.getDate();
+  const kathmanduDate = new Date(date.getTime() + (KATHMANDU_OFFSET_MINUTES * 60000));
+  const year = kathmanduDate.getUTCFullYear();
+  const month = kathmanduDate.getUTCMonth();
+  const day = kathmanduDate.getUTCDate();
   
   const startOfDayUTC = Date.UTC(year, month, day, 0, 0, 0, 0);
   return new Date(startOfDayUTC - (KATHMANDU_OFFSET_MINUTES * 60000));
@@ -96,10 +100,10 @@ const getKathmanduEndOfDay = (date) => {
   }
   
   // Convert date to Kathmandu time and get its end of day
-  const kathmanduDate = new Date(date.getTime() + (KATHMANDU_OFFSET_MINUTES * 60000) - (date.getTimezoneOffset() * 60000));
-  const year = kathmanduDate.getFullYear();
-  const month = kathmanduDate.getMonth();
-  const day = kathmanduDate.getDate();
+  const kathmanduDate = new Date(date.getTime() + (KATHMANDU_OFFSET_MINUTES * 60000));
+  const year = kathmanduDate.getUTCFullYear();
+  const month = kathmanduDate.getUTCMonth();
+  const day = kathmanduDate.getUTCDate();
   
   const endOfDayUTC = Date.UTC(year, month, day, 23, 59, 59, 999);
   return new Date(endOfDayUTC - (KATHMANDU_OFFSET_MINUTES * 60000));
@@ -111,7 +115,7 @@ const getKathmanduEndOfDay = (date) => {
  * @returns {Date} Date adjusted to show Kathmandu time
  */
 const convertToKathmandu = (date) => {
-  return new Date(date.getTime() + (KATHMANDU_OFFSET_MINUTES * 60000) - (date.getTimezoneOffset() * 60000));
+  return new Date(date.getTime() + (KATHMANDU_OFFSET_MINUTES * 60000));
 };
 
 /**
@@ -122,12 +126,12 @@ const convertToKathmandu = (date) => {
 const formatKathmanduDate = (date) => {
   const kathmanduDate = convertToKathmandu(date);
   
-  const year = kathmanduDate.getFullYear();
-  const month = String(kathmanduDate.getMonth() + 1).padStart(2, '0');
-  const day = String(kathmanduDate.getDate()).padStart(2, '0');
-  const hours = String(kathmanduDate.getHours()).padStart(2, '0');
-  const minutes = String(kathmanduDate.getMinutes()).padStart(2, '0');
-  const seconds = String(kathmanduDate.getSeconds()).padStart(2, '0');
+  const year = kathmanduDate.getUTCFullYear();
+  const month = String(kathmanduDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(kathmanduDate.getUTCDate()).padStart(2, '0');
+  const hours = String(kathmanduDate.getUTCHours()).padStart(2, '0');
+  const minutes = String(kathmanduDate.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(kathmanduDate.getUTCSeconds()).padStart(2, '0');
   
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };

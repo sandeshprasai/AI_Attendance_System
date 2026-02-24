@@ -4,21 +4,17 @@ import onnxruntime as ort
 
 class FaceDetector:
     def __init__(self, model_path, input_size=(512, 512), conf_threshold=0.5):
-        # Configure GPU Providers
+        # Configure providers optimized for M2 Mac
         providers = [
-            ('CUDAExecutionProvider', {
-                'device_id': 0,
-                'arena_extend_strategy': 'kNextPowerOfTwo',
-                'gpu_mem_limit': 2 * 1024 * 1024 * 1024, # Limit to 2GB VRAM
-                'cudnn_conv_algo_search': 'EXHAUSTIVE',
-                'do_copy_in_default_stream': True,
-            }),
+            'CoreMLExecutionProvider',  # M2 Neural Engine acceleration
             'CPUExecutionProvider'
         ]
         
         # Session options for speed
         options = ort.SessionOptions()
         options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        options.intra_op_num_threads = 4  # Optimize for M2
+        options.inter_op_num_threads = 4
         
         self.session = ort.InferenceSession(model_path, sess_options=options, providers=providers)
         self.input_size = input_size

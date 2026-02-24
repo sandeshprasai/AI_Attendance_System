@@ -5,6 +5,7 @@ import HomePage from "./pages/HomePage";
 import AdminDashboard from "./pages/AdminDashboard";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
+import StudentMyClasses from "./pages/StudentMyClasses";
 import Unauthorized from "./pages/Unauthorized";
 import UsersPage from "./pages/UsersPage";
 import ContactUs from "./pages/ContactUs";
@@ -303,6 +304,15 @@ export default function App() {
           element={
             <RoleProtectedRoute allowedRoles={["student"]}>
               <StudentDashboard />
+            </RoleProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/my-classes"
+          element={
+            <RoleProtectedRoute allowedRoles={["student"]}>
+              <StudentMyClasses />
             </RoleProtectedRoute>
           }
         />

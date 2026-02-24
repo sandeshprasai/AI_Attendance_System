@@ -4,10 +4,15 @@ import onnxruntime as ort
 
 class FaceEmbedder:
     def __init__(self, model_path):
-        # Enable CUDA
-        providers = ['CUDAExecutionProvider', 'CPUExecutionProvider']
+        # Enable CoreML for M2 acceleration
+        providers = ['CoreMLExecutionProvider', 'CPUExecutionProvider']
         
-        self.session = ort.InferenceSession(model_path, providers=providers)
+        # Session options for speed
+        options = ort.SessionOptions()
+        options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        options.intra_op_num_threads = 4
+        
+        self.session = ort.InferenceSession(model_path, sess_options=options, providers=providers)
         self.input_name = self.session.get_inputs()[0].name
         self.input_shape = (112, 112)
 

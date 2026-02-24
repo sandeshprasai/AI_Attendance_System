@@ -6,6 +6,7 @@ Handles face recognition and attendance marking.
 from flask import Blueprint, request, jsonify, current_app
 from utils.image import decode_image
 from db.operations import get_student_by_roll_no, load_all_enroll_embeddings
+import numpy as np
 
 recognition_bp = Blueprint('recognition', __name__)
 
@@ -53,11 +54,27 @@ def recognize():
             "results": []
         })
 
-    # Load gallery (filtered if roll_nos provided)
-    gallery = load_all_enroll_embeddings(roll_nos=roll_nos if roll_nos else None)
+    # Load gallery with caching (only load if not filtered or cache is empty)
+    if roll_nos:
+        # If filtered by roll_nos, don't use cache
+        gallery = load_all_enroll_embeddings(roll_nos=roll_nos)
+    else:
+        # Use cache for full gallery
+        gallery = pipe.get_gallery_cache()
+        if gallery is None:
+            gallery = load_all_enroll_embeddings()
+            pipe.set_gallery_cache(gallery)
     
     threshold = 0.45
     recognition_results = []
+
+    # Prepare gallery for vectorized computation
+    if len(gallery) > 0:
+        roll_nos_list = [roll_no for roll_no, _ in gallery]
+        embeddings_array = np.array([emb for _, emb in gallery])  # Shape: (N, 512)
+    else:
+        roll_nos_list = []
+        embeddings_array = np.array([])
 
     for face in detected_faces:
         query_embedding = face['embedding']
@@ -67,11 +84,11 @@ def recognize():
         best_score = -1.0
 
         if len(gallery) > 0:
-            for roll_no, ref_emb in gallery:
-                score = pipe.compute_similarity(query_embedding, ref_emb)
-                if score > best_score:
-                    best_score = score
-                    best_roll_no = roll_no
+            # Vectorized similarity computation (MUCH FASTER)
+            similarities = pipe.compute_similarity_batch(query_embedding, embeddings_array)
+            best_idx = np.argmax(similarities)
+            best_score = float(similarities[best_idx])
+            best_roll_no = roll_nos_list[best_idx]
 
         matched = best_score >= threshold if best_roll_no else False
         
