@@ -68,6 +68,15 @@ npm start
 ```bash
 cd WebApp/frontend
 npm install
+```
+
+Create a `.env` file:
+```env
+VITE_API_URL=http://localhost:5000
+```
+
+Start the frontend:
+```bash
 npm run dev
 ```
 
